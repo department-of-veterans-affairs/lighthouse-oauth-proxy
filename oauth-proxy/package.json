@@ -36,14 +36,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/department-of-veterans-affairs/vets-saml-proxy.git"
+    "url": "https://github.com/department-of-veterans-affairs/lighthouse-oauth-proxy.git"
   },
   "author": "Department of Veterans Affairs",
   "license": "CC0-1.0",
   "bugs": {
-    "url": "https://github.com/department-of-veterans-affairs/vets-saml-proxy/issues"
+    "url": "https://github.com/department-of-veterans-affairs/lighthouse-oauth-proxy/issues"
   },
-  "homepage": "https://github.com/department-of-veterans-affairs/vets-saml-proxy#readme",
+  "homepage": "https://github.com/department-of-veterans-affairs/lighthouse-oauth-proxy#readme",
   "dependencies": {
     "@okta/okta-sdk-nodejs": "^4.4.0",
     "@sentry/node": "^6.2.3",

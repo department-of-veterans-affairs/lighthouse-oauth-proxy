@@ -22,7 +22,7 @@ env:
   shell: bash
   variables:
     DEPLOY: "true"
-    REPO: "vets-saml-proxy"
+    REPO: "lighthouse-oauth-proxy"
     IMAGE: "oauth-proxy"
     # Checks that are not included for the ghstatus script.
     XCHECKS: "oauth-proxy-release,saml-proxy"

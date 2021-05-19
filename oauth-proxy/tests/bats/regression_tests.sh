@@ -112,7 +112,7 @@ assign_code() {
   local network=""
   if [[ $HOST == *"localhost"* ]];
   then
-    network="-it --network container:oauth-proxy_oauth-proxy_1"
+    network="-i --network container:oauth-proxy_oauth-proxy_1"
   else
     network=""
   fi

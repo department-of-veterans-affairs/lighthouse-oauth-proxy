@@ -1,15 +1,10 @@
-FROM docker:latest
+FROM vasdvp/health-apis-dev-tools:mvn-3.6-jdk-14
 
 COPY /tests/bats /bats
 COPY /entrypoint_test.sh /bats/entrypoint_test.sh
 
-RUN apk update
+RUN npm i -g bats
 
-RUN apk add jq \
-    bash \
-    curl \
-    bats
-  
 WORKDIR /bats
 
 ENTRYPOINT [ "./entrypoint_test.sh" ]

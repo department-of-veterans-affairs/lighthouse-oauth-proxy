@@ -16,6 +16,10 @@ docker run \
   --cc-client-secret="\$CC_CLIENT_SECRET" \
   --host="\$HOST" \
   --test-claims
+
+Note: If you are running against the a local oauth-proxy instance.
+You will need to specify the following network: 
+--network container:oauth-proxy_oauth-proxy_1
 EOF
 }
 

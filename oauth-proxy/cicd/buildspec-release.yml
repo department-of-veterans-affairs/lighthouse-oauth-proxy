@@ -17,7 +17,7 @@
 #  - increment.sh
 #  - gh-status.sh
 #######################################################################
-version: 0.2
+version: 0.3
 env:
   shell: bash
   variables:

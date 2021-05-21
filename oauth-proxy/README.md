@@ -2,10 +2,9 @@
 
 This is a slim proxy for transforming and storing values from Okta's OpenID Connect service in order to be compatible with the SMART-on-FHIR auth specification.
 
-testing
 ## Requirements
 
-- Node 8.x.x or greater
+- Node 12.x.x or greater
 
 ## Usage
 

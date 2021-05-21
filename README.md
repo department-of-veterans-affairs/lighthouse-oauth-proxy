@@ -1,12 +1,10 @@
-# OAuth Proxies
-
-## OAuth Proxy
+# OAuth Proxy
 
 The OAuth proxy sits between client applications (run by API consumers) and our Okta deployment. It implements
 the SMART on FHIR spec, which is an OAuth overlay. This involves tracking a state value for the user across
 sessions, so that initial auth flows and refresh auth flows send the same state to the client application.
 
-### Running locally
+## Running locally
 
 The OAuth proxy also requires configuration to run locally. It is tied tightly with Okta and you'll need 
 to have access to an okta authorization server and an api key for the server. 
@@ -21,7 +19,7 @@ You'll also want to setup a local instance of DynamoDB either by running `docker
 by downloading and running it following [Amazon's instructions](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/DynamoDBLocal.html).
 
 
-### git-secrets
+## git-secrets
 git-secrets must be installed and configured to scan for AWS entries and the patterns in
 [.git-secrets-patterns](.git-secrets-patterns). Exclusions are managed in
 [.gitallowed](.gitallowed).

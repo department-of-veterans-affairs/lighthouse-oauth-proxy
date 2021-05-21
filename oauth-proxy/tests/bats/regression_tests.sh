@@ -119,7 +119,7 @@ assign_code() {
 
   local code
   code=$(docker run \
-      $network \
+      $network --rm \
       vasdvp/lighthouse-auth-utils:1.1.2 auth \
       --redirect-uri="$REDIRECT_URI" \
       --authorization-url="$HOST" \

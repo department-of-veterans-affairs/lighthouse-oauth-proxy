@@ -114,7 +114,7 @@ do_client_credentials() {
   fi
 
   local cc
-  cc="$(docker run $network \
+  cc="$(docker run $network --rm \
           vasdvp/lighthouse-auth-utils:latest auth-cc \
           --client-id="$CC_CLIENT_ID" \
           --client-secret="$CC_CLIENT_SECRET" \

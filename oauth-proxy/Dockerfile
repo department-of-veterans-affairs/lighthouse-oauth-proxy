@@ -1,5 +1,27 @@
 FROM vasdvp/lighthouse-node-application-base:node12 as base
 
+# Build Args
+ARG BUILD_DATE_TIME
+ARG VERSION
+ARG BUILD_NUMBER
+ARG BUILD_TOOL
+
+# Static Labels
+LABEL org.opencontainers.image.authors="leeroy-jenkles@va.gov" \
+      org.opencontainers.image.url="https://github.com/department-of-veterans-affairs/lighthouse-oauth-proxy/tree/master/oauth-proxy/DockerfileFG" \
+      org.opencontainers.image.documentation="https://github.com/department-of-veterans-affairs/lighthouse-oauth-proxy/tree/master/oauth-proxy/README.md" \
+      org.opencontainers.image.vendor="lighthouse" \
+      org.opencontainers.image.title="oauth-proxy" \
+      org.opencontainers.image.source="https://github.com/department-of-veterans-affairs/lighthouse-oauth-proxy/tree/master/oauth-proxy" \
+      org.opencontainers.image.description="Oauth Proxy for Lighthouse APIs"
+
+# Dynamic Labels
+LABEL org.opencontainers.image.created=${BUILD_DATE_TIME} \
+      org.opencontainers.image.version=${VERSION} \
+      gov.va.build.number=${BUILD_NUMBER} \
+      gov.va.build.tool=${BUILD_TOOL}
+
+
 WORKDIR /home/node
 
 RUN git config --global url."https://".insteadOf git://
@@ -22,7 +44,7 @@ HEALTHCHECK --interval=1m --timeout=4s --start-period=30s \
 USER node
 
 ENTRYPOINT ["/usr/local/bin/tini", "--"]
-CMD ["node", "index.js"]
+CMD ["node", "index.js", "--config", "/etc/oauth-proxy/config.json"]
 
 from base as deploy
 USER root

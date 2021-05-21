@@ -43,7 +43,7 @@ CICD Workflow
       - deploy_to_ecs.sh
         - configurable for allowed environments
 
-## Manual Deploy (https://console.amazonaws-us-gov.com/codesuite/codebuild/projects/saml-proxy-manual-deploy/history?region=us-gov-west-1)
+## Manual Deploy (https://console.amazonaws-us-gov.com/codesuite/codebuild/projects/oauth-proxy-manual-deploy/history?region=us-gov-west-1)
 
 - Arbitrary deploys of a revision can be accomplished with the Manual deploy job.
   - DEPLOY_ENVS

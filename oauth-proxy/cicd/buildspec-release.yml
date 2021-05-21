@@ -23,7 +23,6 @@ env:
   variables:
     DEPLOY: "true"
     REPO: "lighthouse-oauth-proxy"
-    IMAGE: "oauth-proxy"
     # Checks that are not included for the ghstatus script.
     XCHECKS: "oauth-proxy-release"
   parameter-store:

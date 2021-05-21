@@ -28,10 +28,29 @@ function stopTimer(gauge, start) {
   gauge.set(Number(end - start) / 1000000000);
 }
 
+const codeTokenIssueCounter = new client.Counter({
+  name: "code_token_issue_counter",
+  help: "counter of number access_tokens issued by the code flow.",
+});
+
+const refreshTokenIssueCounter = new client.Counter({
+  name: "refresh_token_issue_counter",
+  help: "counter of number access_tokens issued by the refresh flow.",
+});
+
+const clientCredentialsTokenIssueCounter = new client.Counter({
+  name: "client_credentials_token_issue_counter",
+  help:
+    "counter of number access_tokens issued by the client credentials flow.",
+});
+
 module.exports = {
   loginBegin,
   loginEnd,
   oktaTokenRefreshGauge,
   validationGauge,
   stopTimer,
+  codeTokenIssueCounter,
+  refreshTokenIssueCounter,
+  clientCredentialsTokenIssueCounter,
 };

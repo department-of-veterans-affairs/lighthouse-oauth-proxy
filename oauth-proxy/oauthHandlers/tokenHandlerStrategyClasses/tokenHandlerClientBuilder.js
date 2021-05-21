@@ -33,6 +33,11 @@ const {
   GetPatientInfoFromLaunchStrategy,
 } = require("./getPatientInfoStrategies/getPatientInfoFromLaunchStrategy");
 const { parseBasicAuth } = require("../../utils");
+const {
+  codeTokenIssueCounter,
+  refreshTokenIssueCounter,
+  clientCredentialsTokenIssueCounter,
+} = require("../../metrics");
 const buildTokenHandlerClient = (
   redirect_uri,
   issuer,
@@ -62,6 +67,7 @@ const buildTokenHandlerClient = (
     strategies.getDocumentFromDynamoStrategy,
     strategies.saveDocumentToDynamoStrategy,
     strategies.getPatientInfoStrategy,
+    strategies.tokenIssueCounter,
     req,
     res,
     next
@@ -110,6 +116,7 @@ const getStrategies = (
         logger,
         audience
       ),
+      tokenIssueCounter: refreshTokenIssueCounter,
     };
   } else if (req.body.grant_type === "authorization_code") {
     strategies = {
@@ -137,6 +144,7 @@ const getStrategies = (
         logger,
         audience
       ),
+      tokenIssueCounter: codeTokenIssueCounter,
     };
   } else if (req.body.grant_type === "client_credentials") {
     if (
@@ -162,6 +170,7 @@ const getStrategies = (
         config
       ),
       getPatientInfoStrategy: new GetPatientInfoFromLaunchStrategy(req),
+      tokenIssueCounter: clientCredentialsTokenIssueCounter,
     };
   } else {
     if (!req.body.grant_type) {

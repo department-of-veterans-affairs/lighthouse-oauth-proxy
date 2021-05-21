@@ -7,6 +7,7 @@ class TokenHandlerClient {
     getDocumentFromDynamoStrategy,
     saveDocumentToDynamoStrategy,
     getPatientInfoStrategy,
+    tokenIssueCounter,
     req,
     res,
     next
@@ -15,6 +16,7 @@ class TokenHandlerClient {
     this.getDocumentStrategy = getDocumentFromDynamoStrategy;
     this.saveDocumentToDynamoStrategy = saveDocumentToDynamoStrategy;
     this.getPatientInfoStrategy = getPatientInfoStrategy;
+    this.tokenIssueCounter = tokenIssueCounter;
     this.req = req;
     this.res = res;
     this.next = next;
@@ -23,6 +25,7 @@ class TokenHandlerClient {
     let tokens;
     try {
       tokens = await this.getTokenStrategy.getToken();
+      this.tokenIssueCounter.inc();
     } catch (error) {
       rethrowIfRuntimeError(error);
       if (error.statusCode !== undefined && error.statusCode === 401) {

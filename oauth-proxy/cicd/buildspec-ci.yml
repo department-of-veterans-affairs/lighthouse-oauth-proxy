@@ -50,21 +50,20 @@ phases:
       - time="${time}\nBuild - $(date +%r) - started"
       - aws ssm get-parameters  --name ${FWD_PROXY_CRT} | jq -r '.Parameters[0].Value' > fwdproxy.crt
       - |
-        make build/oauth  \
+        make build  \
          TAG=${COMMIT_HASH} \
-         IMAGE=${IMAGE} \
          VERSION=${COMMIT_HASH} \
          TARGET=deploy \
          BUILD_TOOL=CodeBuild \
          BUILD_NUMBER=${CODEBUILD_BUILD_ID}
       # run linter
-      - make lint IMAGE=${IMAGE} TAG=${COMMIT_HASH}
+      - make lint TAG=${COMMIT_HASH}
       # run unit tests
-      - make test IMAGE=${IMAGE} TAG=${COMMIT_HASH}
+      - make test TAG=${COMMIT_HASH}
       # Login to ECR prior to push
       - echo Logging into ECR
       - make login
       # Push image to ECR tagged with commit hash.
       - echo Pushing image to ECR
       - time="${time}\nPush - $(date +%r) - started"
-      - make push IMAGE=${IMAGE} TAG=${COMMIT_HASH}
+      - make push TAG=${COMMIT_HASH}

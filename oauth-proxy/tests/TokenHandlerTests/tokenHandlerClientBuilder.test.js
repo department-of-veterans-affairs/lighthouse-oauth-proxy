@@ -43,7 +43,11 @@ const {
 const MockExpressRequest = require("mock-express-request");
 const MockExpressResponse = require("mock-express-response");
 const { encodeBasicAuthHeader } = require("../../utils");
-
+const {
+  codeTokenIssueCounter,
+  refreshTokenIssueCounter,
+  clientCredentialsTokenIssueCounter,
+} = require("../../metrics");
 require("jest");
 
 describe("buildTokenHandlerClient Tests", () => {
@@ -91,6 +95,7 @@ describe("buildTokenHandlerClient Tests", () => {
     expect(response.getPatientInfoStrategy).toBeInstanceOf(
       GetPatientInfoFromValidateEndpointStrategy
     );
+    expect(response.tokenIssueCounter).toBe(refreshTokenIssueCounter);
   });
 
   it("Refresh Client Body Auth", () => {
@@ -124,6 +129,7 @@ describe("buildTokenHandlerClient Tests", () => {
     expect(response.getPatientInfoStrategy).toBeInstanceOf(
       GetPatientInfoFromValidateEndpointStrategy
     );
+    expect(response.tokenIssueCounter).toBe(refreshTokenIssueCounter);
   });
 
   it("Code Client PKCE Auth", () => {
@@ -156,6 +162,7 @@ describe("buildTokenHandlerClient Tests", () => {
     expect(response.getPatientInfoStrategy).toBeInstanceOf(
       GetPatientInfoFromValidateEndpointStrategy
     );
+    expect(response.tokenIssueCounter).toBe(codeTokenIssueCounter);
   });
 
   it("ClientCredentials Client", () => {
@@ -189,6 +196,7 @@ describe("buildTokenHandlerClient Tests", () => {
     expect(response.getPatientInfoStrategy).toBeInstanceOf(
       GetPatientInfoFromLaunchStrategy
     );
+    expect(response.tokenIssueCounter).toBe(clientCredentialsTokenIssueCounter);
   });
 
   it("Request with No Grant. Throws Error.", () => {

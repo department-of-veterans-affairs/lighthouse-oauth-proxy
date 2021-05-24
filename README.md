@@ -20,6 +20,7 @@ by downloading and running it following [Amazon's instructions](https://docs.aws
 
 
 ## git-secrets
+
 git-secrets must be installed and configured to scan for AWS entries and the patterns in
 [.git-secrets-patterns](.git-secrets-patterns). Exclusions are managed in
 [.gitallowed](.gitallowed).

@@ -18,6 +18,7 @@ describe("handleToken tests", () => {
   let pullDocumentFromDynamoStrategy;
   let saveDocumentToDynamoStrategy;
   let getPatientInfoStrategy;
+  let tokenIssueCounter;
   let req;
   let res;
   let next;
@@ -28,6 +29,9 @@ describe("handleToken tests", () => {
     pullDocumentFromDynamoStrategy = buildGetDocumentStrategy({});
     saveDocumentToDynamoStrategy = buildSaveDocumentStrategy();
     getPatientInfoStrategy = buildGetPatientInfoStrategy({});
+    tokenIssueCounter = {
+      inc: jest.fn(),
+    };
     req = new MockExpressRequest();
     res = new MockExpressResponse();
     next = jest.fn();
@@ -37,11 +41,12 @@ describe("handleToken tests", () => {
       pullDocumentFromDynamoStrategy,
       saveDocumentToDynamoStrategy,
       getPatientInfoStrategy,
+      tokenIssueCounter,
       req,
       res,
       next
     ).handleToken();
-
+    expect(tokenIssueCounter.inc).toHaveBeenCalled();
     expect(response.statusCode).toBe(200);
     expect(response.responseBody).toBe(token);
   });
@@ -52,6 +57,9 @@ describe("handleToken tests", () => {
     pullDocumentFromDynamoStrategy = buildGetDocumentStrategy({});
     saveDocumentToDynamoStrategy = buildSaveDocumentStrategy();
     getPatientInfoStrategy = buildGetPatientInfoStrategy({});
+    tokenIssueCounter = {
+      inc: jest.fn(),
+    };
     req = new MockExpressRequest();
     res = new MockExpressResponse();
     next = jest.fn();
@@ -61,11 +69,12 @@ describe("handleToken tests", () => {
       pullDocumentFromDynamoStrategy,
       saveDocumentToDynamoStrategy,
       getPatientInfoStrategy,
+      tokenIssueCounter,
       req,
       res,
       next
     ).handleToken();
-
+    expect(tokenIssueCounter.inc).toHaveBeenCalled();
     expect(response.statusCode).toBe(200);
     expect(response.responseBody.access_token).toBe(token.access_token);
   });
@@ -76,6 +85,9 @@ describe("handleToken tests", () => {
     pullDocumentFromDynamoStrategy = buildGetDocumentStrategy({});
     saveDocumentToDynamoStrategy = buildSaveDocumentStrategy();
     getPatientInfoStrategy = buildGetPatientInfoStrategy("patient");
+    tokenIssueCounter = {
+      inc: jest.fn(),
+    };
     req = new MockExpressRequest();
     res = new MockExpressResponse();
     next = jest.fn();
@@ -85,11 +97,13 @@ describe("handleToken tests", () => {
       pullDocumentFromDynamoStrategy,
       saveDocumentToDynamoStrategy,
       getPatientInfoStrategy,
+      tokenIssueCounter,
       req,
       res,
       next
     ).handleToken();
 
+    expect(tokenIssueCounter.inc).toHaveBeenCalled();
     expect(response.statusCode).toBe(200);
     expect(response.responseBody.access_token).toBe(token.access_token);
     expect(response.responseBody.patient).toBe("patient");
@@ -103,6 +117,9 @@ describe("handleToken tests", () => {
     });
     saveDocumentToDynamoStrategy = buildSaveDocumentStrategy();
     getPatientInfoStrategy = buildGetPatientInfoStrategy("patient");
+    tokenIssueCounter = {
+      inc: jest.fn(),
+    };
     req = new MockExpressRequest();
     res = new MockExpressResponse();
     next = jest.fn();
@@ -112,11 +129,13 @@ describe("handleToken tests", () => {
       pullDocumentFromDynamoStrategy,
       saveDocumentToDynamoStrategy,
       getPatientInfoStrategy,
+      tokenIssueCounter,
       req,
       res,
       next
     ).handleToken();
 
+    expect(tokenIssueCounter.inc).toHaveBeenCalled();
     expect(response.statusCode).toBe(200);
     expect(response.responseBody.access_token).toBe(token.access_token);
     expect(response.responseBody.patient).toBe("patient");
@@ -131,6 +150,9 @@ describe("handleToken tests", () => {
     });
     saveDocumentToDynamoStrategy = buildSaveDocumentStrategy();
     getPatientInfoStrategy = buildGetPatientInfoStrategy("patient");
+    tokenIssueCounter = {
+      inc: jest.fn(),
+    };
     req = new MockExpressRequest();
     res = new MockExpressResponse();
     next = jest.fn();
@@ -140,11 +162,13 @@ describe("handleToken tests", () => {
       pullDocumentFromDynamoStrategy,
       saveDocumentToDynamoStrategy,
       getPatientInfoStrategy,
+      tokenIssueCounter,
       req,
       res,
       next
     ).handleToken();
 
+    expect(tokenIssueCounter.inc).toHaveBeenCalled();
     expect(response.statusCode).toBe(200);
     expect(response.responseBody.access_token).toBe(token.access_token);
     expect(response.responseBody.patient).toBe("1234V5678");
@@ -158,6 +182,9 @@ describe("handleToken tests", () => {
     pullDocumentFromDynamoStrategy = buildGetDocumentStrategy({});
     saveDocumentToDynamoStrategy = buildSaveDocumentStrategy();
     getPatientInfoStrategy = buildGetPatientInfoStrategy({});
+    tokenIssueCounter = {
+      inc: jest.fn(),
+    };
     req = new MockExpressRequest();
     res = new MockExpressResponse();
     next = jest.fn();
@@ -167,11 +194,13 @@ describe("handleToken tests", () => {
       pullDocumentFromDynamoStrategy,
       saveDocumentToDynamoStrategy,
       getPatientInfoStrategy,
+      tokenIssueCounter,
       req,
       res,
       next
     ).handleToken();
 
+    expect(tokenIssueCounter.inc).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(401);
     expect(response.responseBody.error).toBe("invalid_client");
     expect(response.responseBody.error_description).toBe(
@@ -189,6 +218,9 @@ describe("handleToken tests", () => {
     pullDocumentFromDynamoStrategy = buildGetDocumentStrategy({});
     saveDocumentToDynamoStrategy = buildSaveDocumentStrategy();
     getPatientInfoStrategy = buildGetPatientInfoStrategy({});
+    tokenIssueCounter = {
+      inc: jest.fn(),
+    };
     req = new MockExpressRequest();
     res = new MockExpressResponse();
     next = jest.fn();
@@ -198,11 +230,13 @@ describe("handleToken tests", () => {
       pullDocumentFromDynamoStrategy,
       saveDocumentToDynamoStrategy,
       getPatientInfoStrategy,
+      tokenIssueCounter,
       req,
       res,
       next
     ).handleToken();
 
+    expect(tokenIssueCounter.inc).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(500);
     expect(response.responseBody.error).toBe("error");
     expect(response.responseBody.error_description).toBe("error_description");

@@ -112,14 +112,14 @@ assign_code() {
   local network=""
   if [[ $HOST == *"localhost"* ]];
   then
-    network="-it --network container:oauth-proxy_oauth-proxy_1"
+    network="-i --network container:oauth-proxy_oauth-proxy_1"
   else
     network=""
   fi
 
   local code
   code=$(docker run \
-      $network \
+      $network --rm \
       vasdvp/lighthouse-auth-utils:1.1.2 auth \
       --redirect-uri="$REDIRECT_URI" \
       --authorization-url="$HOST" \

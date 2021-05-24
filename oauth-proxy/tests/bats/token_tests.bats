@@ -110,11 +110,11 @@ do_client_credentials() {
   if [[ $HOST == *"localhost"* ]];
   then
     url="http://localhost:7100/oauth2/health/system/v1"
-    network="-it --network container:oauth-proxy_oauth-proxy_1"
+    network="-i --network container:oauth-proxy_oauth-proxy_1"
   fi
 
   local cc
-  cc="$(docker run $network \
+  cc="$(docker run $network --rm \
           vasdvp/lighthouse-auth-utils:latest auth-cc \
           --client-id="$CC_CLIENT_ID" \
           --client-secret="$CC_CLIENT_SECRET" \

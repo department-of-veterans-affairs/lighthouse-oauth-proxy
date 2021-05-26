@@ -68,7 +68,6 @@ phases:
          TAG=${COMMIT_HASH} \
          IMAGE=${IMAGE}-tests \
          VERSION=${COMMIT_HASH} \
-         TARGET=deploy \
          BUILD_TOOL=CodeBuild \
          BUILD_NUMBER=${CODEBUILD_BUILD_ID}
       # Login to ECR prior to push

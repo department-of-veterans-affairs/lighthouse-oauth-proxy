@@ -59,7 +59,7 @@ build/oauth:
 .PHONY: build/oauth_tests
 build/oauth_tests : IMAGE = oauth-proxy-tests
 build/oauth_tests:
-	DIR = $(patsubst %-tests,%,$(IMAGE))
+	DIR := $(patsubst %-tests,%,$(IMAGE))
 	## build:	Build Docker image
 	docker build -t $(REPOSITORY)/$(NAMESPACE)/$(IMAGE):$(TAG) \
 		-f $(DIR)/Dockerfile.bats \

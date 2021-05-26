@@ -2,7 +2,7 @@ FROM vasdvp/health-apis-centos:8
 
 # Build Args
 ARG BUILD_DATE_TIME
-ARG VERSION
+ARG BUILD_VERSION
 ARG BUILD_NUMBER
 ARG BUILD_TOOL
 
@@ -17,7 +17,7 @@ LABEL org.opencontainers.image.authors="leeroy-jenkles@va.gov" \
 
 # Dynamic Labels
 LABEL org.opencontainers.image.created=${BUILD_DATE_TIME} \
-      org.opencontainers.image.version=${VERSION} \
+      org.opencontainers.image.version=${BUILD_VERSION} \
       gov.va.build.number=${BUILD_NUMBER} \
       gov.va.build.tool=${BUILD_TOOL}
 

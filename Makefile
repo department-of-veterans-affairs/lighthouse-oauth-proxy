@@ -65,7 +65,7 @@ build/oauth_tests:
 		--build-arg AWS_ACCOUNT_ID=$(AWS_ACCOUNT_ID) \
 		--build-arg BUILD_DATE_TIME=$(BUILD_DATE_TIME) \
 		--build-arg BUILD_TOOL=$(BUILD_TOOL) \
-		--build-arg VERSION=$(BUILD_VERSION) \
+		--build-arg BUILD_VERSION=$(BUILD_VERSION) \
 		--build-arg BUILD_NUMBER=$(BUILD_NUMBER) \
 		--no-cache $(patsubst %-tests,%,$(IMAGE))
 

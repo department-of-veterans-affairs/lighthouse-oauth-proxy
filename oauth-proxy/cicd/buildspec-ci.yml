@@ -77,3 +77,4 @@ phases:
       - echo Pushing image to ECR
       - time="${time}\nPush - $(date +%r) - started"
       - make push IMAGE=${IMAGE} TAG=${COMMIT_HASH}
+      - make push IMAGE=${IMAGE}-tests TAG=${COMMIT_HASH}

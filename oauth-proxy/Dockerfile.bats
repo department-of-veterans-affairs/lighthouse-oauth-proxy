@@ -39,5 +39,7 @@ WORKDIR bats-core
 RUN ./install.sh /usr/local
 
 WORKDIR /bats
-
+RUN useradd bats
+RUN usermod -aG docker bats
+USER bats
 ENTRYPOINT [ "./entrypoint_test.sh" ]

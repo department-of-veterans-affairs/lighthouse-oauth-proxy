@@ -12,7 +12,7 @@ const {
 } = require("./testUtils");
 const {
   buildBackgroundServerModule,
-} = require("../../common/backgroundServer");
+} = require("./backgroundServer");
 const upstreamOAuthTestServer = require("./upstreamOAuthTestServer");
 const {
   startServerInBackground,

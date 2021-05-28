@@ -43,7 +43,6 @@ CMD ["node", "index.js", "--config", "/etc/oauth-proxy/config.json"]
 
 from base as deploy
 WORKDIR /ca-certificates
-COPY ./fwdproxy.crt ./fwdproxy.crt
-RUN  openssl x509 -in /ca-certificates/fwdproxy.crt >> ./ca-certs.pem
+COPY ./ca-certs.pem ./ca-certs.pem
 WORKDIR /home/node
 USER node

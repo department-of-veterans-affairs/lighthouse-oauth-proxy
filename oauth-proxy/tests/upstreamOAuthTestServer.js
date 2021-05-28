@@ -6,7 +6,7 @@
 const express = require("express");
 const {
   buildBackgroundServerModule,
-} = require("../../common/backgroundServer");
+} = require("./backgroundServer");
 const UPSTREAM_OAUTH_PORT = 9091;
 const bodyParser = require("body-parser");
 function prefixPath(path) {

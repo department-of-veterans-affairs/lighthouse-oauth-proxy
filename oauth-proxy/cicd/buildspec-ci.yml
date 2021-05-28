@@ -62,6 +62,14 @@ phases:
       - make lint IMAGE=${IMAGE} TAG=${COMMIT_HASH}
       # run unit tests
       - make test IMAGE=${IMAGE} TAG=${COMMIT_HASH}
+      # Build the tests image
+      - echo Building tests image
+      - make build/oauth_tests  \
+         TAG=${COMMIT_HASH} \
+         IMAGE=${IMAGE}-tests \
+         BUILD_VERSION=${COMMIT_HASH} \
+         BUILD_TOOL=CodeBuild \
+         BUILD_NUMBER=${CODEBUILD_BUILD_ID}
       # Login to ECR prior to push
       - echo Logging into ECR
       - make login
@@ -69,3 +77,4 @@ phases:
       - echo Pushing image to ECR
       - time="${time}\nPush - $(date +%r) - started"
       - make push IMAGE=${IMAGE} TAG=${COMMIT_HASH}
+      - make push IMAGE=${IMAGE}-tests TAG=${COMMIT_HASH}

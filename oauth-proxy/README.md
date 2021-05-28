@@ -8,7 +8,7 @@ This is a slim proxy for transforming and storing values from Okta's OpenID Conn
 
 ## Usage
 
-- Run `npm i` to install dependencies
+- Run `npm i` to install dependencies.
 
 ### Quick Start Docker Compose
 

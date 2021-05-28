@@ -50,6 +50,7 @@ phases:
       - echo Building commit ${TAG}
       - time="${time}\nBuild - $(date +%r) - started"
       - aws ssm get-parameters  --name ${FWD_PROXY_CRT} | jq -r '.Parameters[0].Value' > fwdproxy.crt
+      - openssl x509 -in ./fwdproxy.crt >> ./ca-certs.pem
       - |
         make build/oauth  \
          TAG=${COMMIT_HASH} \

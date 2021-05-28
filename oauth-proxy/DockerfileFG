@@ -29,12 +29,7 @@ COPY --chown=node:node ./oauth-proxy/package.json package.json
 COPY --chown=node:node ./oauth-proxy/package-lock.json package-lock.json
 RUN npm install
 
-USER root
-RUN mkdir -p /home/common && \
-  chown -R node:node /home/common
-
 COPY --chown=node:node ./oauth-proxy ./
-COPY --chown=node:node ./common /home/common
 
 EXPOSE 7100 7100
 
@@ -46,9 +41,12 @@ USER node
 ENTRYPOINT ["/usr/local/bin/tini", "--"]
 CMD ["node", "index.js", "--config", "/etc/oauth-proxy/config.json"]
 
-from base as deploy
-WORKDIR /ca-certificates
+from base as buildcert
+WORKDIR /tmp/ca-certificates
 COPY ./fwdproxy.crt ./fwdproxy.crt
 RUN  openssl x509 -in ./fwdproxy.crt >> ./ca-certs.pem
+
+from base as deploy
 WORKDIR /home/node
-USER node
+COPY --from=buildcert /tmp/ca-certificates/ /ca-certificates/
+

@@ -42,6 +42,8 @@ ENTRYPOINT ["/usr/local/bin/tini", "--"]
 CMD ["node", "index.js", "--config", "/etc/oauth-proxy/config.json"]
 
 from base as deploy
-COPY ./fwdproxy.crt /ca-certificates/fwdproxy.crt
-RUN  openssl x509 -in /ca-certificates/fwdproxy.crt >> /ca-certificates/ca-certs.pem
+WORKDIR /ca-certificates
+COPY ./fwdproxy.crt ./fwdproxy.crt
+RUN  openssl x509 -in /ca-certificates/fwdproxy.crt >> ./ca-certs.pem
+WORKDIR /home/node
 USER node

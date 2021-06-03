@@ -78,7 +78,3 @@ phases:
       - time="${time}\nPush - $(date +%r) - started"
       - make push IMAGE=${IMAGE} TAG=${COMMIT_HASH}
       - make push IMAGE=${IMAGE}-tests TAG=${COMMIT_HASH}
-  test:
-    commands:
-      - echo Running regression tests ...
-      - make regression

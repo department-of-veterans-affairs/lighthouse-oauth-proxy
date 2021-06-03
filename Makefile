@@ -87,15 +87,6 @@ test:
 		$(REPOSITORY)/$(NAMESPACE)/$(IMAGE):$(TAG) \
 		npm run test:ci
 
-## test: Regression Tests
-.PHONY: regression
-regression:
-	@:$(call check_defined, IMAGE, IMAGE variable should be saml-proxy or oauth-proxy)
-	docker run --rm --entrypoint='' \
-		-w "/home/node" \
-		$(REPOSITORY)/$(NAMESPACE)/$(IMAGE):$(TAG) \
-		npm run test:regression
-
 ## pull: 	Pull an image to ECR
 .PHONY: pull
 pull:

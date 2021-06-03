@@ -6,7 +6,6 @@
   "scripts": {
     "test": "jest",
     "test:ci": "jest --ci",
-    "test:regression": "./tests/bats/regression_tests.sh",
     "prestart": "npx eslint .",
     "start": "node index.js --config dev-config.json",
     "lint": "npx eslint .",

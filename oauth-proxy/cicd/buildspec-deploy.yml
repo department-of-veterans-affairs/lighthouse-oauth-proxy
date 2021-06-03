@@ -35,6 +35,7 @@ env:
   parameter-store:
     # SLACK_WEBHOOK should be a webhook that posts to the Slack channel you want notifications to go to
     SLACK_WEBHOOK: "/dvp/devops/codebuild_slack_webhook_lighthouse"
+    CLIENT_SECRET: "/dvp/devops/codebuild_client_secret"
 phases:
   pre_build:
     commands:
@@ -78,6 +79,18 @@ phases:
             --tag ${DEPLOY_TAG} \
             --timeout 1200 || exit 1
             slackpost.sh -t success "Deployed OAuth Proxy to ${env}."
+          if  [[ (${env} != "prod" ]]; then
+            echo Running regression tests.
+            make regression \
+              IMAGE=${IMAGE}-tests \
+              USER_EMAIL=${USER_EMAIL} \
+              USER_PASSWORD=${USER_PASSWORD} \
+              CLIENT_ID=${CLIENT_ID} \
+              CLIENT_SECRET=${CLIENT_SECRET} \
+              CC_CLIENT_ID=${CC_CLIENT_ID} \
+              CC_CLIENT_SECRET=${CC_CLIENT_SECRET} \
+              HOST=${HOST}
+          fi
         done
   post_build:
     commands:

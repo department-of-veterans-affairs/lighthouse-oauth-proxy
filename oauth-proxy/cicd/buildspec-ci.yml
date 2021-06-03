@@ -90,4 +90,4 @@ phases:
           CLIENT_SECRET=${CLIENT_SECRET} \
           CC_CLIENT_ID=${CC_CLIENT_ID} \
           CC_CLIENT_SECRET=${CC_CLIENT_SECRET} \
-          HOST=${HOST} \
+          HOST=${HOST}

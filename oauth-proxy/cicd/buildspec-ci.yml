@@ -69,3 +69,7 @@ phases:
       - echo Pushing image to ECR
       - time="${time}\nPush - $(date +%r) - started"
       - make push IMAGE=${IMAGE} TAG=${COMMIT_HASH}
+  test:
+    commands:
+      - echo Running regression tests ...
+      - make regression

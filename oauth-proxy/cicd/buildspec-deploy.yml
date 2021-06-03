@@ -32,10 +32,20 @@ env:
     DEPLOYABLE_ENVIRONMENTS: "dev staging sandbox prod"
     # Variables needed for ecs deployment
     AWS_APP_NAME: "ecs-oauth-proxy"
+    # Variables needed for regression tests
+    USER_EMAIL: "va.api.user+idme.003@gmail.com"
+    USER_PASSWORD: "Password1234!"
+    DEV_HOST: "https://dev-api.va.gov/oauth2"
+    SANDBOX_HOST: "https://sandbox-api.va.gov/oauth2"
+    STAGING_HOST: "https://staging-api.va.gov/oauth2"
   parameter-store:
     # SLACK_WEBHOOK should be a webhook that posts to the Slack channel you want notifications to go to
     SLACK_WEBHOOK: "/dvp/devops/codebuild_slack_webhook_lighthouse"
+    # Variables needed for regression tests
+    CLIENT_ID: "/dvp/devops/codebuild_client_id"
     CLIENT_SECRET: "/dvp/devops/codebuild_client_secret"
+    CC_CLIENT_ID: "/dvp/devops/codebuild_cc_client_id"
+    CC_CLIENT_SECRET: "/dvp/devops/codebuild_cc_client_secret"
 phases:
   pre_build:
     commands:
@@ -81,6 +91,7 @@ phases:
             slackpost.sh -t success "Deployed OAuth Proxy to ${env}."
           if  [[ (${env} != "prod" ]]; then
             echo Running regression tests.
+            HOST=${env}_HOST
             make regression \
               IMAGE=${IMAGE}-tests \
               USER_EMAIL=${USER_EMAIL} \
@@ -89,7 +100,7 @@ phases:
               CLIENT_SECRET=${CLIENT_SECRET} \
               CC_CLIENT_ID=${CC_CLIENT_ID} \
               CC_CLIENT_SECRET=${CC_CLIENT_SECRET} \
-              HOST=${HOST}
+              HOST=${${HOST}}
           fi
         done
   post_build:

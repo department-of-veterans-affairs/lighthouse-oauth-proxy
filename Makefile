@@ -87,6 +87,20 @@ test:
 		$(REPOSITORY)/$(NAMESPACE)/$(IMAGE):$(TAG) \
 		npm run test:ci
 
+## regression: Regression Tests
+.PHONY: regression
+regression:
+	@:$(call check_defined, IMAGE, IMAGE variable should be oauth-proxy)
+	docker run -v /var/run/docker.sock:/var/run/docker.sock \
+		--rm $(REPOSITORY)/$(NAMESPACE)/$(IMAGE):$(TAG) \
+		--user-email=$(USER_EMAIL) \
+		--user-password=$(USER_PASSWORD) \
+		--client-id=$(CLIENT_ID) \
+		--client-secret=$(CLIENT_SECRET) \
+		--cc-client-id=$(CC_CLIENT_ID) \
+		--cc-client-secret=$(CC_CLIENT_SECRET) \
+		--host=$(HOST) 
+
 ## pull: 	Pull an image to ECR
 .PHONY: pull
 pull:

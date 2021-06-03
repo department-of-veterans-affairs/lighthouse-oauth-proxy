@@ -112,15 +112,15 @@ assign_code() {
   local network=""
   if [[ $HOST == *"localhost"* ]];
   then
-    network="-it --network container:oauth-proxy_oauth-proxy_1"
+    network="-i --network container:oauth-proxy_oauth-proxy_1"
   else
     network=""
   fi
 
   local code
   code=$(docker run \
-      $network \
-      vasdvp/lighthouse-auth-utils:1.1.2 auth \
+      $network --rm \
+      vasdvp/lighthouse-auth-utils:latest auth \
       --redirect-uri="$REDIRECT_URI" \
       --authorization-url="$HOST" \
       --user-email="$USER_EMAIL" \
@@ -148,7 +148,7 @@ assign_code() {
 # ----
 
 # Pulling latest lighthouse-auth-utils docker image if necessary
-docker pull vasdvp/lighthouse-auth-utils:1.1.2
+docker pull vasdvp/lighthouse-auth-utils:latest
 
 # Start Tests
 

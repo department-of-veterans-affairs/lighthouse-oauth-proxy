@@ -2,7 +2,8 @@ from vasdvp/lighthouse-node-application-base:node12
 
 WORKDIR /home/ca-certificates
 COPY ./fwdproxy.crt ./fwdproxy.crt
-RUN  openssl x509 -in ./fwdproxy.crt >> ./ca-certs.pem
+RUN  openssl x509 -in ./fwdproxy.crt >> ./fwdproxy.pem
+RUN  cat  /ca-certificates/ca-certs.pem ./fwdproxy > ./ca-certs.pem
 
 FROM vasdvp/lighthouse-node-application-base:node12 as base
 
@@ -48,5 +49,5 @@ ENTRYPOINT ["/usr/local/bin/tini", "--"]
 CMD ["node", "index.js", "--config", "/etc/oauth-proxy/config.json"]
 
 from base as deploy
-COPY --from=0 /home/ca-certificates/ /ca-certificates/
+COPY --from=0 /home/ca-certificates/ca-certs.pem /ca-certificates/ca-certs.pem
 USER node

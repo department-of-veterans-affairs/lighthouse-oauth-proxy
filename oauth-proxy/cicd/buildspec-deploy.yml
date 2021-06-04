@@ -32,6 +32,7 @@ env:
     DEPLOYABLE_ENVIRONMENTS: "dev staging sandbox prod"
     # Variables needed for ecs deployment
     AWS_APP_NAME: "ecs-oauth-proxy"
+    IMAGE: "oauth-proxy"
     # Variables needed for regression tests
     USER_EMAIL: "va.api.user+idme.003@gmail.com"
     USER_PASSWORD: "Password1234!"

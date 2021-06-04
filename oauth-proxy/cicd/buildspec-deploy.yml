@@ -89,7 +89,7 @@ phases:
             --tag ${DEPLOY_TAG} \
             --timeout 1200 || exit 1
             slackpost.sh -t success "Deployed OAuth Proxy to ${env}."
-          if  [[ (${env} != "prod" ]]; then
+          if  [[ ${env} != "prod" ]]; then
             echo Running regression tests.
             HOST=${env}_HOST
             make regression \

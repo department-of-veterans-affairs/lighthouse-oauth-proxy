@@ -92,6 +92,7 @@ test:
 regression:
 	@:$(call check_defined, IMAGE, IMAGE variable should be oauth-proxy)
 	docker run \
+		-v "/var/run/docker.sock:/var/run/docker.sock" \
 		--rm $(REPOSITORY)/$(NAMESPACE)/$(IMAGE):$(TAG) \
 		--user-email=$(USER_EMAIL) \
 		--user-password=$(USER_PASSWORD) \

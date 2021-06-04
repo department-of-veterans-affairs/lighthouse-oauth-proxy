@@ -101,7 +101,7 @@ phases:
               CLIENT_SECRET=${CLIENT_SECRET} \
               CC_CLIENT_ID=${CC_CLIENT_ID} \
               CC_CLIENT_SECRET=${CC_CLIENT_SECRET} \
-              HOST=${HOST}
+              HOST=${dev_HOST}
           fi
         done
   post_build:

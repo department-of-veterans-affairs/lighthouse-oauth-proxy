@@ -1,8 +1,10 @@
-FROM vasdvp/lighthouse-node-application-base:node12 as pembuilder
+from vasdvp/lighthouse-node-application-base:node12
 
 WORKDIR /home/ca-certificates
 COPY ./fwdproxy.crt ./fwdproxy.crt
-RUN  openssl x509 -in ./fwdproxy.crt >> ./ca-certs.pem
+RUN openssl x509 -in ./fwdproxy.crt >> ./fwdproxy.pem
+RUN cat  /ca-certificates/ca-certs.pem > ./ca-certs.pem
+RUN cat  ./fwdproxy.pem >> ./ca-certs.pem
 
 FROM vasdvp/lighthouse-node-application-base:node12 as base
 
@@ -18,13 +20,13 @@ COPY --chown=node:node ./oauth-proxy ./
 EXPOSE 7100 7100
 
 HEALTHCHECK --interval=1m --timeout=4s --start-period=30s \
-  CMD curl -f http://localhost:7100/oauth2/.well-known/openid-configuration || exit 1
+  CMD node bin/healthcheck.js
+
 USER node
 
 ENTRYPOINT ["/usr/local/bin/tini", "--"]
 CMD ["node", "index.js"]
 
 from base as deploy
-COPY --from=pembuilder /home/ca-certificates/fwdproxy.crt /ca-certificates/fwdproxy.crt
-COPY --from=pembuilder /home/ca-certificates/ca-certs.pem /ca-certificates/ca-certs.pem
+COPY --from=0 /home/ca-certificates/ca-certs.pem /ca-certificates/ca-certs.pem
 USER node

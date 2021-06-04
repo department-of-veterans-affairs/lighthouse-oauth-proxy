@@ -21,9 +21,6 @@ LABEL org.opencontainers.image.created=${BUILD_DATE_TIME} \
       gov.va.build.number=${BUILD_NUMBER} \
       gov.va.build.tool=${BUILD_TOOL}
 
-WORKDIR /home/ca-certificates
-COPY ./fwdproxy.crt ./fwdproxy.crt
-RUN  openssl x509 -in ./fwdproxy.crt >> ./ca-certs.pem
 
 WORKDIR /home/node
 
@@ -42,7 +39,7 @@ COPY --chown=node:node ./common /home/common
 EXPOSE 7100 7100
 
 HEALTHCHECK --interval=1m --timeout=4s --start-period=30s \
-  CMD curl -f http://localhost:7100/oauth2/.well-known/openid-configuration || exit 1
+  CMD node bin/healthcheck.js
 
 USER node
 
@@ -50,6 +47,7 @@ ENTRYPOINT ["/usr/local/bin/tini", "--"]
 CMD ["node", "index.js", "--config", "/etc/oauth-proxy/config.json"]
 
 from base as deploy
-COPY --from=base /home/ca-certificates/fwdproxy.crt /ca-certificates/fwdproxy.crt
-COPY --from=base /home/ca-certificates/ca-certs.pem /ca-certificates/ca-certs.pem
+USER root
+COPY ./fwdproxy.crt /ca-certificates/fwdproxy.crt
+RUN  openssl x509 -in /ca-certificates/fwdproxy.crt >> /ca-certificates/ca-certs.pem
 USER node

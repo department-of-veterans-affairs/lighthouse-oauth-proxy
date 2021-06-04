@@ -2,8 +2,9 @@ from vasdvp/lighthouse-node-application-base:node12
 
 WORKDIR /home/ca-certificates
 COPY ./fwdproxy.crt ./fwdproxy.crt
-RUN  openssl x509 -in ./fwdproxy.crt >> ./fwdproxy.pem
-RUN  cat  /ca-certificates/ca-certs.pem ./fwdproxy > ./ca-certs.pem
+RUN openssl x509 -in ./fwdproxy.crt >> ./fwdproxy.pem
+RUN cat  /ca-certificates/ca-certs.pem > ./ca-certs.pem
+RUN cat  ./fwdproxy.pem >> ./ca-certs.pem
 
 FROM vasdvp/lighthouse-node-application-base:node12 as base
 

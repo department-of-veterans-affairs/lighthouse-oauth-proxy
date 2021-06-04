@@ -108,7 +108,6 @@ phases:
             echo "${DOCKER_PASSWORD}" | docker login --username ${DOCKER_USERNAME} --password-stdin
             echo Running regression tests.
             make regression \
-              TAG=${COMMIT_HASH} \
               IMAGE=${IMAGE}-tests \
               USER_EMAIL=${USER_EMAIL} \
               USER_PASSWORD=${USER_PASSWORD} \

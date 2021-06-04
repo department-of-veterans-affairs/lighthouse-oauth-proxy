@@ -26,6 +26,8 @@ version: 0.2
 env:
   shell: bash
   variables:
+    # Honor Docker ignore at folder level
+    DOCKER_BUILDKIT: 1
     # These are the default deploy environments
     ENVIRONMENTS: "dev staging"
     # These are the deployable environments
@@ -40,6 +42,9 @@ env:
     sandbox_HOST: "https://sandbox-api.va.gov/oauth2"
     staging_HOST: "https://staging-api.va.gov/oauth2"
   parameter-store:
+    # For pulling docker images
+    DOCKER_USERNAME: "/dvp/devops/DOCKER_USERNAME"
+    DOCKER_PASSWORD: "/dvp/devops/DOCKER_PASSWORD"
     # SLACK_WEBHOOK should be a webhook that posts to the Slack channel you want notifications to go to
     SLACK_WEBHOOK: "/dvp/devops/codebuild_slack_webhook_lighthouse"
     # Variables needed for regression tests
@@ -47,6 +52,8 @@ env:
     CLIENT_SECRET: "/dvp/devops/codebuild_client_secret"
     CC_CLIENT_ID: "/dvp/devops/codebuild_cc_client_id"
     CC_CLIENT_SECRET: "/dvp/devops/codebuild_cc_client_secret"
+  exported-variables:
+    - DOCKER_BUILDKIT
 phases:
   install:
     commands:
@@ -97,6 +104,9 @@ phases:
             --timeout 1200 || exit 1
             slackpost.sh -t success "Deployed OAuth Proxy to ${env}."
           if  [[ ${env} != "prod" ]]; then
+            # Login to Docker Hub prior to pulling base images to avoid rate limiting
+            echo Logging into Docker Hub
+            echo "${DOCKER_PASSWORD}" | docker login --username ${DOCKER_USERNAME} --password-stdin
             echo Running regression tests.
             HOST=${env}_HOST
             echo ${HOST}

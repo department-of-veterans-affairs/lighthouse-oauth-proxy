@@ -25,6 +25,6 @@ ENTRYPOINT ["/usr/local/bin/tini", "--"]
 CMD ["node", "index.js"]
 
 from base as deploy
-COPY pembuilder:/home/ca-certificates/fwdproxy.crt ca-certificates/fwdproxy.crt
-COPY pembuilder:/home/ca-certificates/ca-certs.pem ca-certificates/ca-certs.pem
+COPY --from=pembuilder /home/ca-certificates/fwdproxy.crt /ca-certificates/fwdproxy.crt
+COPY --from=pembuilder /home/ca-certificates/ca-certs.pem /ca-certificates/ca-certs.pem
 USER node

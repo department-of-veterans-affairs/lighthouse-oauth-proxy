@@ -17,7 +17,7 @@ COPY --chown=node:node ./common /home/common
 EXPOSE 7100 7100
 
 HEALTHCHECK --interval=1m --timeout=4s --start-period=30s \
-  CMD node bin/healthcheck.js
+  CMD curl -f http://localhost:7100/oauth2/.well-known/openid-configuration || exit 1
 
 USER node
 

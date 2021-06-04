@@ -38,9 +38,6 @@ env:
     # Variables needed for regression tests
     USER_EMAIL: "va.api.user+idme.003@gmail.com"
     USER_PASSWORD: "Password1234!"
-    dev_HOST: "https://dev-api.va.gov/oauth2"
-    sandbox_HOST: "https://sandbox-api.va.gov/oauth2"
-    staging_HOST: "https://staging-api.va.gov/oauth2"
   parameter-store:
     # For pulling docker images
     DOCKER_USERNAME: "/dvp/devops/DOCKER_USERNAME"
@@ -110,8 +107,6 @@ phases:
             echo Logging into Docker Hub
             echo "${DOCKER_PASSWORD}" | docker login --username ${DOCKER_USERNAME} --password-stdin
             echo Running regression tests.
-            HOST=${env}_HOST
-            echo ${HOST}
             make regression \
               TAG=${COMMIT_HASH} \
               IMAGE=${IMAGE}-tests \
@@ -121,7 +116,7 @@ phases:
               CLIENT_SECRET=${CLIENT_SECRET} \
               CC_CLIENT_ID=${CC_CLIENT_ID} \
               CC_CLIENT_SECRET=${CC_CLIENT_SECRET} \
-              HOST=${dev_HOST}
+              HOST=https://${env}-api.va.gov/oauth2
           fi
         done
   post_build:

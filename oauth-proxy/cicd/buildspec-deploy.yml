@@ -92,6 +92,7 @@ phases:
           if  [[ ${env} != "prod" ]]; then
             echo Running regression tests.
             HOST=${env}_HOST
+            echo ${HOST}
             make regression \
               IMAGE=${IMAGE}-tests \
               USER_EMAIL=${USER_EMAIL} \
@@ -100,7 +101,7 @@ phases:
               CLIENT_SECRET=${CLIENT_SECRET} \
               CC_CLIENT_ID=${CC_CLIENT_ID} \
               CC_CLIENT_SECRET=${CC_CLIENT_SECRET} \
-              HOST=${$HOST}
+              HOST=${HOST}
           fi
         done
   post_build:

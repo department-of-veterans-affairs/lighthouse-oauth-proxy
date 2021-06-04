@@ -104,6 +104,8 @@ phases:
             --timeout 1200 || exit 1
             slackpost.sh -t success "Deployed OAuth Proxy to ${env}."
           if  [[ ${env} != "prod" ]]; then
+            echo Logging into ECR
+            make login
             # Login to Docker Hub prior to pulling base images to avoid rate limiting
             echo Logging into Docker Hub
             echo "${DOCKER_PASSWORD}" | docker login --username ${DOCKER_USERNAME} --password-stdin

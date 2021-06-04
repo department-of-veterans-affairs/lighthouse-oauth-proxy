@@ -100,7 +100,8 @@ regression:
 		--client-secret=$(CLIENT_SECRET) \
 		--cc-client-id=$(CC_CLIENT_ID) \
 		--cc-client-secret=$(CC_CLIENT_SECRET) \
-		--host=$(HOST) 
+		--host=$(HOST) \
+		--test-claims
 
 ## pull: 	Pull an image to ECR
 .PHONY: pull

@@ -1,7 +1,7 @@
 FROM vasdvp/lighthouse-node-application-base:node12 as base
 
-USER node
 WORKDIR /home/node
+USER node
 
 RUN git config --global url."https://".insteadOf git://
 COPY --chown=node:node ./oauth-proxy/package.json package.json

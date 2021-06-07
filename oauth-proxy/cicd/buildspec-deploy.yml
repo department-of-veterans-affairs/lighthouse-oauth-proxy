@@ -35,9 +35,6 @@ env:
     # Variables needed for ecs deployment
     AWS_APP_NAME: "ecs-oauth-proxy"
     IMAGE: "oauth-proxy"
-    # Variables needed for regression tests
-    USER_EMAIL: "va.api.user+idme.003@gmail.com"
-    USER_PASSWORD: "Password1234!"
   parameter-store:
     # For pulling docker images
     DOCKER_USERNAME: "/dvp/devops/DOCKER_USERNAME"
@@ -45,10 +42,12 @@ env:
     # SLACK_WEBHOOK should be a webhook that posts to the Slack channel you want notifications to go to
     SLACK_WEBHOOK: "/dvp/devops/codebuild_slack_webhook_lighthouse"
     # Variables needed for regression tests
-    CLIENT_ID: "/dvp/devops/codebuild_client_id"
-    CLIENT_SECRET: "/dvp/devops/codebuild_client_secret"
-    CC_CLIENT_ID: "/dvp/devops/codebuild_cc_client_id"
-    CC_CLIENT_SECRET: "/dvp/devops/codebuild_cc_client_secret"
+    CLIENT_ID: "/dvp/common/ecs-oauth-proxy/codebuild/client_id"
+    CLIENT_SECRET: "/dvp/common/ecs-oauth-proxy/codebuild/client_secret"
+    CC_CLIENT_ID: "/dvp/common/ecs-oauth-proxy/codebuild/cc_client_id"
+    CC_CLIENT_SECRET: "/dvp/common/ecs-oauth-proxy/codebuild/cc_client_secret"
+    USER_EMAIL: "/dvp/common/ecs-oauth-proxy/codebuild/user_email"
+    USER_PASSWORD: "/dvp/common/ecs-oauth-proxy/codebuild/user_password"
   exported-variables:
     - DOCKER_BUILDKIT
 phases:

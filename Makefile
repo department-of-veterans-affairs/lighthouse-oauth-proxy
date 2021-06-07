@@ -90,7 +90,7 @@ test:
 ## regression: Regression Tests
 .PHONY: regression
 regression:
-	@:$(call check_defined, IMAGE, IMAGE variable should be oauth-proxy)
+	@:$(call check_defined, IMAGE, IMAGE variable should be oauth-proxy-tests)
 	docker run \
 		-v "/var/run/docker.sock:/var/run/docker.sock" \
 		--rm $(REPOSITORY)/$(NAMESPACE)/$(IMAGE):$(TAG) \
@@ -100,8 +100,7 @@ regression:
 		--client-secret=$(CLIENT_SECRET) \
 		--cc-client-id=$(CC_CLIENT_ID) \
 		--cc-client-secret=$(CC_CLIENT_SECRET) \
-		--host=$(HOST) \
-		--test-claims
+		--host=$(HOST)
 
 ## pull: 	Pull an image to ECR
 .PHONY: pull

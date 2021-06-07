@@ -22,11 +22,8 @@ EXPOSE 7100 7100
 HEALTHCHECK --interval=1m --timeout=4s --start-period=30s \
   CMD node bin/healthcheck.js
 
-USER node
-
 ENTRYPOINT ["/usr/local/bin/tini", "--"]
 CMD ["node", "index.js"]
 
 from base as deploy
 COPY --from=0 /home/ca-certificates/ca-certs.pem /ca-certificates/ca-certs.pem
-USER node

@@ -119,7 +119,7 @@ phases:
               CC_CLIENT_SECRET=${CC_CLIENT_SECRET} \
               HOST=https://${env}-api.va.gov/oauth2
             if [[ $? -gt 0 ]]; then
-              TEST_STATUS="Some regression tests failed."
+              export TEST_STATUS="Some regression tests failed."
               exit 1
             fi
           fi

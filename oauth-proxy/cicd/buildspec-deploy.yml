@@ -52,6 +52,7 @@ env:
     USER_PASSWORD: "/dvp/common/ecs-oauth-proxy/codebuild/user_password"
   exported-variables:
     - DOCKER_BUILDKIT
+    - TEST_STATUS
 phases:
   install:
     commands:
@@ -119,7 +120,7 @@ phases:
               CC_CLIENT_SECRET=${CC_CLIENT_SECRET} \
               HOST=https://${env}-api.va.gov/oauth2
             if [[ $? -gt 0 ]]; then
-              env.variables.TEST_STATUS="Some regression tests failed."
+              export TEST_STATUS "Some regression tests failed."
               exit 1
             fi
           fi

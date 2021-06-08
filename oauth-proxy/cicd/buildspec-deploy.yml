@@ -49,7 +49,7 @@ env:
     USER_EMAIL: "/dvp/common/ecs-oauth-proxy/codebuild/user_email"
     USER_PASSWORD: "/dvp/common/ecs-oauth-proxy/codebuild/user_password"
   exported-variables:
-    - TEST_STATUS: "Build failed before regression tests were ran."
+    - DOCKER_BUILDKIT
 phases:
   install:
     commands:
@@ -117,7 +117,7 @@ phases:
               CC_CLIENT_SECRET=${CC_CLIENT_SECRET} \
               HOST=https://${env}-api.va.gov/oauth2
             if [[ $? -gt 0 ]]; then
-              export TEST_STATUS="Some regression tests failed."
+              slackpost.sh -t failure "Some tests failed."
               exit 1
             fi
           fi
@@ -126,5 +126,5 @@ phases:
     commands:
       - |
         if [[ ${CODEBUILD_BUILD_SUCCEEDING} -eq 0 ]]; then
-          slackpost.sh -t failure "There was an error with the deployment process of OAuth Proxy! ${TEST_STATUS}"
+          slackpost.sh -t failure "There was an error with the deployment process of OAuth Proxy!"
         fi

@@ -117,8 +117,7 @@ phases:
               CC_CLIENT_SECRET=${CC_CLIENT_SECRET} \
               HOST=https://${env}-api.va.gov/oauth2
             if [[ $? -gt 0 ]]; then
-              slackpost.sh -t failure "Some tests failed."
-              exit 1
+              slackpost.sh -t warning "Some regression tests failed."
             fi
           fi
         done

@@ -35,6 +35,8 @@ env:
     # Variables needed for ecs deployment
     AWS_APP_NAME: "ecs-oauth-proxy"
     IMAGE: "oauth-proxy"
+    # Will be changed is the regression tests are ran
+    TEST_STATUS: "Build failed before regression tests were ran."
   parameter-store:
     # For pulling docker images
     DOCKER_USERNAME: "/dvp/devops/DOCKER_USERNAME"
@@ -106,6 +108,7 @@ phases:
             echo Logging into Docker Hub
             echo "${DOCKER_PASSWORD}" | docker login --username ${DOCKER_USERNAME} --password-stdin
             echo Running regression tests.
+            TEST_STATUS="Some regression tests failed."
             make regression \
               TAG=${COMMIT_HASH} \
               IMAGE=${IMAGE}-tests \
@@ -116,11 +119,12 @@ phases:
               CC_CLIENT_ID=${CC_CLIENT_ID} \
               CC_CLIENT_SECRET=${CC_CLIENT_SECRET} \
               HOST=https://${env}-api.va.gov/oauth2
+            TEST_STATUS="All regression tests passed!"
           fi
         done
   post_build:
     commands:
       - |
         if [[ ${CODEBUILD_BUILD_SUCCEEDING} -eq 0 ]]; then
-          slackpost.sh -t failure "There was an error with the deployment process of OAuth Proxy!"
+          slackpost.sh -t failure "There was an error with the deployment process of OAuth Proxy! ${TEST_STATUS}"
         fi

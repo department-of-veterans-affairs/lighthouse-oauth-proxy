@@ -49,7 +49,7 @@ env:
     USER_EMAIL: "/dvp/common/ecs-oauth-proxy/codebuild/user_email"
     USER_PASSWORD: "/dvp/common/ecs-oauth-proxy/codebuild/user_password"
   exported-variables:
-    TEST_STATUS: "Build failed before regression tests were ran."
+    - TEST_STATUS: "Build failed before regression tests were ran."
 phases:
   install:
     commands:

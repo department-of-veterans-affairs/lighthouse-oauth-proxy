@@ -35,8 +35,6 @@ env:
     # Variables needed for ecs deployment
     AWS_APP_NAME: "ecs-oauth-proxy"
     IMAGE: "oauth-proxy"
-    # Will be changed is the regression tests are ran
-    TEST_STATUS: "Build failed before regression tests were ran."
   parameter-store:
     # For pulling docker images
     DOCKER_USERNAME: "/dvp/devops/DOCKER_USERNAME"
@@ -51,8 +49,7 @@ env:
     USER_EMAIL: "/dvp/common/ecs-oauth-proxy/codebuild/user_email"
     USER_PASSWORD: "/dvp/common/ecs-oauth-proxy/codebuild/user_password"
   exported-variables:
-    - DOCKER_BUILDKIT
-    - TEST_STATUS
+    TEST_STATUS: "Build failed before regression tests were ran."
 phases:
   install:
     commands:

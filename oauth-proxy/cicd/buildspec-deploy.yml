@@ -108,7 +108,6 @@ phases:
             echo Logging into Docker Hub
             echo "${DOCKER_PASSWORD}" | docker login --username ${DOCKER_USERNAME} --password-stdin
             echo Running regression tests.
-            TEST_STATUS="Some regression tests failed."
             make regression \
               TAG=${COMMIT_HASH} \
               IMAGE=${IMAGE}-tests \
@@ -119,7 +118,10 @@ phases:
               CC_CLIENT_ID=${CC_CLIENT_ID} \
               CC_CLIENT_SECRET=${CC_CLIENT_SECRET} \
               HOST=https://${env}-api.va.gov/oauth2
-            TEST_STATUS="All regression tests passed!"
+            if [[ $? -gt 0 ]]; then
+              TEST_STATUS="Some regression tests failed."
+              exit 1
+            fi
           fi
         done
   post_build:

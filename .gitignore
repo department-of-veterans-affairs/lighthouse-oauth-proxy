@@ -121,16 +121,13 @@ $RECYCLE.BIN/
 # Typescript build
 build/
 /test-report.xml
-/saml-proxy/public/core.css
-/saml-proxy/sp-metadata.xml
 
 # Local config
-/saml-proxy/dev-config.json
-/oauth-proxy/dev-config.json
-/oauth-proxy/tests/scripts/setup-tests.sh
+dev-config.json
+tests/scripts/setup-tests.sh
 
 # Coverage data for the test suite
-/oauth-proxy/tests/coverage
+tests/coverage
 
 ## Webstorm
 .idea/

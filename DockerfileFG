@@ -17,7 +17,7 @@ ARG BUILD_TOOL
 
 # Static Labels
 LABEL org.opencontainers.image.authors="leeroy-jenkles@va.gov" \
-      org.opencontainers.image.url="https://github.com/department-of-veterans-affairs/lighthouse-oauth-proxy/tree/master/oauth-proxy/DockerfileFG" \
+      org.opencontainers.image.url="https://github.com/department-of-veterans-affairs/lighthouse-oauth-proxy/tree/master/DockerfileFG" \
       org.opencontainers.image.documentation="https://github.com/department-of-veterans-affairs/lighthouse-oauth-proxy/tree/master/lighthouse-oauth-proxy/README.md" \
       org.opencontainers.image.vendor="lighthouse" \
       org.opencontainers.image.title="oauth-proxy" \
@@ -34,8 +34,8 @@ LABEL org.opencontainers.image.created=${BUILD_DATE_TIME} \
 WORKDIR /home/node
 
 RUN git config --global url."https://".insteadOf git://
-COPY --chown=node:node ./oauth-proxy/package.json package.json
-COPY --chown=node:node ./oauth-proxy/package-lock.json package-lock.json
+COPY --chown=node:node ./package.json package.json
+COPY --chown=node:node ./package-lock.json package-lock.json
 RUN npm install
 
 COPY --chown=node:node ./oauth-proxy ./

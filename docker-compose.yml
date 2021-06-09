@@ -13,9 +13,9 @@ services:
     command: sh -c "cd /opt && npm install && node dynamo_schema.js"
   oauth-proxy:
     build:
-      context: ../.
+      context: ./
       target: base
-      dockerfile: oauth-proxy/Dockerfile
+      dockerfile: ./Dockerfile
     depends_on:
       - dynamodb
     ports:

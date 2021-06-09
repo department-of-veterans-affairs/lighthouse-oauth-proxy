@@ -10,9 +10,7 @@ const {
   convertObjectToDynamoAttributeValues,
   buildFakeOktaClient,
 } = require("./testUtils");
-const {
-  buildBackgroundServerModule,
-} = require("../../common/backgroundServer");
+const { buildBackgroundServerModule } = require("./backgroundServer");
 const upstreamOAuthTestServer = require("./upstreamOAuthTestServer");
 const {
   startServerInBackground,

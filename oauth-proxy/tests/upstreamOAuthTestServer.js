@@ -4,9 +4,7 @@
 // pre-canned responses. This is used as a stand-in for Okta in our e2e tests.
 
 const express = require("express");
-const {
-  buildBackgroundServerModule,
-} = require("../../common/backgroundServer");
+const { buildBackgroundServerModule } = require("./backgroundServer");
 const UPSTREAM_OAUTH_PORT = 9091;
 const bodyParser = require("body-parser");
 function prefixPath(path) {

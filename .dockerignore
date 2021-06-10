@@ -3,7 +3,7 @@ public/bower_components/*
 build/*
 .git
 .gitignore
-Dockerfile
+Dockerfile*
 docker-compose.yml
 buildspec.yml
 

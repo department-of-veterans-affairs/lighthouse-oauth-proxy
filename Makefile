@@ -67,7 +67,7 @@ build/oauth_tests:
 		--build-arg BUILD_TOOL=$(BUILD_TOOL) \
 		--build-arg BUILD_VERSION=$(BUILD_VERSION) \
 		--build-arg BUILD_NUMBER=$(BUILD_NUMBER) \
-		--no-cache $(patsubst %-tests,%,$(IMAGE))
+		--no-cache $(patsubst %-tests,%,.)
 
 ## lint: Linting
 .PHONY: lint

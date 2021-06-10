@@ -61,7 +61,7 @@ build/oauth_tests : IMAGE = oauth-proxy-tests
 build/oauth_tests:
 	## build:	Build Docker image
 	docker build -t $(REPOSITORY)/$(NAMESPACE)/$(IMAGE):$(TAG) \
-		-f $(patsubst %-tests,%,Dockerfile.bats) \
+		-f Dockerfile.bats \
 		--build-arg AWS_ACCOUNT_ID=$(AWS_ACCOUNT_ID) \
 		--build-arg BUILD_DATE_TIME=$(BUILD_DATE_TIME) \
 		--build-arg BUILD_TOOL=$(BUILD_TOOL) \

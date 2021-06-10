@@ -4,7 +4,7 @@ This is a slim proxy for transforming and storing values from Okta's OpenID Conn
 
 ## Requirements
 
-- Node 12.x.x or greater
+- Node 12.21.0 or greater
 
 ## Usage
 

@@ -46,7 +46,7 @@ build/oauth : IMAGE = oauth-proxy
 build/oauth:
 	## build:	Build Docker image
 	docker build -t $(REPOSITORY)/$(NAMESPACE)/$(IMAGE):$(TAG) \
-		-f $(IMAGE)/DockerfileFG \
+		-f DockerfileFG \
 		--target $(TARGET) \
 		--build-arg AWS_ACCOUNT_ID=$(AWS_ACCOUNT_ID) \
 		--build-arg BUILD_DATE_TIME=$(BUILD_DATE_TIME) \
@@ -61,13 +61,13 @@ build/oauth_tests : IMAGE = oauth-proxy-tests
 build/oauth_tests:
 	## build:	Build Docker image
 	docker build -t $(REPOSITORY)/$(NAMESPACE)/$(IMAGE):$(TAG) \
-		-f $(patsubst %-tests,%,$(IMAGE))/Dockerfile.bats \
+		-f $(patsubst %-tests,%,.)/Dockerfile.bats \
 		--build-arg AWS_ACCOUNT_ID=$(AWS_ACCOUNT_ID) \
 		--build-arg BUILD_DATE_TIME=$(BUILD_DATE_TIME) \
 		--build-arg BUILD_TOOL=$(BUILD_TOOL) \
 		--build-arg BUILD_VERSION=$(BUILD_VERSION) \
 		--build-arg BUILD_NUMBER=$(BUILD_NUMBER) \
-		--no-cache $(patsubst %-tests,%,$(IMAGE))
+		--no-cache $(patsubst %-tests,%,.)
 
 ## lint: Linting
 .PHONY: lint

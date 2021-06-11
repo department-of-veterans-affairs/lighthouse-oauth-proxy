@@ -110,7 +110,7 @@ do_client_credentials() {
   if [[ $HOST == *"localhost"* ]];
   then
     url="http://localhost:7100/oauth2/health/system/v1"
-    network="-i --network container:oauth-proxy_oauth-proxy_1"
+    network="-i --network container:lighthouse-oauth-proxy_oauth-proxy_1"
   fi
 
   local cc

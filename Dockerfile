@@ -4,11 +4,11 @@ WORKDIR /home/node
 USER node
 
 RUN git config --global url."https://".insteadOf git://
-COPY --chown=node:node ./oauth-proxy/package.json package.json
-COPY --chown=node:node ./oauth-proxy/package-lock.json package-lock.json
+COPY --chown=node:node ./package.json package.json
+COPY --chown=node:node ./package-lock.json package-lock.json
 RUN npm install
 
-COPY --chown=node:node ./oauth-proxy ./
+COPY --chown=node:node ./ ./
 
 EXPOSE 7100 7100
 

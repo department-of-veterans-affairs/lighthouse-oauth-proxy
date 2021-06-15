@@ -53,7 +53,7 @@ describe("saveDocumentStateStrategy tests", () => {
       redirect_uri: REDIRECT_URI,
     };
     tokens = buildToken(false, true, true, "launch");
-    jest.spyOn(global.Math, "round").mockReturnValue(0);
+    jest.spyOn(global.Math, "round").mockReturnValue(86400000);
   });
 
   afterEach(() => {
@@ -98,7 +98,7 @@ describe("saveDocumentStateStrategy tests", () => {
       {
         access_token:
           "4116ff9d9b7bb73aff7680b14eb012670eb93cfc7266f142f13bd1486ae6cbb1",
-        expires_on: 300,
+        expires_on: 86400300,
         launch: "1234V5678",
       },
       "LaunchContext"
@@ -175,7 +175,7 @@ describe("saveDocumentStateStrategy tests", () => {
       {
         access_token:
           "4116ff9d9b7bb73aff7680b14eb012670eb93cfc7266f142f13bd1486ae6cbb1",
-        expires_on: 300,
+        expires_on: 86400300,
         launch: "1234V5678",
       },
       "LaunchContext"

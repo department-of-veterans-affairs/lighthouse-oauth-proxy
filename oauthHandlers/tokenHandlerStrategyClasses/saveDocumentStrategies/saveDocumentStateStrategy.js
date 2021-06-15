@@ -32,11 +32,13 @@ class SaveDocumentStateStrategy {
             tokens.refresh_token,
             this.config.hmac_secret
           );
-          let created_at = document.expires_on - 60 * 60 * 24 * 42;
           let now = Math.round(Date.now() / 1000);
-          this.refreshTokenLifeCycleHistogram.observe(
-            (now - created_at) / (60 * 60 * 24 * 1000)
-          );
+          if (document.refresh_token) {
+            let created_at = document.expires_on - 60 * 60 * 24 * 42;
+            this.refreshTokenLifeCycleHistogram.observe(
+              (now - created_at) / (60 * 60 * 24 * 1000)
+            );
+          }
           updated_document.expires_on = now + 60 * 60 * 24 * 42;
         } else {
           updated_document.expires_on = tokens.expires_at;

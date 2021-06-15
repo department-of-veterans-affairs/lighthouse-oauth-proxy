@@ -34,6 +34,7 @@ let logger;
 let req;
 let document;
 let tokens;
+let mockRefreshTokenLifeCycleHistogram;
 
 describe("saveDocumentStateStrategy tests", () => {
   beforeEach(() => {
@@ -51,10 +52,11 @@ describe("saveDocumentStateStrategy tests", () => {
       code: CODE_HASH_PAIR[0],
       refresh_token: REFRESH_TOKEN_HASH_PAIR[0],
       redirect_uri: REDIRECT_URI,
-      expires_on: 86400000 +  60 * 60 * 24 * 42,
+      expires_on: 86400000 + 60 * 60 * 24 * 42,
     };
     tokens = buildToken(false, true, true, "launch");
     jest.spyOn(global.Math, "round").mockReturnValue(172800000);
+    mockRefreshTokenLifeCycleHistogram = { observe: jest.fn() }
   });
 
   afterEach(() => {
@@ -73,10 +75,12 @@ describe("saveDocumentStateStrategy tests", () => {
       logger,
       dynamoClient,
       config,
-      "issuer"
+      "issuer",
+      mockRefreshTokenLifeCycleHistogram
     );
     await strategy.saveDocumentToDynamo(document, tokens);
     expect(logger.error).not.toHaveBeenCalled();
+    expect(mockRefreshTokenLifeCycleHistogram.observe).toHaveBeenCalledWith(1);
   });
   it("Happy Path with launch", async () => {
     document.launch = LAUNCH;
@@ -92,7 +96,8 @@ describe("saveDocumentStateStrategy tests", () => {
       logger,
       dynamoClient,
       config,
-      "issuer"
+      "issuer",
+      mockRefreshTokenLifeCycleHistogram
     );
     await strategy.saveDocumentToDynamo(document, tokens);
     expect(dynamoClient.savePayloadToDynamo).toHaveBeenCalledWith(
@@ -104,6 +109,7 @@ describe("saveDocumentStateStrategy tests", () => {
       },
       "LaunchContext"
     );
+    expect(mockRefreshTokenLifeCycleHistogram.observe).toHaveBeenCalledWith(1);
     expect(logger.error).not.toHaveBeenCalled();
   });
 
@@ -121,11 +127,12 @@ describe("saveDocumentStateStrategy tests", () => {
       logger,
       dynamoClient,
       config,
-      "issuer"
+      "issuer",
+      mockRefreshTokenLifeCycleHistogram
     );
     tokens = buildToken(false, true, false, "");
     await strategy.saveDocumentToDynamo(document, tokens);
-
+    expect(mockRefreshTokenLifeCycleHistogram.observe).toHaveBeenCalledWith(1);
     expect(logger.warn).toHaveBeenCalledWith(
       "Launch context specified but scope not granted."
     );
@@ -143,12 +150,14 @@ describe("saveDocumentStateStrategy tests", () => {
       logger,
       dynamoClient,
       config,
-      "issuer"
+      "issuer",
+      mockRefreshTokenLifeCycleHistogram
     );
     try {
       await strategy.saveDocumentToDynamo(document, tokens);
       fail("Should have thrown error");
     } catch (error) {
+      expect(mockRefreshTokenLifeCycleHistogram.observe).toHaveBeenCalledWith(1);
       expect(error.status).toBe(500);
       expect(error.errorMessage).toBe("Could not save the launch context.");
     }
@@ -166,7 +175,8 @@ describe("saveDocumentStateStrategy tests", () => {
       logger,
       dynamoClient,
       config,
-      "issuer"
+      "issuer",
+      mockRefreshTokenLifeCycleHistogram
     );
 
     delete tokens.refresh_token;
@@ -181,6 +191,7 @@ describe("saveDocumentStateStrategy tests", () => {
       },
       "LaunchContext"
     );
+    expect(mockRefreshTokenLifeCycleHistogram.observe).not.toHaveBeenCalled();
     expect(logger.error).not.toHaveBeenCalled();
   });
 
@@ -197,9 +208,11 @@ describe("saveDocumentStateStrategy tests", () => {
       logger,
       dynamoClient,
       config,
-      "issuer"
+      "issuer",
+      mockRefreshTokenLifeCycleHistogram
     );
     await strategy.saveDocumentToDynamo(document, tokens);
+    expect(mockRefreshTokenLifeCycleHistogram.observe).not.toHaveBeenCalled();
     expect(logger.error).not.toHaveBeenCalled();
     expect(dynamoClient.updateToDynamo).not.toHaveBeenCalled();
   });
@@ -213,9 +226,11 @@ describe("saveDocumentStateStrategy tests", () => {
       logger,
       dynamoClient,
       config,
-      "issuer"
+      "issuer",
+      mockRefreshTokenLifeCycleHistogram
     );
     await strategy.saveDocumentToDynamo(document, tokens);
+    expect(mockRefreshTokenLifeCycleHistogram.observe).toHaveBeenCalledWith(1);
     expect(logger.error).toHaveBeenCalled();
   });
 });

@@ -51,6 +51,7 @@ describe("saveDocumentStateStrategy tests", () => {
       code: CODE_HASH_PAIR[0],
       refresh_token: REFRESH_TOKEN_HASH_PAIR[0],
       redirect_uri: REDIRECT_URI,
+      expires_on: 0
     };
     tokens = buildToken(false, true, true, "launch");
     jest.spyOn(global.Math, "round").mockReturnValue(86400000);

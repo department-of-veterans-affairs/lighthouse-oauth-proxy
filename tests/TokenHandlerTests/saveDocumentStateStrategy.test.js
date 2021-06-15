@@ -82,6 +82,28 @@ describe("saveDocumentStateStrategy tests", () => {
     expect(logger.error).not.toHaveBeenCalled();
     expect(mockRefreshTokenLifeCycleHistogram.observe).toHaveBeenCalledWith(1);
   });
+
+  it("Happy Path Code Flow", async () => {
+    dynamoClient = buildFakeDynamoClient({
+      state: STATE,
+      code: CODE_HASH_PAIR[1],
+      refresh_token: REFRESH_TOKEN_HASH_PAIR[1],
+      redirect_uri: REDIRECT_URI,
+    });
+    let strategy = new SaveDocumentStateStrategy(
+      req,
+      logger,
+      dynamoClient,
+      config,
+      "issuer",
+      mockRefreshTokenLifeCycleHistogram
+    );
+    delete document.refresh_token;
+    await strategy.saveDocumentToDynamo(document, tokens);
+    expect(logger.error).not.toHaveBeenCalled();
+    expect(mockRefreshTokenLifeCycleHistogram.observe).not.toHaveBeenCalled();
+  });
+
   it("Happy Path with launch", async () => {
     document.launch = LAUNCH;
     dynamoClient = buildFakeDynamoClient({

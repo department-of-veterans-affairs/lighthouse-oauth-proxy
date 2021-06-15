@@ -1,12 +1,20 @@
 const { hashString } = require("../../../utils");
 
 class SaveDocumentStateStrategy {
-  constructor(req, logger, dynamoClient, config, issuer) {
+  constructor(
+    req,
+    logger,
+    dynamoClient,
+    config,
+    issuer,
+    refreshTokenLifeCycleHistogram
+  ) {
     this.req = req;
     this.logger = logger;
     this.dynamoClient = dynamoClient;
     this.config = config;
     this.issuer = issuer;
+    this.refreshTokenLifeCycleHistogram = refreshTokenLifeCycleHistogram;
   }
   async saveDocumentToDynamo(document, tokens) {
     try {
@@ -24,8 +32,12 @@ class SaveDocumentStateStrategy {
             tokens.refresh_token,
             this.config.hmac_secret
           );
-          updated_document.expires_on =
-            Math.round(Date.now() / 1000) + 60 * 60 * 24 * 42;
+          let created_at = document.expires_on - 60 * 60 * 24 * 42;
+          let now = Math.round(Date.now() / 1000);
+          this.refreshTokenLifeCycleHistogram.observe(
+            (now - created_at) / (60 * 60 * 24 * 1000)
+          );
+          updated_document.expires_on = now + 60 * 60 * 24 * 42;
         } else {
           updated_document.expires_on = tokens.expires_at;
         }

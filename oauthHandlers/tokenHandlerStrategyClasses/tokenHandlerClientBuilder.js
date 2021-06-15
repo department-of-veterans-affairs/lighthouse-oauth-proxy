@@ -37,6 +37,7 @@ const {
   codeTokenIssueCounter,
   refreshTokenIssueCounter,
   clientCredentialsTokenIssueCounter,
+  refreshTokenLifeCycleHistogram,
 } = require("../../metrics");
 const buildTokenHandlerClient = (
   redirect_uri,
@@ -109,7 +110,8 @@ const getStrategies = (
         logger,
         dynamoClient,
         config,
-        issuer.issuer
+        issuer.issuer,
+        refreshTokenLifeCycleHistogram
       ),
       getPatientInfoStrategy: new GetPatientInfoFromValidateEndpointStrategy(
         validateToken,
@@ -137,7 +139,8 @@ const getStrategies = (
         logger,
         dynamoClient,
         config,
-        issuer.issuer
+        issuer.issuer,
+        refreshTokenLifeCycleHistogram
       ),
       getPatientInfoStrategy: new GetPatientInfoFromValidateEndpointStrategy(
         validateToken,

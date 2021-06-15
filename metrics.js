@@ -44,6 +44,12 @@ const clientCredentialsTokenIssueCounter = new client.Counter({
     "counter of number access_tokens issued by the client credentials flow.",
 });
 
+const refreshTokenLifeCycleHistogram = new client.Histogram({
+  name: "refresh_token_life_cycle_histogram",
+  help:
+    "measures the time in days between a refresh token's instantiation and its use.",
+});
+
 module.exports = {
   loginBegin,
   loginEnd,
@@ -53,4 +59,5 @@ module.exports = {
   codeTokenIssueCounter,
   refreshTokenIssueCounter,
   clientCredentialsTokenIssueCounter,
+  refreshTokenLifeCycleHistogram,
 };

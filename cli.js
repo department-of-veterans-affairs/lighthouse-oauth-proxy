@@ -118,9 +118,10 @@ function processArgs() {
         default: false,
       },
       refresh_histogram_buckets: {
-        description: "Histogram bucket values for refresh_token_life_cycle_histogram.",
+        description:
+          "Histogram bucket values for refresh_token_life_cycle_histogram.",
         required: false,
-        type: "array"
+        type: "array",
       },
       routes: {
         description:

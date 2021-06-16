@@ -117,12 +117,6 @@ function processArgs() {
         required: false,
         default: false,
       },
-      refresh_histogram_buckets: {
-        description:
-          "Histogram bucket values for refresh_token_life_cycle_histogram.",
-        required: false,
-        type: "array",
-      },
       routes: {
         description:
           "An object that describes route configurations for isolated api categories",

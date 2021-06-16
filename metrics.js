@@ -1,5 +1,4 @@
 const client = require("prom-client");
-const { processArgs } = require("./cli");
 
 const defaultLabels = { app: "oauth_proxy" };
 client.register.setDefaultLabels(defaultLabels);
@@ -49,7 +48,7 @@ const refreshTokenLifeCycleHistogram = new client.Histogram({
   name: "refresh_token_life_cycle_histogram",
   help:
     "measures the time in days between a refresh token's instantiation and its use.",
-  buckets: processArgs().refresh_histogram_buckets,
+  buckets: [1, 3, 5, 10, 21, 42],
 });
 
 module.exports = {

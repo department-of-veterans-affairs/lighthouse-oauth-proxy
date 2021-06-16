@@ -56,7 +56,7 @@ describe("saveDocumentStateStrategy tests", () => {
     };
     tokens = buildToken(false, true, true, "launch");
     jest.spyOn(global.Math, "round").mockReturnValue(172800000);
-    mockRefreshTokenLifeCycleHistogram = { observe: jest.fn() }
+    mockRefreshTokenLifeCycleHistogram = { observe: jest.fn() };
   });
 
   afterEach(() => {
@@ -179,7 +179,9 @@ describe("saveDocumentStateStrategy tests", () => {
       await strategy.saveDocumentToDynamo(document, tokens);
       fail("Should have thrown error");
     } catch (error) {
-      expect(mockRefreshTokenLifeCycleHistogram.observe).toHaveBeenCalledWith(1);
+      expect(mockRefreshTokenLifeCycleHistogram.observe).toHaveBeenCalledWith(
+        1
+      );
       expect(error.status).toBe(500);
       expect(error.errorMessage).toBe("Could not save the launch context.");
     }

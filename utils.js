@@ -148,8 +148,8 @@ const subtractDaysToDate = (date, days) => {
 
 /**
  * Converts seconds to date based on epoch time.
- * 
- * @param {int} seconds 
+ *
+ * @param {int} seconds
  * @returns {Date} The Date value of the seconds.
  */
 const secondsToDate = (seconds) => {
@@ -158,9 +158,9 @@ const secondsToDate = (seconds) => {
 
 /**
  * Converts a Date object into seconds based on epoch time.
- * 
- * @param {Date} date The Date that will be 
- * @returns 
+ *
+ * @param {Date} date The Date that will be
+ * @returns
  */
 const dateToSeconds = (date) => {
   return Math.round(date.getTime() / 1000);
@@ -168,9 +168,9 @@ const dateToSeconds = (date) => {
 
 /**
  * Finds the distance in days between two date objects.
- * 
- * @param {Date} date1 
- * @param {Date} date2 
+ *
+ * @param {Date} date1
+ * @param {Date} date2
  * @returns Number of days between the two dates.
  */
 const dateDifference = (date1, date2) => {

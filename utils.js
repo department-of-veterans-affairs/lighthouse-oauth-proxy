@@ -122,12 +122,28 @@ function parseBearerAuthorization(authorization) {
   return match[1];
 }
 
-const daysToLong = (days) => {
-  return 60 * 60 * 24 * days;
+const addDaysToDate = (date, days) => {
+  date.setDate(date.getDate() + days);
+  return date;
 };
-const longToDays = (date) => {
-  return date / (60 * 60 * 24 * 1000);
+
+const subtractDaysToDate = (date, days) => {
+  date.setDate(date.getDate() - days);
+  return date;
 };
+
+const secondsToDate = (seconds) => {
+  return new Date(seconds * 1000);
+};
+
+const dateToSeconds = (date) => {
+  return date.getTime() / 1000
+}
+
+const dateDifference = (date1, date2) => {
+  let timeDiff = date1.getTime() - date2.getTime();
+  return Math.round(timeDiff / (1000 * 3600 * 24));
+}
 
 module.exports = {
   isRuntimeError,
@@ -139,6 +155,9 @@ module.exports = {
   hashString,
   parseBearerAuthorization,
   minimalError,
-  daysToLong,
-  longToDays,
+  addDaysToDate,
+  subtractDaysToDate,
+  secondsToDate,
+  dateToSeconds,
+  dateDifference,
 };

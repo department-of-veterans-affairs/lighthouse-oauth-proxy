@@ -49,8 +49,8 @@ class SaveDocumentStateStrategy {
               dateDifference(now, created_at)
             );
           }
-          let expires = dateToSeconds(addDaysToDate(now, 42));
-          updated_document.expires_on = expires;
+
+          updated_document.expires_on = dateToSeconds(addDaysToDate(now, 42));
         } else {
           updated_document.expires_on = tokens.expires_at;
         }

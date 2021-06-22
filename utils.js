@@ -137,7 +137,7 @@ const secondsToDate = (seconds) => {
 };
 
 const dateToSeconds = (date) => {
-  return date.getTime() / 1000;
+  return Math.round(date.getTime() / 1000);
 };
 
 const dateDifference = (date1, date2) => {

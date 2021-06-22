@@ -15,7 +15,7 @@ describe("getDocumentByLaunchStrategy tests", () => {
 
     const strategy = new GetDocumentByLaunchStrategy(req);
     const document = await strategy.getDocument();
-    expect(document).toBe(null);
+    expect(document.launch).toBe(undefined);
   });
 
   it("empty launch", async () => {
@@ -28,7 +28,7 @@ describe("getDocumentByLaunchStrategy tests", () => {
     const strategy = new GetDocumentByLaunchStrategy(req);
 
     const document = await strategy.getDocument();
-    expect(document).toBe(null);
+    expect(document.launch).toBe("");
   });
 
   it("empty request body", async () => {
@@ -39,7 +39,7 @@ describe("getDocumentByLaunchStrategy tests", () => {
     const strategy = new GetDocumentByLaunchStrategy(req);
 
     const document = await strategy.getDocument();
-    expect(document).toBe(null);
+    expect(document.launch).toBe(undefined);
   });
   it("non-empty launch", async () => {
     const req = new MockExpressRequest({

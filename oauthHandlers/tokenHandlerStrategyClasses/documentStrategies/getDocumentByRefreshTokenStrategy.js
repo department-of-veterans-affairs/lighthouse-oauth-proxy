@@ -1,4 +1,4 @@
-const { hashString, parseBasicAuth } = require("../../../utils");
+const { hashString } = require("../../../utils");
 
 class GetDocumentByRefreshTokenStrategy {
   constructor(req, logger, dynamoClient, config, client_id) {
@@ -8,6 +8,17 @@ class GetDocumentByRefreshTokenStrategy {
     this.config = config;
     this.client_id = client_id;
   }
+
+  /**
+   * Retrieve a document from DynamoDB by refresh_token.
+   *
+   * @typedef {Object} Document
+   * @property {string} state - The document state
+   * @property {string} internal_state - The internal state
+   * @property {string} launch - The optional launch context
+   *
+   * @returns {Promise<{Document}|undefined>}
+   */
   async getDocument() {
     let hashedRefreshToken = hashString(
       this.req.body.refresh_token,
@@ -17,21 +28,6 @@ class GetDocumentByRefreshTokenStrategy {
       hashedRefreshToken,
       this.config.dynamo_oauth_requests_table
     );
-
-    // Will be usefull in finding stateless tokens and throwing errors
-    if (!document) {
-      const basicAuth = parseBasicAuth(this.req);
-      let hashedClient = "empty";
-      if (basicAuth) {
-        hashedClient = hashString(basicAuth.username, this.config.hmac_secret);
-      } else if (this.client_id) {
-        hashedClient = hashString(this.client_id, this.config.hmac_secret);
-      }
-      this.logger.warn("Fallback OAuthRequests refresh_token not found.", {
-        client_id: hashedClient,
-        hashed_id: hashString(hashedRefreshToken, this.config.hmac_secret),
-      });
-    }
 
     return document;
   }

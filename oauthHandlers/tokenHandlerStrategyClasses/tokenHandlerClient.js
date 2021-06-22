@@ -8,6 +8,8 @@ class TokenHandlerClient {
     saveDocumentToDynamoStrategy,
     getPatientInfoStrategy,
     tokenIssueCounter,
+    dbMissCounter,
+    logger,
     req,
     res,
     next
@@ -17,11 +19,34 @@ class TokenHandlerClient {
     this.saveDocumentToDynamoStrategy = saveDocumentToDynamoStrategy;
     this.getPatientInfoStrategy = getPatientInfoStrategy;
     this.tokenIssueCounter = tokenIssueCounter;
+    this.dbMissCounter = dbMissCounter;
+    this.logger = logger;
     this.req = req;
     this.res = res;
     this.next = next;
   }
   async handleToken() {
+    /*
+     * Lookup a previous document (db record) associated with this request.
+     *
+     * If nothing is found, log the event and return an error.
+     */
+    let document = await this.getDocumentStrategy.getDocument();
+    if (!document) {
+      this.logger.warn("Previous document not found for provided grant");
+      if (this.dbMissCounter) {
+        this.dbMissCounter.inc();
+      }
+      return {
+        statusCode: 407,
+        responseBody: {
+          error: "invalid_grant",
+          error_description:
+            "The provided authorization grant or refresh token is expired or otherwise invalid.",
+        },
+      };
+    }
+
     let tokens;
     try {
       tokens = await this.getTokenStrategy.getToken();
@@ -53,10 +78,10 @@ class TokenHandlerClient {
         responseBody: tokens,
       };
     }
-    let document = await this.getDocumentStrategy.getDocument();
+
     let state;
     let launch;
-    if (document && tokens) {
+    if (tokens) {
       await this.saveDocumentToDynamoStrategy.saveDocumentToDynamo(
         document,
         tokens

@@ -48,15 +48,33 @@ describe("saveDocumentToDynamo tests", () => {
     expect(logger.error.mock.calls).toHaveLength(1);
   });
 
-  it("Empty Document Launch", async () => {
+  it("Missing Document Launch", async () => {
     let token = buildToken(false, false);
-    token.launch = "launch";
 
     let document = convertObjectToDynamoAttributeValues({
       access_token: token,
     });
     dynamoClient = buildFakeDynamoClient(document);
+    const strategy = new SaveDocumentLaunchStrategy(
+      logger,
+      dynamoClient,
+      config,
+      hashingFunction
+    );
 
+    await strategy.saveDocumentToDynamo(document, token);
+    expect(dynamoClient.savePayloadToDynamo).not.toHaveBeenCalled();
+    expect(logger.error.mock.calls).toHaveLength(0);
+  });
+
+  it("Empty Document Launch", async () => {
+    let token = buildToken(false, false);
+
+    let document = convertObjectToDynamoAttributeValues({
+      access_token: token,
+    });
+    document.launch = "";
+    dynamoClient = buildFakeDynamoClient(document);
     const strategy = new SaveDocumentLaunchStrategy(
       logger,
       dynamoClient,

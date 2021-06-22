@@ -44,6 +44,16 @@ const clientCredentialsTokenIssueCounter = new client.Counter({
     "counter of number access_tokens issued by the client credentials flow.",
 });
 
+const missRefreshTokenCounter = new client.Counter({
+  name: "miss_refresh_token_counter",
+  help: "db miss for refresh_token.",
+});
+
+const missAuthorizationCodeCounter = new client.Counter({
+  name: "miss_authorization_code_counter",
+  help: "db miss for authorization_code.",
+});
+
 module.exports = {
   loginBegin,
   loginEnd,
@@ -53,4 +63,6 @@ module.exports = {
   codeTokenIssueCounter,
   refreshTokenIssueCounter,
   clientCredentialsTokenIssueCounter,
+  missRefreshTokenCounter,
+  missAuthorizationCodeCounter,
 };

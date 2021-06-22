@@ -52,11 +52,11 @@ describe("saveDocumentStateStrategy tests", () => {
       code: CODE_HASH_PAIR[0],
       refresh_token: REFRESH_TOKEN_HASH_PAIR[0],
       redirect_uri: REDIRECT_URI,
-      expires_on: 807454800,
+      expires_on: new Date("1995-08-03T00:00:00.000+08:00").getTime() / 1000,
     };
     tokens = buildToken(false, true, true, "launch");
     jest.useFakeTimers("modern");
-    jest.setSystemTime(new Date(1995, 5, 23, 0, 0, 0));
+    jest.setSystemTime(new Date("1995-06-23T00:00:00.000+08:00"));
     mockRefreshTokenLifeCycleHistogram = { observe: jest.fn() };
   });
 
@@ -127,7 +127,7 @@ describe("saveDocumentStateStrategy tests", () => {
       {
         access_token:
           "4116ff9d9b7bb73aff7680b14eb012670eb93cfc7266f142f13bd1486ae6cbb1",
-        expires_on: 803887500,
+        expires_on: 803837100,
         launch: "1234V5678",
       },
       "LaunchContext"
@@ -211,7 +211,7 @@ describe("saveDocumentStateStrategy tests", () => {
       {
         access_token:
           "4116ff9d9b7bb73aff7680b14eb012670eb93cfc7266f142f13bd1486ae6cbb1",
-        expires_on: 803887500,
+        expires_on: 803837100,
         launch: "1234V5678",
       },
       "LaunchContext"

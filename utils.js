@@ -141,8 +141,7 @@ const dateToSeconds = (date) => {
 };
 
 const dateDifference = (date1, date2) => {
-  let timeDiff = date1.getTime() - date2.getTime();
-  return Math.round(timeDiff / (1000 * 3600 * 24));
+  return Math.round((date1.getTime() - date2.getTime()) / (1000 * 3600 * 24));
 };
 
 module.exports = {

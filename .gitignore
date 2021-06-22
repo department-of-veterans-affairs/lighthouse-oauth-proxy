@@ -125,6 +125,7 @@ build/
 # Local config
 dev-config.json
 tests/scripts/setup-tests.sh
+tests/bats/setup-tests.sh
 
 # Coverage data for the test suite
 tests/coverage

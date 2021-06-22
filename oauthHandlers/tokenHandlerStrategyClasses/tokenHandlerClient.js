@@ -31,20 +31,23 @@ class TokenHandlerClient {
      *
      * If nothing is found, log the event and return an error.
      */
-    let document = await this.getDocumentStrategy.getDocument();
-    if (!document) {
-      this.logger.warn("Previous document not found for provided grant");
-      if (this.dbMissCounter) {
-        this.dbMissCounter.inc();
+    let document;
+    if (this.getDocumentStrategy) {
+      document = await this.getDocumentStrategy.getDocument();
+      if (!document) {
+        this.logger.warn("Previous document not found for provided grant");
+        if (this.dbMissCounter) {
+          this.dbMissCounter.inc();
+        }
+        return {
+          statusCode: 400,
+          responseBody: {
+            error: "invalid_grant",
+            error_description:
+              "The provided authorization grant or refresh token is expired or otherwise invalid.",
+          },
+        };
       }
-      return {
-        statusCode: 400,
-        responseBody: {
-          error: "invalid_grant",
-          error_description:
-            "The provided authorization grant or refresh token is expired or otherwise invalid.",
-        },
-      };
     }
 
     let tokens;

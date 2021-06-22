@@ -55,7 +55,7 @@ describe("saveDocumentStateStrategy tests", () => {
       expires_on: 807454800,
     };
     tokens = buildToken(false, true, true, "launch");
-    jest.useFakeTimers('modern');
+    jest.useFakeTimers("modern");
     jest.setSystemTime(new Date(1995, 5, 23, 0, 0, 0));
     mockRefreshTokenLifeCycleHistogram = { observe: jest.fn() };
   });

@@ -50,7 +50,7 @@ class SaveDocumentStateStrategy {
             );
           }
           let expires = dateToSeconds(addDaysToDate(now, 42));
-          updated_document.expires_on = expires
+          updated_document.expires_on = expires;
         } else {
           updated_document.expires_on = tokens.expires_at;
         }

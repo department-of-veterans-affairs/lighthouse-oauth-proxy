@@ -137,13 +137,13 @@ const secondsToDate = (seconds) => {
 };
 
 const dateToSeconds = (date) => {
-  return date.getTime() / 1000
-}
+  return date.getTime() / 1000;
+};
 
 const dateDifference = (date1, date2) => {
   let timeDiff = date1.getTime() - date2.getTime();
   return Math.round(timeDiff / (1000 * 3600 * 24));
-}
+};
 
 module.exports = {
   isRuntimeError,

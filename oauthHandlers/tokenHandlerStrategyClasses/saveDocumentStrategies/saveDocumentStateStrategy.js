@@ -1,4 +1,4 @@
-const { hashString } = require("../../../utils");
+const { hashString, longToDays, daysToLong } = require("../../../utils");
 
 class SaveDocumentStateStrategy {
   constructor(
@@ -34,12 +34,12 @@ class SaveDocumentStateStrategy {
           );
           let now = Math.round(Date.now() / 1000);
           if (document.refresh_token) {
-            let created_at = document.expires_on - 60 * 60 * 24 * 42;
+            let created_at = document.expires_on - daysToLong(42);
             this.refreshTokenLifeCycleHistogram.observe(
-              (now - created_at) / (60 * 60 * 24 * 1000)
+              longToDays(now - created_at)
             );
           }
-          updated_document.expires_on = now + 60 * 60 * 24 * 42;
+          updated_document.expires_on = now + daysToLong(42);
         } else {
           updated_document.expires_on = tokens.expires_at;
         }

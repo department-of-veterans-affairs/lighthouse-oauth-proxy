@@ -122,6 +122,13 @@ function parseBearerAuthorization(authorization) {
   return match[1];
 }
 
+const daysToLong = (days) => {
+  return 60 * 60 * 24 * days;
+};
+const longToDays = (date) => {
+  return date / (60 * 60 * 24 * 1000);
+};
+
 module.exports = {
   isRuntimeError,
   rethrowIfRuntimeError,
@@ -132,4 +139,6 @@ module.exports = {
   hashString,
   parseBearerAuthorization,
   minimalError,
+  daysToLong,
+  longToDays,
 };

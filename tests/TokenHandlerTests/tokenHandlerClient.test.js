@@ -237,7 +237,7 @@ describe("handleToken tests", () => {
 
     let response = await tokenHandlerClient.handleToken();
 
-    expect(response.statusCode).toBe(407);
+    expect(response.statusCode).toBe(400);
     expect(logger.warn).toHaveBeenCalled();
     expect(response.responseBody.error).toBe("invalid_grant");
   });
@@ -254,7 +254,7 @@ describe("handleToken tests", () => {
 
     expect(dbMissCounter.inc).toHaveBeenCalled();
     expect(logger.warn).toHaveBeenCalled();
-    expect(response.statusCode).toBe(407);
+    expect(response.statusCode).toBe(400);
     expect(response.responseBody.error).toBe("invalid_grant");
   });
 });

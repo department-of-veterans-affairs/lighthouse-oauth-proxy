@@ -38,7 +38,7 @@ class TokenHandlerClient {
         this.dbMissCounter.inc();
       }
       return {
-        statusCode: 407,
+        statusCode: 400,
         responseBody: {
           error: "invalid_grant",
           error_description:

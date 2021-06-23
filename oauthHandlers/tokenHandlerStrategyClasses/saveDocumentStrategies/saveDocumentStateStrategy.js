@@ -1,11 +1,11 @@
+const { hashString } = require("../../../utils");
 const {
-  hashString,
-  addDaysToDate,
-  subtractDaysToDate,
-  secondsToDate,
-  dateToSeconds,
-  dateDifference,
-} = require("../../../utils");
+  addDays,
+  getUnixTime,
+  subDays,
+  fromUnixTime,
+  differenceInDays,
+} = require("date-fns");
 
 class SaveDocumentStateStrategy {
   constructor(
@@ -41,16 +41,13 @@ class SaveDocumentStateStrategy {
           );
           let now = new Date();
           if (document.refresh_token) {
-            let created_at = subtractDaysToDate(
-              secondsToDate(document.expires_on),
-              42
-            );
+            let created_at = subDays(fromUnixTime(document.expires_on), 42);
             this.refreshTokenLifeCycleHistogram.observe(
-              dateDifference(now, created_at)
+              differenceInDays(now, created_at)
             );
           }
-
-          updated_document.expires_on = dateToSeconds(addDaysToDate(now, 42));
+          let expires_on = addDays(now, 42);
+          updated_document.expires_on = getUnixTime(expires_on);
         } else {
           updated_document.expires_on = tokens.expires_at;
         }
@@ -80,7 +77,7 @@ class SaveDocumentStateStrategy {
           let payload = {
             access_token: accessToken,
             launch: launch,
-            expires_on: dateToSeconds(new Date()) + tokens.expires_in,
+            expires_on: getUnixTime(new Date()) + tokens.expires_in,
           };
 
           await this.dynamoClient.savePayloadToDynamo(

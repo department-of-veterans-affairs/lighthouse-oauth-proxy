@@ -122,61 +122,6 @@ function parseBearerAuthorization(authorization) {
   return match[1];
 }
 
-/**
- * Add days to date.
- *
- * @param {Date} date Date that days will be added to.
- * @param {int} days The days that will be added to the Date.
- * @returns {Date} New Date.
- */
-const addDaysToDate = (date, days) => {
-  date.setDate(date.getDate() + days);
-  return date;
-};
-
-/**
- * Subtracts days to date.
- *
- * @param {Date} date Date that days will be subtracted from.
- * @param {int} days The days that will be subtracted from the Date.
- * @returns {Date} New Date.
- */
-const subtractDaysToDate = (date, days) => {
-  date.setDate(date.getDate() - days);
-  return date;
-};
-
-/**
- * Converts seconds to date based on epoch time.
- *
- * @param {int} seconds
- * @returns {Date} The Date value of the seconds.
- */
-const secondsToDate = (seconds) => {
-  return new Date(seconds * 1000);
-};
-
-/**
- * Converts a Date object into seconds based on epoch time.
- *
- * @param {Date} date The Date that will be
- * @returns
- */
-const dateToSeconds = (date) => {
-  return Math.round(date.getTime() / 1000);
-};
-
-/**
- * Finds the distance in days between two date objects.
- *
- * @param {Date} date1
- * @param {Date} date2
- * @returns Number of days between the two dates.
- */
-const dateDifference = (date1, date2) => {
-  return Math.round((date1.getTime() - date2.getTime()) / (1000 * 3600 * 24));
-};
-
 module.exports = {
   isRuntimeError,
   rethrowIfRuntimeError,
@@ -187,9 +132,4 @@ module.exports = {
   hashString,
   parseBearerAuthorization,
   minimalError,
-  addDaysToDate,
-  subtractDaysToDate,
-  secondsToDate,
-  dateToSeconds,
-  dateDifference,
 };

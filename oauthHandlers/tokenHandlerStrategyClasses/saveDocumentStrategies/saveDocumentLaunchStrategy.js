@@ -8,7 +8,7 @@ class SaveDocumentLaunchStrategy {
   }
   async saveDocumentToDynamo(document, tokens) {
     try {
-      if (document.launch && document.launch !== "") {
+      if (document.launch) {
         let launch = document.launch;
         let accessToken = hashString(
           tokens.access_token,

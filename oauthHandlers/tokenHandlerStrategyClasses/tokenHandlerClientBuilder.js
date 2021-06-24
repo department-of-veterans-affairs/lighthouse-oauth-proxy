@@ -37,6 +37,7 @@ const {
   codeTokenIssueCounter,
   refreshTokenIssueCounter,
   clientCredentialsTokenIssueCounter,
+  refreshTokenLifeCycleHistogram,
   missRefreshTokenCounter,
   missAuthorizationCodeCounter,
 } = require("../../metrics");
@@ -113,7 +114,8 @@ const getStrategies = (
         logger,
         dynamoClient,
         config,
-        issuer.issuer
+        issuer.issuer,
+        refreshTokenLifeCycleHistogram
       ),
       getPatientInfoStrategy: new GetPatientInfoFromValidateEndpointStrategy(
         validateToken,
@@ -142,7 +144,8 @@ const getStrategies = (
         logger,
         dynamoClient,
         config,
-        issuer.issuer
+        issuer.issuer,
+        refreshTokenLifeCycleHistogram
       ),
       getPatientInfoStrategy: new GetPatientInfoFromValidateEndpointStrategy(
         validateToken,

@@ -22,11 +22,12 @@ describe("saveDocumentToDynamo tests", () => {
     logger = buildFakeLogger();
     config = createFakeConfig();
     hashingFunction = createFakeHashingFunction();
-    jest.spyOn(global.Math, "round").mockReturnValue(0);
+    jest.useFakeTimers("modern");
+    jest.setSystemTime(new Date("1995-06-23T00:00:00.000+08:00"));
   });
 
   afterEach(() => {
-    jest.spyOn(global.Math, "round").mockRestore();
+    jest.useRealTimers();
   });
 
   it("Empty Tokens", async () => {
@@ -109,7 +110,7 @@ describe("saveDocumentToDynamo tests", () => {
       {
         access_token:
           "e0f866111645e58199f0382a6fa50a217b0c2ccc1ca07e27738e758e1183a8db",
-        expires_on: 300,
+        expires_on: 803837100,
         launch: {
           S: "launch",
         },

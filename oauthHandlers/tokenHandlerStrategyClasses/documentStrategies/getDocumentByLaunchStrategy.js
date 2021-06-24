@@ -2,17 +2,18 @@ class GetDocumentByLaunchStrategy {
   constructor(req) {
     this.req = req;
   }
+
+  /**
+   * Build an object from the request body representing launch context.
+   *
+   * Note: Despite being labeled "document" this does not involve DynamoDB documents.
+   * It "implements an interface", for convenience, that is used for other grant types
+   * that do involve documents.
+   *
+   * @returns {Promise<{launch: *}>}
+   */
   async getDocument() {
-    let launch = this.req.body.launch;
-    if (launch === undefined || launch === "") {
-      return null;
-    }
-
-    let document = {
-      launch: launch,
-    };
-
-    return document;
+    return { launch: this.req.body.launch };
   }
 }
 

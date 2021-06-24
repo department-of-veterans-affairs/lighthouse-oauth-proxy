@@ -8,6 +8,8 @@ class TokenHandlerClient {
     saveDocumentToDynamoStrategy,
     getPatientInfoStrategy,
     tokenIssueCounter,
+    dbMissCounter,
+    logger,
     req,
     res,
     next
@@ -17,11 +19,37 @@ class TokenHandlerClient {
     this.saveDocumentToDynamoStrategy = saveDocumentToDynamoStrategy;
     this.getPatientInfoStrategy = getPatientInfoStrategy;
     this.tokenIssueCounter = tokenIssueCounter;
+    this.dbMissCounter = dbMissCounter;
+    this.logger = logger;
     this.req = req;
     this.res = res;
     this.next = next;
   }
   async handleToken() {
+    /*
+     * Lookup a previous document (db record) associated with this request.
+     *
+     * If nothing is found, log the event and return an error.
+     */
+    let document;
+    if (this.getDocumentStrategy) {
+      document = await this.getDocumentStrategy.getDocument();
+      if (!document) {
+        this.logger.warn("Previous document not found for provided grant");
+        if (this.dbMissCounter) {
+          this.dbMissCounter.inc();
+        }
+        return {
+          statusCode: 400,
+          responseBody: {
+            error: "invalid_grant",
+            error_description:
+              "The provided authorization grant or refresh token is expired or otherwise invalid.",
+          },
+        };
+      }
+    }
+
     let tokens;
     try {
       tokens = await this.getTokenStrategy.getToken();
@@ -53,10 +81,10 @@ class TokenHandlerClient {
         responseBody: tokens,
       };
     }
-    let document = await this.getDocumentStrategy.getDocument();
+
     let state;
     let launch;
-    if (document && tokens) {
+    if (tokens) {
       await this.saveDocumentToDynamoStrategy.saveDocumentToDynamo(
         document,
         tokens
@@ -72,16 +100,15 @@ class TokenHandlerClient {
 
     if (tokens && tokens.scope) {
       if (tokens.scope.split(" ").includes("launch/patient")) {
-        let patient = await this.getPatientInfoStrategy.createPatientInfo(
-          tokens
-        );
-        responseBody["patient"] = patient;
+        responseBody[
+          "patient"
+        ] = await this.getPatientInfoStrategy.createPatientInfo(tokens);
       } else if (tokens.scope.split(" ").includes("launch") && launch) {
         try {
           let decodedLaunch = JSON.parse(
             Buffer.from(launch, "base64").toString("ascii")
           );
-          for (var key in decodedLaunch) {
+          for (let key in decodedLaunch) {
             if (!responseBody[key]) {
               responseBody[key] = decodedLaunch[key];
             }

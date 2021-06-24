@@ -188,7 +188,7 @@ do_token "$(jq \
 
   [ "$(cat "$curl_status")" -eq 400 ]
   [ "$(cat "$curl_body" | jq .error | tr -d '"')" == "invalid_grant" ]
-  [ "$(cat "$curl_body" | jq .error_description | tr -d '"')" == "The authorization code is invalid or has expired." ]
+  [ "$(cat "$curl_body" | jq .error_description | tr -d '"')" == "The provided authorization grant or refresh token is expired or otherwise invalid." ]
 }
 
 @test 'Token Handler code path invalid client id' {
@@ -249,7 +249,7 @@ do_token "$(jq \
 
   [ "$(cat "$curl_status")" -eq 400 ]
   [ "$(cat "$curl_body" | jq .error | tr -d '"')" == "invalid_grant" ]
-  [ "$(cat "$curl_body" | jq .error_description | tr -d '"')" == "The refresh token is invalid or expired." ]
+  [ "$(cat "$curl_body" | jq .error_description | tr -d '"')" == "The provided authorization grant or refresh token is expired or otherwise invalid." ]
 }
 
 @test 'Token Handler refresh path invalid client id' {

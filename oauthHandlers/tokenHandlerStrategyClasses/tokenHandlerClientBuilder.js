@@ -38,6 +38,8 @@ const {
   refreshTokenIssueCounter,
   clientCredentialsTokenIssueCounter,
   refreshTokenLifeCycleHistogram,
+  missRefreshTokenCounter,
+  missAuthorizationCodeCounter,
 } = require("../../metrics");
 const buildTokenHandlerClient = (
   redirect_uri,
@@ -69,6 +71,8 @@ const buildTokenHandlerClient = (
     strategies.saveDocumentToDynamoStrategy,
     strategies.getPatientInfoStrategy,
     strategies.tokenIssueCounter,
+    strategies.dbMissCounter,
+    logger,
     req,
     res,
     next
@@ -119,6 +123,7 @@ const getStrategies = (
         audience
       ),
       tokenIssueCounter: refreshTokenIssueCounter,
+      dbMissCounter: missRefreshTokenCounter,
     };
   } else if (req.body.grant_type === "authorization_code") {
     strategies = {
@@ -148,6 +153,7 @@ const getStrategies = (
         audience
       ),
       tokenIssueCounter: codeTokenIssueCounter,
+      dbMissCounter: missAuthorizationCodeCounter,
     };
   } else if (req.body.grant_type === "client_credentials") {
     if (

@@ -28,7 +28,7 @@ class RefreshTokenStrategy {
           payload = await this.dynamoClient.scanFromDynamo(
             this.config.dynamo_static_token_table
           );
-          var self = this;
+          let self = this;
           payload.Items.forEach(function (staticToken) {
             self.staticTokens.set(
               staticToken.static_refresh_token,

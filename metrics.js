@@ -51,6 +51,16 @@ const refreshTokenLifeCycleHistogram = new client.Histogram({
   buckets: [1, 3, 5, 10, 21, 42],
 });
 
+const missRefreshTokenCounter = new client.Counter({
+  name: "miss_refresh_token_counter",
+  help: "db miss for refresh_token.",
+});
+
+const missAuthorizationCodeCounter = new client.Counter({
+  name: "miss_authorization_code_counter",
+  help: "db miss for authorization_code.",
+});
+
 module.exports = {
   loginBegin,
   loginEnd,
@@ -61,4 +71,6 @@ module.exports = {
   refreshTokenIssueCounter,
   clientCredentialsTokenIssueCounter,
   refreshTokenLifeCycleHistogram,
+  missRefreshTokenCounter,
+  missAuthorizationCodeCounter,
 };

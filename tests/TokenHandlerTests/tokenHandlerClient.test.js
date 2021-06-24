@@ -19,61 +19,118 @@ describe("handleToken tests", () => {
   let saveDocumentToDynamoStrategy;
   let getPatientInfoStrategy;
   let tokenIssueCounter;
+  let dbMissCounter;
+  let logger;
   let req;
   let res;
   let next;
 
-  it("Happy Path Static", async () => {
-    let token = buildToken(true, false, false, "email.read");
-    getTokenResponseStrategy = buildGetTokenStrategy(token, false);
-    pullDocumentFromDynamoStrategy = buildGetDocumentStrategy({});
-    saveDocumentToDynamoStrategy = buildSaveDocumentStrategy();
-    getPatientInfoStrategy = buildGetPatientInfoStrategy({});
-    tokenIssueCounter = {
-      inc: jest.fn(),
-    };
-    req = new MockExpressRequest();
-    res = new MockExpressResponse();
-    next = jest.fn();
+  /*
+   * Utility to build a tokenHandlerClient with reasonable defaults and
+   * ability to override all settings. Reduces duplicative code.
+   */
+  const buildTokenClient = function (clientConfig) {
+    let token = Object.prototype.hasOwnProperty.call(clientConfig, "token")
+      ? clientConfig.token
+      : buildToken(true, false, false, "email.read");
 
-    let response = await new TokenHandlerClient(
+    getTokenResponseStrategy = Object.prototype.hasOwnProperty.call(
+      clientConfig,
+      "getTokenResponseStrategy"
+    )
+      ? clientConfig.getTokenResponseStrategy
+      : buildGetTokenStrategy(token, false);
+
+    pullDocumentFromDynamoStrategy = Object.prototype.hasOwnProperty.call(
+      clientConfig,
+      "pullDocumentFromDynamoStrategy"
+    )
+      ? clientConfig.pullDocumentFromDynamoStrategy
+      : buildGetDocumentStrategy({});
+
+    saveDocumentToDynamoStrategy = Object.prototype.hasOwnProperty.call(
+      clientConfig,
+      "saveDocumentToDynamoStrategy"
+    )
+      ? clientConfig.saveDocumentToDynamoStrategy
+      : buildSaveDocumentStrategy();
+
+    getPatientInfoStrategy = Object.prototype.hasOwnProperty.call(
+      clientConfig,
+      "getPatientInfoStrategy"
+    )
+      ? clientConfig.getPatientInfoStrategy
+      : buildGetPatientInfoStrategy({});
+
+    tokenIssueCounter = Object.prototype.hasOwnProperty.call(
+      clientConfig,
+      "tokenIssueCounter"
+    )
+      ? clientConfig.tokenIssueCounter
+      : { inc: jest.fn() };
+
+    dbMissCounter = Object.prototype.hasOwnProperty.call(
+      clientConfig,
+      "dbMissCounter"
+    )
+      ? clientConfig.dbMissCounter
+      : { inc: jest.fn() };
+
+    logger = Object.prototype.hasOwnProperty.call(clientConfig, "logger")
+      ? clientConfig.logger
+      : { warn: jest.fn() };
+
+    req = Object.prototype.hasOwnProperty.call(clientConfig, "req")
+      ? req
+      : new MockExpressRequest();
+
+    res = Object.prototype.hasOwnProperty.call(clientConfig, "res")
+      ? clientConfig.res
+      : new MockExpressResponse();
+
+    next = Object.prototype.hasOwnProperty.call(clientConfig, "next")
+      ? clientConfig.next
+      : jest.fn();
+
+    return new TokenHandlerClient(
       getTokenResponseStrategy,
       pullDocumentFromDynamoStrategy,
       saveDocumentToDynamoStrategy,
       getPatientInfoStrategy,
       tokenIssueCounter,
+      dbMissCounter,
+      logger,
       req,
       res,
       next
-    ).handleToken();
+    );
+  };
+
+  it("Happy Path Static", async () => {
+    let token = buildToken(true, false, false, "email.read");
+
+    let tokenHandlerClient = buildTokenClient({
+      token: token,
+    });
+
+    let response = await tokenHandlerClient.handleToken();
+
     expect(tokenIssueCounter.inc).toHaveBeenCalled();
     expect(response.statusCode).toBe(200);
     expect(response.responseBody).toBe(token);
   });
 
   it("Happy Path no launch/patient", async () => {
-    let token = buildToken(false, false, false, "email.readt");
-    getTokenResponseStrategy = buildGetTokenStrategy(token);
-    pullDocumentFromDynamoStrategy = buildGetDocumentStrategy({});
-    saveDocumentToDynamoStrategy = buildSaveDocumentStrategy();
-    getPatientInfoStrategy = buildGetPatientInfoStrategy({});
-    tokenIssueCounter = {
-      inc: jest.fn(),
-    };
-    req = new MockExpressRequest();
-    res = new MockExpressResponse();
-    next = jest.fn();
+    let token = buildToken(false, false, false, "email.read");
 
-    let response = await new TokenHandlerClient(
-      getTokenResponseStrategy,
-      pullDocumentFromDynamoStrategy,
-      saveDocumentToDynamoStrategy,
-      getPatientInfoStrategy,
-      tokenIssueCounter,
-      req,
-      res,
-      next
-    ).handleToken();
+    let tokenHandlerClient = buildTokenClient({
+      token: token,
+      getTokenResponseStrategy: buildGetTokenStrategy(token),
+      getPatientInfoStrategy: buildGetPatientInfoStrategy("patient"),
+    });
+
+    let response = await tokenHandlerClient.handleToken();
+
     expect(tokenIssueCounter.inc).toHaveBeenCalled();
     expect(response.statusCode).toBe(200);
     expect(response.responseBody.access_token).toBe(token.access_token);
@@ -81,27 +138,13 @@ describe("handleToken tests", () => {
 
   it("Happy Path with launch/patient", async () => {
     let token = buildToken(false, true, true, "launch/patient");
-    getTokenResponseStrategy = buildGetTokenStrategy(token, false);
-    pullDocumentFromDynamoStrategy = buildGetDocumentStrategy({});
-    saveDocumentToDynamoStrategy = buildSaveDocumentStrategy();
-    getPatientInfoStrategy = buildGetPatientInfoStrategy("patient");
-    tokenIssueCounter = {
-      inc: jest.fn(),
-    };
-    req = new MockExpressRequest();
-    res = new MockExpressResponse();
-    next = jest.fn();
 
-    let response = await new TokenHandlerClient(
-      getTokenResponseStrategy,
-      pullDocumentFromDynamoStrategy,
-      saveDocumentToDynamoStrategy,
-      getPatientInfoStrategy,
-      tokenIssueCounter,
-      req,
-      res,
-      next
-    ).handleToken();
+    let tokenHandlerClient = buildTokenClient({
+      token: token,
+      getPatientInfoStrategy: buildGetPatientInfoStrategy("patient"),
+    });
+
+    let response = await tokenHandlerClient.handleToken();
 
     expect(tokenIssueCounter.inc).toHaveBeenCalled();
     expect(response.statusCode).toBe(200);
@@ -111,29 +154,16 @@ describe("handleToken tests", () => {
 
   it("Happy Path with launch", async () => {
     let token = buildToken(false, true, false, "launch");
-    getTokenResponseStrategy = buildGetTokenStrategy(token, false);
-    pullDocumentFromDynamoStrategy = buildGetDocumentStrategy({
-      launch: "patient",
-    });
-    saveDocumentToDynamoStrategy = buildSaveDocumentStrategy();
-    getPatientInfoStrategy = buildGetPatientInfoStrategy("patient");
-    tokenIssueCounter = {
-      inc: jest.fn(),
-    };
-    req = new MockExpressRequest();
-    res = new MockExpressResponse();
-    next = jest.fn();
 
-    let response = await new TokenHandlerClient(
-      getTokenResponseStrategy,
-      pullDocumentFromDynamoStrategy,
-      saveDocumentToDynamoStrategy,
-      getPatientInfoStrategy,
-      tokenIssueCounter,
-      req,
-      res,
-      next
-    ).handleToken();
+    let tokenHandlerClient = buildTokenClient({
+      token: token,
+      pullDocumentFromDynamoStrategy: buildGetDocumentStrategy({
+        launch: "patient",
+      }),
+      getPatientInfoStrategy: buildGetPatientInfoStrategy("patient"),
+    });
+
+    let response = await tokenHandlerClient.handleToken();
 
     expect(tokenIssueCounter.inc).toHaveBeenCalled();
     expect(response.statusCode).toBe(200);
@@ -143,30 +173,17 @@ describe("handleToken tests", () => {
 
   it("Happy Path with launch base64", async () => {
     let token = buildToken(false, true, false, "launch");
-    getTokenResponseStrategy = buildGetTokenStrategy(token, false);
-    pullDocumentFromDynamoStrategy = buildGetDocumentStrategy({
-      launch:
-        "ewogICJwYXRpZW50IjogIjEyMzRWNTY3OCIsCiAgImVuY291bnRlciI6ICI5ODc2LTU0MzItMTAwMCIKfQ==",
-    });
-    saveDocumentToDynamoStrategy = buildSaveDocumentStrategy();
-    getPatientInfoStrategy = buildGetPatientInfoStrategy("patient");
-    tokenIssueCounter = {
-      inc: jest.fn(),
-    };
-    req = new MockExpressRequest();
-    res = new MockExpressResponse();
-    next = jest.fn();
 
-    let response = await new TokenHandlerClient(
-      getTokenResponseStrategy,
-      pullDocumentFromDynamoStrategy,
-      saveDocumentToDynamoStrategy,
-      getPatientInfoStrategy,
-      tokenIssueCounter,
-      req,
-      res,
-      next
-    ).handleToken();
+    let tokenHandlerClient = buildTokenClient({
+      token: token,
+      pullDocumentFromDynamoStrategy: buildGetDocumentStrategy({
+        launch:
+          "ewogICJwYXRpZW50IjogIjEyMzRWNTY3OCIsCiAgImVuY291bnRlciI6ICI5ODc2LTU0MzItMTAwMCIKfQ==",
+      }),
+      getPatientInfoStrategy: buildGetPatientInfoStrategy("patient"),
+    });
+
+    let response = await tokenHandlerClient.handleToken();
 
     expect(tokenIssueCounter.inc).toHaveBeenCalled();
     expect(response.statusCode).toBe(200);
@@ -178,27 +195,12 @@ describe("handleToken tests", () => {
     let err = {
       statusCode: 401,
     };
-    getTokenResponseStrategy = buildGetTokenStrategy(err, true);
-    pullDocumentFromDynamoStrategy = buildGetDocumentStrategy({});
-    saveDocumentToDynamoStrategy = buildSaveDocumentStrategy();
-    getPatientInfoStrategy = buildGetPatientInfoStrategy({});
-    tokenIssueCounter = {
-      inc: jest.fn(),
-    };
-    req = new MockExpressRequest();
-    res = new MockExpressResponse();
-    next = jest.fn();
 
-    let response = await new TokenHandlerClient(
-      getTokenResponseStrategy,
-      pullDocumentFromDynamoStrategy,
-      saveDocumentToDynamoStrategy,
-      getPatientInfoStrategy,
-      tokenIssueCounter,
-      req,
-      res,
-      next
-    ).handleToken();
+    let tokenHandlerClient = buildTokenClient({
+      getTokenResponseStrategy: buildGetTokenStrategy(err, true),
+    });
+
+    let response = await tokenHandlerClient.handleToken();
 
     expect(tokenIssueCounter.inc).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(401);
@@ -214,31 +216,45 @@ describe("handleToken tests", () => {
       error: "error",
       error_description: "error_description",
     };
-    getTokenResponseStrategy = buildGetTokenStrategy(err, true);
-    pullDocumentFromDynamoStrategy = buildGetDocumentStrategy({});
-    saveDocumentToDynamoStrategy = buildSaveDocumentStrategy();
-    getPatientInfoStrategy = buildGetPatientInfoStrategy({});
-    tokenIssueCounter = {
-      inc: jest.fn(),
-    };
-    req = new MockExpressRequest();
-    res = new MockExpressResponse();
-    next = jest.fn();
 
-    let response = await new TokenHandlerClient(
-      getTokenResponseStrategy,
-      pullDocumentFromDynamoStrategy,
-      saveDocumentToDynamoStrategy,
-      getPatientInfoStrategy,
-      tokenIssueCounter,
-      req,
-      res,
-      next
-    ).handleToken();
+    let tokenHandlerClient = buildTokenClient({
+      getTokenResponseStrategy: buildGetTokenStrategy(err, true),
+    });
+
+    let response = await tokenHandlerClient.handleToken();
 
     expect(tokenIssueCounter.inc).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(500);
     expect(response.responseBody.error).toBe("error");
     expect(response.responseBody.error_description).toBe("error_description");
+  });
+
+  it("missing document returns 400 error (without metrics)", async () => {
+    let tokenHandlerClient = buildTokenClient({
+      pullDocumentFromDynamoStrategy: buildGetDocumentStrategy(undefined),
+      dbMissCounter: undefined,
+    });
+
+    let response = await tokenHandlerClient.handleToken();
+
+    expect(response.statusCode).toBe(400);
+    expect(logger.warn).toHaveBeenCalled();
+    expect(response.responseBody.error).toBe("invalid_grant");
+  });
+
+  it("missing document returns 400 error (with metrics)", async () => {
+    let tokenHandlerClient = buildTokenClient({
+      pullDocumentFromDynamoStrategy: buildGetDocumentStrategy(undefined),
+      dbMissCounter: {
+        inc: jest.fn(),
+      },
+    });
+
+    let response = await tokenHandlerClient.handleToken();
+
+    expect(dbMissCounter.inc).toHaveBeenCalled();
+    expect(logger.warn).toHaveBeenCalled();
+    expect(response.statusCode).toBe(400);
+    expect(response.responseBody.error).toBe("invalid_grant");
   });
 });

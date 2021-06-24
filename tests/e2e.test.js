@@ -73,9 +73,9 @@ const defaultTestingConfig = {
   },
 };
 
-function buildFakeDynamoClient(fakeDynamoClientRecord) {
-  const fakeDynamoClient = {};
-  fakeDynamoClient.updateToDynamo = (tok) => {
+function buildMockDynamoClient(mockDynamoClientRecord) {
+  const mockDynamoClient = {};
+  mockDynamoClient.updateToDynamo = (tok) => {
     return new Promise((resolve) => {
       // It's unclear whether this should resolve with a full records or just
       // the identity field but thus far it has been irrelevant to the
@@ -83,20 +83,22 @@ function buildFakeDynamoClient(fakeDynamoClientRecord) {
       resolve({ pk: tok.state });
     });
   };
-  fakeDynamoClient.queryFromDynamo = (queryParams, tableName) => {
+  mockDynamoClient.queryFromDynamo = (queryParams, tableName) => {
     return new Promise((resolve, reject) => {
       if (
-        fakeDynamoClientRecord &&
-        fakeDynamoClientRecord[Object.keys(queryParams)[0]] ===
+        mockDynamoClientRecord &&
+        mockDynamoClientRecord[Object.keys(queryParams)[0]] ===
           Object.values(queryParams)[0]
       ) {
-        resolve(convertObjectToDynamoAttributeValues(fakeDynamoClientRecord));
+        resolve({
+          Items: [convertObjectToDynamoAttributeValues(mockDynamoClientRecord)],
+        });
       } else {
         reject(`no such ${queryParams} value on ${tableName}`);
       }
     });
   };
-  fakeDynamoClient.getPayloadFromDynamo = (search_params, tableName) => {
+  mockDynamoClient.getPayloadFromDynamo = (search_params, tableName) => {
     const hashed_smart_launch_token =
       "ab29a92e1db44913c896efeed12108faa0b47a944b56cd7cd07d121aefa3769a";
     const fakeLaunchRecord = {
@@ -109,18 +111,18 @@ function buildFakeDynamoClient(fakeDynamoClientRecord) {
         searchKey === "access_token" &&
         search_params[searchKey] === hashed_smart_launch_token
       ) {
-        fakeDynamoClientRecord.access_token = hashed_smart_launch_token;
+        mockDynamoClientRecord.access_token = hashed_smart_launch_token;
         resolve({ Item: fakeLaunchRecord });
       } else if (
-        search_params[searchKey] === fakeDynamoClientRecord[searchKey]
+        search_params[searchKey] === mockDynamoClientRecord[searchKey]
       ) {
-        resolve({ Item: fakeDynamoClientRecord });
+        resolve({ Item: mockDynamoClientRecord });
       } else {
         reject(`no such state value on ${tableName}`);
       }
     });
   };
-  fakeDynamoClient.savePayloadToDynamo = (payload) => {
+  mockDynamoClient.savePayloadToDynamo = (payload) => {
     return new Promise((resolve) => {
       // It's unclear whether this should resolve with a full records or just
       // the identity field but thus far it has been irrelevant to the
@@ -128,12 +130,12 @@ function buildFakeDynamoClient(fakeDynamoClientRecord) {
       resolve({ payload });
     });
   };
-  return fakeDynamoClient;
+  return mockDynamoClient;
 }
 
 describe("OpenID Connect Conformance", () => {
   let oktaClient;
-  let fakeDynamoClient;
+  let mockDynamoClient;
   const testServerBaseUrlPattern = new RegExp(
     `^${defaultTestingConfig.host}${defaultTestingConfig.well_known_base_path}.*`
   );
@@ -166,10 +168,13 @@ describe("OpenID Connect Conformance", () => {
         isolatedOktaClients[service_config.api_category] = oktaClient;
       }
     }
-    fakeDynamoClient = buildFakeDynamoClient({
+    /*
+     * Mock DynamoDB record. Note that `code` is a hash of "xzy789".
+     */
+    mockDynamoClient = buildMockDynamoClient({
       state: "abc123",
       internal_state: "1234-5678-9100-0000",
-      code: "xyz789",
+      code: "57f1cb54483a01af1fc88c6bef6c872ba4138384bf8d7444aef426269e5e8216",
       launch: "123V456",
       refresh_token: "jkl456",
       redirect_uri: FAKE_CLIENT_APP_REDIRECT_URL,
@@ -185,7 +190,7 @@ describe("OpenID Connect Conformance", () => {
 
     const app = buildApp(
       defaultTestingConfig,
-      fakeDynamoClient,
+      mockDynamoClient,
       fakeTokenValidator,
       isolatedIssuers,
       isolatedOktaClients
@@ -286,7 +291,7 @@ describe("OpenID Connect Conformance", () => {
     // upstream test server support constructing and signing proper JWTs. These
     // tests should be enough to start breaking up the proxy app code into more
     // easily testable parts and inject a fake openid client to side-step the
-    // signaure requirement.
+    // signature requirement.
   });
 
   it("responds to the isolated api category endpoints described in the OIDC metadata response", async (done) => {
@@ -294,7 +299,7 @@ describe("OpenID Connect Conformance", () => {
     // up, with each request being made in a separate test. That would make it
     // much more difficult to use the metadata response to drive the requests
     // for the subsequent requests.
-    const testServerIssolatedBaseUrlPattern = new RegExp(
+    const testServerIsolatedBaseUrlPattern = new RegExp(
       `^${defaultTestingConfig.host}${defaultTestingConfig.well_known_base_path}/veteran-verification-apis/v1.*`
     );
 
@@ -310,16 +315,16 @@ describe("OpenID Connect Conformance", () => {
     });
 
     expect(parsedMeta).toMatchObject({
-      jwks_uri: expect.stringMatching(testServerIssolatedBaseUrlPattern),
+      jwks_uri: expect.stringMatching(testServerIsolatedBaseUrlPattern),
       authorization_endpoint: expect.stringMatching(
-        testServerIssolatedBaseUrlPattern
+        testServerIsolatedBaseUrlPattern
       ),
       userinfo_endpoint: expect.stringMatching(
-        testServerIssolatedBaseUrlPattern
+        testServerIsolatedBaseUrlPattern
       ),
-      token_endpoint: expect.stringMatching(testServerIssolatedBaseUrlPattern),
+      token_endpoint: expect.stringMatching(testServerIsolatedBaseUrlPattern),
       introspection_endpoint: expect.stringMatching(
-        testServerIssolatedBaseUrlPattern
+        testServerIsolatedBaseUrlPattern
       ),
     });
 

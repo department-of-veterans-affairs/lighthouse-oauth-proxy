@@ -1,4 +1,5 @@
 const { hashString } = require("../../../utils");
+const { getUnixTime } = require("date-fns");
 
 class SaveDocumentLaunchStrategy {
   constructor(logger, dynamoClient, config) {
@@ -18,7 +19,7 @@ class SaveDocumentLaunchStrategy {
         let payload = {
           access_token: accessToken,
           launch: launch,
-          expires_on: Math.round(Date.now() / 1000) + tokens.expires_in,
+          expires_on: getUnixTime(new Date()) + tokens.expires_in,
         };
 
         await this.dynamoClient.savePayloadToDynamo(

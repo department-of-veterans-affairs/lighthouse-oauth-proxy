@@ -9,11 +9,11 @@ ARG BUILD_TOOL
 # Static Labels
 LABEL org.opencontainers.image.authors="leeroy-jenkles@va.gov" \
       org.opencontainers.image.url="https://github.com/department-of-veterans-affairs/lighthouse-oauth-proxy/tree/master/Dockerfile.bats" \
-      org.opencontainers.image.documentation="https://github.com/department-of-veterans-affairs/lighthouse-oauth-proxy/tree/master/lighthouse-oauth-proxy/README.md" \
+      org.opencontainers.image.documentation="https://github.com/department-of-veterans-affairs/lighthouse-oauth-proxy/tree/master/README.md" \
       org.opencontainers.image.vendor="lighthouse" \
       org.opencontainers.image.title="oauth-proxy-tests" \
       org.opencontainers.image.source="https://github.com/department-of-veterans-affairs/lighthouse-oauth-proxy/tree/master" \
-      org.opencontainers.image.description="Oauth Proxy Tests for Lighthouse APIs"
+      org.opencontainers.image.description="OAuth Proxy Tests for Lighthouse APIs"
 
 # Dynamic Labels
 LABEL org.opencontainers.image.created=${BUILD_DATE_TIME} \

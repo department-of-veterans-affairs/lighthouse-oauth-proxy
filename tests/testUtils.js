@@ -1,4 +1,3 @@
-const { RequestError } = require("request-promise-native/errors");
 const jwt = require("njwt");
 const fs = require("fs");
 
@@ -274,13 +273,19 @@ const buildExpiredRefreshTokenClient = () => {
   return buildOpenIDClient({
     refresh: () => {
       // This simulates an upstream error so that we don't have to test the full handler.
-      throw new RequestError(
-        new Error(
-          "simulated upstream response error for expired refresh token"
-        ),
-        {},
-        { statusCode: 400 }
+
+      const cause = new Error(
+        "simulated upstream response error for expired refresh token"
       );
+
+      throw {
+        name: "RequestError",
+        message: String(cause),
+        cause: cause,
+        error: cause,
+        options: {},
+        response: { statusCode: 400 },
+      };
     },
   });
 };

@@ -75,8 +75,7 @@ function parseClientId(clientId) {
 
 const hashString = (unhashedString, secret) => {
   const hmac = crypto.createHmac("sha256", secret);
-  let hashedString = hmac.update(unhashedString).digest("hex");
-  return hashedString;
+  return hmac.update(unhashedString).digest("hex");
 };
 
 const isString = (obj) => typeof obj === "string" || obj instanceof String;

@@ -14,7 +14,8 @@ class SaveDocumentStateStrategy {
     dynamoClient,
     config,
     issuer,
-    refreshTokenLifeCycleHistogram
+    refreshTokenLifeCycleHistogram,
+    temp_client_id
   ) {
     this.req = req;
     this.logger = logger;
@@ -22,6 +23,7 @@ class SaveDocumentStateStrategy {
     this.config = config;
     this.issuer = issuer;
     this.refreshTokenLifeCycleHistogram = refreshTokenLifeCycleHistogram;
+    this.temp_client_id = temp_client_id;
   }
   async saveDocumentToDynamo(document, tokens) {
     try {
@@ -32,21 +34,56 @@ class SaveDocumentStateStrategy {
             this.config.hmac_secret
           ),
           iss: this.issuer,
+          issued_on: getUnixTime(Date.now()),
         };
+
+        /*
+         * Legacy records may not have a client_id. This back-fills those records.
+         * This logic can be removed once all records are updated (~42 days from
+         * commit/release).
+         *
+         * "New" records get this set at authorization.
+         */
+        document.client_id = this.temp_client_id;
+        updated_document.client_id = document.client_id;
 
         if (tokens.refresh_token) {
           updated_document.refresh_token = hashString(
             tokens.refresh_token,
             this.config.hmac_secret
           );
-          let now = new Date();
+
+          /*
+           * If replacing a refresh token, record metrics about its usage.
+           *
+           * Legacy records may not have an issued_on value. Assume these to be
+           * issued 42 days prior to its expiration. This logic can be removed
+           * once all documents are updated (~42 days from commit/release).
+           *
+           * Note this number is intentionally hardcoded to not change when the
+           * config.refresh_token_ttl value is updated.
+           */
           if (document.refresh_token) {
-            let created_at = subDays(fromUnixTime(document.expires_on), 42);
-            this.refreshTokenLifeCycleHistogram.observe(
-              differenceInDays(now, created_at)
-            );
+            let issued_on = fromUnixTime(document.issued_on);
+            if (!document.issued_on) {
+              issued_on = subDays(fromUnixTime(document.expires_on), 42);
+            }
+
+            this.refreshTokenLifeCycleHistogram
+              .labels({ client_id: document.client_id })
+              .observe(differenceInDays(Date.now(), issued_on));
           }
-          let expires_on = addDays(now, 42);
+
+          /*
+           * Set expiration date.
+           *
+           * If a refresh token was issued, expiration should match refresh token TTL.
+           * If only an access token was issued, expiration should match access token TTL.
+           */
+          let expires_on = addDays(
+            fromUnixTime(updated_document.issued_on),
+            this.config.refresh_token_ttl
+          );
           updated_document.expires_on = getUnixTime(expires_on);
         } else {
           updated_document.expires_on = tokens.expires_at;

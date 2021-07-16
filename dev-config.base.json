@@ -7,6 +7,7 @@
   "dynamo_launch_context_table": "launch-context-table",
   "dynamo_static_token_table": "static-token-table",
   "hmac_secret": "hmac-secret",
+  "refresh_token_ttl": 42,
   "okta_url": "https://example.okta.com",
   "validate_post_endpoint": "https://example.com/validation",
   "validate_apiKey": "validate-api-key",

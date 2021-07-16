@@ -2,6 +2,7 @@
 const { URLSearchParams, URL } = require("url");
 const { loginBegin } = require("../metrics");
 const { v4: uuidv4 } = require("uuid");
+const { addMinutes, getUnixTime } = require("date-fns");
 
 /**
  * Checks for valid authorization request and proxies to authorization server.
@@ -75,7 +76,8 @@ const authorizeHandler = async (
       internal_state: internal_state,
       state: state,
       redirect_uri: client_redirect,
-      expires_on: Math.round(Date.now() / 1000) + 60 * 10, // 10 minutes
+      expires_on: getUnixTime(addMinutes(Date.now(), 10)),
+      client_id: client_id,
     };
 
     // If the launch scope is included then also

@@ -92,12 +92,12 @@ const getStrategies = (
 ) => {
   let strategies;
   if (req.body.grant_type === "refresh_token") {
-    const temp_client_id = req.body.client_id;
+    const clientMetadata = createClientMetadata(redirect_uri, req, config);
     strategies = {
       getTokenStrategy: new RefreshTokenStrategy(
         req,
         logger,
-        new issuer.Client(createClientMetadata(redirect_uri, req, config)),
+        new issuer.Client(clientMetadata),
         dynamoClient,
         config,
         staticTokens
@@ -106,8 +106,7 @@ const getStrategies = (
         req,
         logger,
         dynamoClient,
-        config,
-        temp_client_id
+        config
       ),
       saveDocumentToDynamoStrategy: new SaveDocumentStateStrategy(
         req,
@@ -115,7 +114,8 @@ const getStrategies = (
         dynamoClient,
         config,
         issuer.issuer,
-        refreshTokenLifeCycleHistogram
+        refreshTokenLifeCycleHistogram,
+        clientMetadata.client_id
       ),
       getPatientInfoStrategy: new GetPatientInfoFromValidateEndpointStrategy(
         validateToken,
@@ -126,12 +126,13 @@ const getStrategies = (
       dbMissCounter: missRefreshTokenCounter,
     };
   } else if (req.body.grant_type === "authorization_code") {
+    const clientMetadata = createClientMetadata(redirect_uri, req, config);
     strategies = {
       getTokenStrategy: new AuthorizationCodeStrategy(
         req,
         logger,
         redirect_uri,
-        new issuer.Client(createClientMetadata(redirect_uri, req, config))
+        new issuer.Client(clientMetadata)
       ),
       getDocumentFromDynamoStrategy: new GetDocumentByCodeStrategy(
         req,
@@ -145,7 +146,8 @@ const getStrategies = (
         dynamoClient,
         config,
         issuer.issuer,
-        refreshTokenLifeCycleHistogram
+        refreshTokenLifeCycleHistogram,
+        clientMetadata.client_id
       ),
       getPatientInfoStrategy: new GetPatientInfoFromValidateEndpointStrategy(
         validateToken,

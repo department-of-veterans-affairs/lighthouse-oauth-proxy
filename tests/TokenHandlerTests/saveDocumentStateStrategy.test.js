@@ -18,6 +18,7 @@ const HMAC_SECRET = "secret";
 const STATE = "abc123";
 const INTERNAL_STATE = "1234-5678-9100-0000";
 const LAUNCH = "1234V5678";
+const CLIENT_ID = "00a123";
 const CODE_HASH_PAIR = [
   "the_fake_authorization_code",
   "9daf298b2cb68502791f6f264aef8ebb56dc0ddd3542fbd1c4bd675538fd9cb8",
@@ -57,7 +58,12 @@ describe("saveDocumentStateStrategy tests", () => {
     tokens = buildToken(false, true, true, "launch");
     jest.useFakeTimers("modern");
     jest.setSystemTime(new Date("1995-06-23T00:00:00.000+08:00"));
-    mockRefreshTokenLifeCycleHistogram = { observe: jest.fn() };
+    mockRefreshTokenLifeCycleHistogram = {
+      labels: jest.fn(() => {
+        return mockRefreshTokenLifeCycleHistogram;
+      }),
+      observe: jest.fn(),
+    };
   });
 
   afterEach(() => {
@@ -77,10 +83,14 @@ describe("saveDocumentStateStrategy tests", () => {
       dynamoClient,
       config,
       "issuer",
-      mockRefreshTokenLifeCycleHistogram
+      mockRefreshTokenLifeCycleHistogram,
+      CLIENT_ID
     );
     await strategy.saveDocumentToDynamo(document, tokens);
     expect(logger.error).not.toHaveBeenCalled();
+    expect(mockRefreshTokenLifeCycleHistogram.labels).toHaveBeenCalledWith({
+      client_id: CLIENT_ID,
+    });
     expect(mockRefreshTokenLifeCycleHistogram.observe).toHaveBeenCalledWith(1);
   });
 
@@ -120,7 +130,8 @@ describe("saveDocumentStateStrategy tests", () => {
       dynamoClient,
       config,
       "issuer",
-      mockRefreshTokenLifeCycleHistogram
+      mockRefreshTokenLifeCycleHistogram,
+      CLIENT_ID
     );
     await strategy.saveDocumentToDynamo(document, tokens);
     expect(dynamoClient.savePayloadToDynamo).toHaveBeenCalledWith(
@@ -132,6 +143,9 @@ describe("saveDocumentStateStrategy tests", () => {
       },
       "LaunchContext"
     );
+    expect(mockRefreshTokenLifeCycleHistogram.labels).toHaveBeenCalledWith({
+      client_id: CLIENT_ID,
+    });
     expect(mockRefreshTokenLifeCycleHistogram.observe).toHaveBeenCalledWith(1);
     expect(logger.error).not.toHaveBeenCalled();
   });
@@ -151,10 +165,14 @@ describe("saveDocumentStateStrategy tests", () => {
       dynamoClient,
       config,
       "issuer",
-      mockRefreshTokenLifeCycleHistogram
+      mockRefreshTokenLifeCycleHistogram,
+      CLIENT_ID
     );
     tokens = buildToken(false, true, false, "");
     await strategy.saveDocumentToDynamo(document, tokens);
+    expect(mockRefreshTokenLifeCycleHistogram.labels).toHaveBeenCalledWith({
+      client_id: CLIENT_ID,
+    });
     expect(mockRefreshTokenLifeCycleHistogram.observe).toHaveBeenCalledWith(1);
     expect(logger.warn).toHaveBeenCalledWith(
       "Launch context specified but scope not granted."
@@ -174,12 +192,16 @@ describe("saveDocumentStateStrategy tests", () => {
       dynamoClient,
       config,
       "issuer",
-      mockRefreshTokenLifeCycleHistogram
+      mockRefreshTokenLifeCycleHistogram,
+      CLIENT_ID
     );
     try {
       await strategy.saveDocumentToDynamo(document, tokens);
       fail("Should have thrown error");
     } catch (error) {
+      expect(mockRefreshTokenLifeCycleHistogram.labels).toHaveBeenCalledWith({
+        client_id: CLIENT_ID,
+      });
       expect(mockRefreshTokenLifeCycleHistogram.observe).toHaveBeenCalledWith(
         1
       );
@@ -252,9 +274,13 @@ describe("saveDocumentStateStrategy tests", () => {
       dynamoClient,
       config,
       "issuer",
-      mockRefreshTokenLifeCycleHistogram
+      mockRefreshTokenLifeCycleHistogram,
+      CLIENT_ID
     );
     await strategy.saveDocumentToDynamo(document, tokens);
+    expect(mockRefreshTokenLifeCycleHistogram.labels).toHaveBeenCalledWith({
+      client_id: CLIENT_ID,
+    });
     expect(mockRefreshTokenLifeCycleHistogram.observe).toHaveBeenCalledWith(1);
     expect(logger.error).toHaveBeenCalled();
   });

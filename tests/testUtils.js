@@ -321,6 +321,7 @@ const createFakeConfig = () => {
     dynamo_oauth_requests_table: "OAuthRequestsV2",
     dynamo_launch_context_table: "LaunchContext",
     hmac_secret: "secret",
+    refresh_token_ttl: 42,
     okta_url: "https://deptva-eval.okta.com",
     validate_post_endpoint:
       "https://sandbox-api.va.gov/internal/auth/v1/validation",

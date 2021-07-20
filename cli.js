@@ -62,6 +62,10 @@ function processArgs() {
           "hmac secret to hash access tokens being stored in client credentials table.",
         required: true,
       },
+      refresh_token_ttl: {
+        description: "TTL (days) of a refresh token",
+        required: true,
+      },
       okta_url: {
         description: "base URL of okta organization",
         required: true,

@@ -48,6 +48,7 @@ const refreshTokenLifeCycleHistogram = new client.Histogram({
   name: "refresh_token_life_cycle_histogram",
   help:
     "measures the time in days between a refresh token's instantiation and its use.",
+  labelNames: ["client_id"],
   buckets: [1, 3, 5, 10, 21, 42],
 });
 

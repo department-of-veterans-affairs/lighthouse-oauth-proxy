@@ -1,39 +1,39 @@
 const {
   buildTokenHandlerClient,
-} = require("../../oauthHandlers/tokenHandlerStrategyClasses/tokenHandlerClientBuilder");
+} = require("../../src/oauthHandlers/tokenHandlerStrategyClasses/tokenHandlerClientBuilder");
 const {
   RefreshTokenStrategy,
-} = require("../../oauthHandlers/tokenHandlerStrategyClasses/tokenStrategies/refreshTokenStrategy");
+} = require("../../src/oauthHandlers/tokenHandlerStrategyClasses/tokenStrategies/refreshTokenStrategy");
 const {
   AuthorizationCodeStrategy,
-} = require("../../oauthHandlers/tokenHandlerStrategyClasses/tokenStrategies/authorizationCodeStrategy");
+} = require("../../src/oauthHandlers/tokenHandlerStrategyClasses/tokenStrategies/authorizationCodeStrategy");
 const {
   ClientCredentialsStrategy,
-} = require("../../oauthHandlers/tokenHandlerStrategyClasses/tokenStrategies/clientCredentialsStrategy");
+} = require("../../src/oauthHandlers/tokenHandlerStrategyClasses/tokenStrategies/clientCredentialsStrategy");
 const {
   UnsupportedGrantStrategy,
-} = require("../../oauthHandlers/tokenHandlerStrategyClasses/tokenStrategies/unsupportedGrantStrategy");
+} = require("../../src/oauthHandlers/tokenHandlerStrategyClasses/tokenStrategies/unsupportedGrantStrategy");
 const {
   GetDocumentByRefreshTokenStrategy,
-} = require("../../oauthHandlers/tokenHandlerStrategyClasses/documentStrategies/getDocumentByRefreshTokenStrategy");
+} = require("../../src/oauthHandlers/tokenHandlerStrategyClasses/documentStrategies/getDocumentByRefreshTokenStrategy");
 const {
   GetDocumentByCodeStrategy,
-} = require("../../oauthHandlers/tokenHandlerStrategyClasses/documentStrategies/getDocumentByCodeStrategy");
+} = require("../../src/oauthHandlers/tokenHandlerStrategyClasses/documentStrategies/getDocumentByCodeStrategy");
 const {
   GetDocumentByLaunchStrategy,
-} = require("../../oauthHandlers/tokenHandlerStrategyClasses/documentStrategies/getDocumentByLaunchStrategy");
+} = require("../../src/oauthHandlers/tokenHandlerStrategyClasses/documentStrategies/getDocumentByLaunchStrategy");
 const {
   SaveDocumentStateStrategy,
-} = require("../../oauthHandlers/tokenHandlerStrategyClasses/saveDocumentStrategies/saveDocumentStateStrategy");
+} = require("../../src/oauthHandlers/tokenHandlerStrategyClasses/saveDocumentStrategies/saveDocumentStateStrategy");
 const {
   SaveDocumentLaunchStrategy,
-} = require("../../oauthHandlers/tokenHandlerStrategyClasses/saveDocumentStrategies/saveDocumentLaunchStrategy");
+} = require("../../src/oauthHandlers/tokenHandlerStrategyClasses/saveDocumentStrategies/saveDocumentLaunchStrategy");
 const {
   GetPatientInfoFromValidateEndpointStrategy,
-} = require("../../oauthHandlers/tokenHandlerStrategyClasses/getPatientInfoStrategies/getPatientInfoFromValidateEndpointStrategy");
+} = require("../../src/oauthHandlers/tokenHandlerStrategyClasses/getPatientInfoStrategies/getPatientInfoFromValidateEndpointStrategy");
 const {
   GetPatientInfoFromLaunchStrategy,
-} = require("../../oauthHandlers/tokenHandlerStrategyClasses/getPatientInfoStrategies/getPatientInfoFromLaunchStrategy");
+} = require("../../src/oauthHandlers/tokenHandlerStrategyClasses/getPatientInfoStrategies/getPatientInfoFromLaunchStrategy");
 const {
   FakeIssuer,
   buildFakeDynamoClient,
@@ -42,12 +42,12 @@ const {
 } = require("../testUtils");
 const MockExpressRequest = require("mock-express-request");
 const MockExpressResponse = require("mock-express-response");
-const { encodeBasicAuthHeader } = require("../../utils");
+const { encodeBasicAuthHeader } = require("../../src/utils");
 const {
   codeTokenIssueCounter,
   refreshTokenIssueCounter,
   clientCredentialsTokenIssueCounter,
-} = require("../../metrics");
+} = require("../../src/metrics");
 require("jest");
 
 describe("buildTokenHandlerClient Tests", () => {

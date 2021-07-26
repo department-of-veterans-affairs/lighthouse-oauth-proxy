@@ -2,7 +2,7 @@ require("jest");
 
 const {
   GetPatientInfoFromValidateEndpointStrategy,
-} = require("../../oauthHandlers/tokenHandlerStrategyClasses/getPatientInfoStrategies/getPatientInfoFromValidateEndpointStrategy");
+} = require("../../src/oauthHandlers/tokenHandlerStrategyClasses/getPatientInfoStrategies/getPatientInfoFromValidateEndpointStrategy");
 const { buildFakeLogger } = require("../testUtils");
 const { buildValidateToken } = require("./tokenHandlerTestUtils");
 describe("getPatientInfoFromValidateEndpointStrategy tests", () => {

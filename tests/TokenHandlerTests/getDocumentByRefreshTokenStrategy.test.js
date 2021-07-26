@@ -2,7 +2,7 @@ require("jest");
 
 const {
   GetDocumentByRefreshTokenStrategy,
-} = require("../../oauthHandlers/tokenHandlerStrategyClasses/documentStrategies/getDocumentByRefreshTokenStrategy");
+} = require("../../src/oauthHandlers/tokenHandlerStrategyClasses/documentStrategies/getDocumentByRefreshTokenStrategy");
 
 const {
   buildFakeDynamoClient,

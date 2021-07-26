@@ -2,7 +2,7 @@
 
 require("jest");
 
-const { SlugHelper } = require("../slug_helper");
+const { SlugHelper } = require("../src/slug_helper");
 const config = {
   idps: [
     {

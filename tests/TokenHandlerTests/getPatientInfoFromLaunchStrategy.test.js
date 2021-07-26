@@ -1,6 +1,6 @@
 const {
   GetPatientInfoFromLaunchStrategy,
-} = require("../../oauthHandlers/tokenHandlerStrategyClasses/getPatientInfoStrategies/getPatientInfoFromLaunchStrategy");
+} = require("../../src/oauthHandlers/tokenHandlerStrategyClasses/getPatientInfoStrategies/getPatientInfoFromLaunchStrategy");
 
 require("jest");
 

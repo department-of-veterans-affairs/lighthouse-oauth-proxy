@@ -1,6 +1,6 @@
 const {
   UnsupportedGrantStrategy,
-} = require("../../oauthHandlers/tokenHandlerStrategyClasses/tokenStrategies/unsupportedGrantStrategy");
+} = require("../../src/oauthHandlers/tokenHandlerStrategyClasses/tokenStrategies/unsupportedGrantStrategy");
 
 require("jest");
 

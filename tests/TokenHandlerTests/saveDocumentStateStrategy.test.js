@@ -7,7 +7,7 @@ const {
 const MockExpressRequest = require("mock-express-request");
 const {
   SaveDocumentStateStrategy,
-} = require("../../oauthHandlers/tokenHandlerStrategyClasses/saveDocumentStrategies/saveDocumentStateStrategy");
+} = require("../../src/oauthHandlers/tokenHandlerStrategyClasses/saveDocumentStrategies/saveDocumentStateStrategy");
 jest.mock("uuid", () => ({
   v4: () => "fake-uuid",
 }));

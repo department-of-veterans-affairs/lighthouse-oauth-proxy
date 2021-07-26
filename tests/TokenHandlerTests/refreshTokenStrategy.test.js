@@ -8,7 +8,7 @@ const {
 } = require("../testUtils");
 const {
   RefreshTokenStrategy,
-} = require("../../oauthHandlers/tokenHandlerStrategyClasses/tokenStrategies/refreshTokenStrategy");
+} = require("../../src/oauthHandlers/tokenHandlerStrategyClasses/tokenStrategies/refreshTokenStrategy");
 let logger;
 let dynamoClient;
 let client;

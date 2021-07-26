@@ -2,7 +2,7 @@
 
 require("jest");
 const { createFakeConfig, ISSUER_METADATA } = require("./testUtils");
-const { buildIssuer } = require("../issuer_helper");
+const { buildIssuer } = require("../src/issuer_helper");
 const { Issuer } = require("openid-client");
 
 describe("happy paths buildIssuer tests", () => {

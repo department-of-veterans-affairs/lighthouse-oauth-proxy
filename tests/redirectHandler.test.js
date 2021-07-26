@@ -6,7 +6,7 @@ const MockExpressResponse = require("mock-express-response");
 const Collection = require("@okta/okta-sdk-nodejs/src/collection");
 const ModelFactory = require("@okta/okta-sdk-nodejs/src/model-factory");
 const User = require("@okta/okta-sdk-nodejs/src/models/User");
-const { redirectHandler } = require("../oauthHandlers");
+const { redirectHandler } = require("../src/oauthHandlers");
 const { buildFakeDynamoClient } = require("./testUtils");
 
 const userCollection = new Collection("", "", new ModelFactory(User));

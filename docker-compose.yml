@@ -10,7 +10,7 @@ services:
       - dynamodb
     volumes:
       - .:/opt/
-    command: sh -c "cd /opt && npm install && node dynamo_schema.js"
+    command: sh -c "cd /opt && npm install && node src/dynamo_schema.js"
   oauth-proxy:
     build:
       context: ./
@@ -28,4 +28,4 @@ services:
       - AWS_DEFAULT_REGION=us-west-2
     volumes:
       - .:/opt/app
-    command: "node --inspect=0.0.0.0:9229 index.js --config dev-config.json"
+    command: "node --inspect=0.0.0.0:9229 src/index.js --config dev-config.json"

@@ -16,8 +16,8 @@ const {
   startServerInBackground,
   stopBackgroundServer,
 } = buildBackgroundServerModule("oauth-proxy test app");
-const { buildApp } = require("../index");
-const { encodeBasicAuthHeader } = require("../utils");
+const { buildApp } = require("../src");
+const { encodeBasicAuthHeader } = require("../src/utils");
 
 beforeAll(() => {
   upstreamOAuthTestServer.start();

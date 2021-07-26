@@ -1,6 +1,6 @@
 const {
   SaveDocumentLaunchStrategy,
-} = require("../../oauthHandlers/tokenHandlerStrategyClasses/saveDocumentStrategies/saveDocumentLaunchStrategy");
+} = require("../../src/oauthHandlers/tokenHandlerStrategyClasses/saveDocumentStrategies/saveDocumentLaunchStrategy");
 const { buildToken } = require("./tokenHandlerTestUtils");
 const {
   buildFakeDynamoClient,

@@ -2,15 +2,15 @@
   "name": "oauth-proxy",
   "version": "1.0.0",
   "description": "Proxies requests to Okta to conform to FHIR API standard",
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
     "test": "jest",
     "test:ci": "jest --ci",
     "prestart": "npx eslint .",
-    "start": "node index.js --config dev-config.json",
+    "start": "node src/index.js --config dev-config.json",
     "lint": "npx eslint .",
     "lint-fix": "npx eslint . --fix",
-    "help": "node index.js --help"
+    "help": "node src/index.js --help"
   },
   "jest": {
     "clearMocks": true,

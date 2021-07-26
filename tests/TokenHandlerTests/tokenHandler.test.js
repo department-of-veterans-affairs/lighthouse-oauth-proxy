@@ -1,6 +1,6 @@
 require("jest");
 const MockExpressRequest = require("mock-express-request");
-const { tokenHandler } = require("../../oauthHandlers");
+const { tokenHandler } = require("../../src/oauthHandlers");
 const {
   FakeIssuer,
   buildFakeDynamoClient,
@@ -10,9 +10,9 @@ const {
 const { buildValidateToken } = require("./tokenHandlerTestUtils");
 const {
   buildTokenHandlerClient,
-} = require("../../oauthHandlers/tokenHandlerStrategyClasses/tokenHandlerClientBuilder");
+} = require("../../src/oauthHandlers/tokenHandlerStrategyClasses/tokenHandlerClientBuilder");
 jest.mock(
-  "../../oauthHandlers/tokenHandlerStrategyClasses/tokenHandlerClientBuilder",
+  "../../src/oauthHandlers/tokenHandlerStrategyClasses/tokenHandlerClientBuilder",
   () => ({ buildTokenHandlerClient: jest.fn() })
 );
 

@@ -2,8 +2,8 @@
 
 require("jest");
 
-const { claimsHandler } = require("../../oauthHandlers");
-const { hashString } = require("../../utils");
+const { claimsHandler } = require("../../src/oauthHandlers");
+const { hashString } = require("../../src/utils");
 const { defaultConfig, mockDynamoClient, mockLogger } = require("../testUtils");
 let { beforeEach, describe, it } = global; // ESLint
 

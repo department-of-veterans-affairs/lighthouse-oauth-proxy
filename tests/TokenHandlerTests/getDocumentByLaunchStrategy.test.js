@@ -1,6 +1,6 @@
 const {
   GetDocumentByLaunchStrategy,
-} = require("../../oauthHandlers/tokenHandlerStrategyClasses/documentStrategies/getDocumentByLaunchStrategy");
+} = require("../../src/oauthHandlers/tokenHandlerStrategyClasses/documentStrategies/getDocumentByLaunchStrategy");
 const MockExpressRequest = require("mock-express-request");
 
 require("jest");

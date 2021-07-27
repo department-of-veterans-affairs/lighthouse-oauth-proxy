@@ -2,7 +2,7 @@ require("jest");
 
 const {
   TokenHandlerClient,
-} = require("../../oauthHandlers/tokenHandlerStrategyClasses/tokenHandlerClient");
+} = require("../../src/oauthHandlers/tokenHandlerStrategyClasses/tokenHandlerClient");
 const {
   buildGetDocumentStrategy,
   buildSaveDocumentStrategy,

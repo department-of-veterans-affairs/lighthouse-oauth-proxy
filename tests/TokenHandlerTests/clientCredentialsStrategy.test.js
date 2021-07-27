@@ -5,7 +5,7 @@ const MockExpressRequest = require("mock-express-request");
 const { buildFakeLogger } = require("../testUtils");
 const {
   ClientCredentialsStrategy,
-} = require("../../oauthHandlers/tokenHandlerStrategyClasses/tokenStrategies/clientCredentialsStrategy");
+} = require("../../src/oauthHandlers/tokenHandlerStrategyClasses/tokenStrategies/clientCredentialsStrategy");
 let logger;
 let token_endpoint = "http://localhost:9090/testServer/token";
 let mock = new MockAdapter(axios);

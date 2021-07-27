@@ -16,4 +16,4 @@ HEALTHCHECK --interval=1m --timeout=4s --start-period=30s \
   CMD curl -f http://localhost:7100/oauth2/.well-known/openid-configuration || exit 1
 
 ENTRYPOINT ["/usr/local/bin/tini", "--"]
-CMD ["node", "index.js"]
+CMD ["node", "src/index.js"]

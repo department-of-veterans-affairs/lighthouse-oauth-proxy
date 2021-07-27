@@ -3,7 +3,7 @@
 require("jest");
 const { TokenSet } = require("openid-client");
 const timekeeper = require("timekeeper");
-const { translateTokenSet } = require("../oauthHandlers/tokenResponse");
+const { translateTokenSet } = require("../src/oauthHandlers/tokenResponse");
 
 describe("translateTokenSet", () => {
   it("omits id_token if not in TokenSet", async () => {

@@ -9,7 +9,7 @@ const userCollection = new Collection(null, "", new ModelFactory(User));
 const MockExpressRequest = require("mock-express-request");
 const {
   AuthorizationCodeStrategy,
-} = require("../../oauthHandlers/tokenHandlerStrategyClasses/tokenStrategies/authorizationCodeStrategy");
+} = require("../../src/oauthHandlers/tokenHandlerStrategyClasses/tokenStrategies/authorizationCodeStrategy");
 
 require("jest");
 

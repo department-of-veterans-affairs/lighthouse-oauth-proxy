@@ -46,7 +46,7 @@ HEALTHCHECK --interval=1m --timeout=4s --start-period=30s \
   CMD curl -f http://localhost:7100/oauth2/.well-known/openid-configuration || exit 1
 
 ENTRYPOINT ["/usr/local/bin/tini", "--"]
-CMD ["node", "index.js", "--config", "/etc/oauth-proxy/config.json"]
+CMD ["node", "src/index.js", "--config", "/etc/oauth-proxy/config.json"]
 
 from base as deploy
 COPY --from=0 /home/ca-certificates/ca-certs.pem /ca-certificates/ca-certs.pem

@@ -8,7 +8,7 @@ const {
   parseBearerAuthorization,
   hashString,
   minimalError,
-} = require("../utils");
+} = require("../src/utils");
 
 describe("statusCodeFromError", () => {
   describe("returns the default", () => {

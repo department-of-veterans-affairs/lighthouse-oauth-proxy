@@ -3,7 +3,7 @@
 require("jest");
 
 const MockExpressResponse = require("mock-express-response");
-const { jwtAuthorizationHandler } = require("../jwtAuthorizationHandler");
+const { jwtAuthorizationHandler } = require("../src/jwtAuthorizationHandler");
 
 describe("jwtAuthorizationHandler", () => {
   it("missing jwt", () => {

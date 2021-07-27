@@ -5,7 +5,7 @@ var _ = require("lodash");
 
 jest.mock("aws-sdk");
 
-const { DynamoClient } = require("../dynamo_client");
+const { DynamoClient } = require("../src/dynamo_client");
 
 describe("dynamo client tests", () => {
   const dynamoclient = new DynamoClient(

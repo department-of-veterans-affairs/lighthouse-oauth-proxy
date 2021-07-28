@@ -56,6 +56,7 @@ class TokenHandlerClient {
       this.tokenIssueCounter.inc();
     } catch (error) {
       rethrowIfRuntimeError(error);
+      //change here
       if (error.statusCode !== undefined && error.statusCode === 401) {
         return {
           statusCode: 401,

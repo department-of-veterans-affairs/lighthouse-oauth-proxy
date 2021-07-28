@@ -194,6 +194,8 @@ describe("handleToken tests", () => {
   it("getToken 401 Response", async () => {
     let err = {
       statusCode: 401,
+      error: "invalid_client",
+      error_description: "error description"
     };
 
     let tokenHandlerClient = buildTokenClient({
@@ -206,7 +208,7 @@ describe("handleToken tests", () => {
     expect(response.statusCode).toBe(401);
     expect(response.responseBody.error).toBe("invalid_client");
     expect(response.responseBody.error_description).toBe(
-      "Invalid value for client_id parameter."
+      "error description"
     );
   });
 

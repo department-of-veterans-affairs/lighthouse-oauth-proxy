@@ -56,8 +56,18 @@ class TokenHandlerClient {
       this.tokenIssueCounter.inc();
     } catch (error) {
       rethrowIfRuntimeError(error);
-      if (!error) {
-        throw error;
+      if (
+        !error ||
+        !error.statusCode ||
+        !error.error
+      ) {
+        return {
+          statusCode: 500,
+          responseBody: {
+            error: "server_error",
+            error_description: "An error occured retrieving the token from the authorization server",
+          },
+        };
       }
       return {
         statusCode: error.statusCode,

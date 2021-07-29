@@ -243,7 +243,7 @@ describe("handleToken tests", () => {
     expect(tokenIssueCounter.inc).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(500);
     expect(response.responseBody.error).toBe("server_error");
-    expect(response.responseBody.error_description).toBe("An error occured retrieving the token from the authorization server");
+    expect(response.responseBody.error_description).toBe("An error occurred retrieving the token from the authorization server");
   });
 
   it("missing document returns 400 error (without metrics)", async () => {

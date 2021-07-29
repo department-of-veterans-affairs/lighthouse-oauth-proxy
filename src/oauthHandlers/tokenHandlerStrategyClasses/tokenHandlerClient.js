@@ -65,7 +65,7 @@ class TokenHandlerClient {
           statusCode: 500,
           responseBody: {
             error: "server_error",
-            error_description: "An error occured retrieving the token from the authorization server",
+            error_description: "An error occurred retrieving the token from the authorization server",
           },
         };
       }

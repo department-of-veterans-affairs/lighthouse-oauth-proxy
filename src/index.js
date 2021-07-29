@@ -436,6 +436,7 @@ if (require.main === module) {
       if (config.upstream_issuer_timeout_ms) {
         custom.setHttpOptionsDefaults({
           timeout: config.upstream_issuer_timeout_ms,
+          throwHttpErrors: true
         });
       }
 

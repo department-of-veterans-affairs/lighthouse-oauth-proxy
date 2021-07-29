@@ -1,10 +1,7 @@
 const process = require("process");
-const {
-  rethrowIfRuntimeError,
-  statusCodeFromError,
-  minimalError,
-} = require("../../../utils");
+const { rethrowIfRuntimeError, minimalError } = require("../../../utils");
 const { oktaTokenRefreshGauge, stopTimer } = require("../../../metrics");
+const { handleError } = require("../../../issuer_helper");
 
 class RefreshTokenStrategy {
   constructor(req, logger, client, dynamoClient, config, staticTokens) {
@@ -68,16 +65,13 @@ class RefreshTokenStrategy {
         tokens = await this.client.refresh(this.req.body.refresh_token);
       } catch (error) {
         rethrowIfRuntimeError(error);
+        let handledError = handleError(error);
         this.logger.error(
           "Could not refresh the client session with the provided refresh token",
-          minimalError(error)
+          minimalError(handledError)
         );
         stopTimer(oktaTokenRefreshGauge, oktaTokenRefreshStart);
-        throw {
-          error: error.error,
-          error_description: error.error_description,
-          statusCode: statusCodeFromError(error),
-        };
+        throw handledError;
       }
     }
     stopTimer(oktaTokenRefreshGauge, oktaTokenRefreshStart);

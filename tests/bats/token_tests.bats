@@ -202,8 +202,21 @@ do_token "$(jq \
 
   [ "$(cat "$curl_status")" -eq 401 ]
   [ "$(cat "$curl_body" | jq .error | tr -d '"')" == "invalid_client" ]
-  [ "$(cat "$curl_body" | jq .error_description | tr -d '"')" == "Invalid value for client_id parameter." ]
+  [ "$(cat "$curl_body" | jq .error_description | tr -d '"')" == "Invalid value for 'client_id' parameter." ]
 }
+
+@test 'Token Handler code path invalid client secret' {
+do_token "$(jq \
+                -scn \
+                --arg client_id "$CLIENT_ID" \
+                --arg grant_type "authorization_code" \
+                --arg code "$CODE" \
+                --arg secret "invalid" \
+                '{"client_id": $client_id, "grant_type": $grant_type, "code": $code, "client_secret": $secret}')"
+
+  [ "$(cat "$curl_status")" -eq 401 ]
+  [ "$(cat "$curl_body" | jq .error | tr -d '"')" == "invalid_client" ]
+  [ "$(cat "$curl_body" | jq .error_description | tr -d '"')" == "The client secret supplied for a confidential client is invalid." ]
 
 @test 'Revoke active token happy path' {
   access_token=$(cat "$TOKEN_FILE" | jq ".access_token" | tr -d '"')
@@ -263,7 +276,21 @@ do_token "$(jq \
 
   [ "$(cat "$curl_status")" -eq 401 ]
   [ "$(cat "$curl_body" | jq .error | tr -d '"')" == "invalid_client" ]
-  [ "$(cat "$curl_body" | jq .error_description | tr -d '"')" == "Invalid value for client_id parameter." ]
+  [ "$(cat "$curl_body" | jq .error_description | tr -d '"')" == "Invalid value for 'client_id' parameter." ]
+}
+
+@test 'Token Handler refresh path invalid client secret' {
+  do_token "$(jq \
+                -scn \
+                --arg client_id "$CLIENT_ID" \
+                --arg grant_type "refresh_token" \
+                --arg refresh_token "$(cat "$TOKEN_FILE" | jq ".refresh_token" | tr -d '"')" \
+                --arg secret "invalid" \
+                '{"client_id": $client_id, "grant_type": $grant_type, "refresh_token": $refresh_token, "client_secret": $secret}')"
+
+  [ "$(cat "$curl_status")" -eq 401 ]
+  [ "$(cat "$curl_body" | jq .error | tr -d '"')" == "invalid_client" ]
+  [ "$(cat "$curl_body" | jq .error_description | tr -d '"')" == "The client secret supplied for a confidential client is invalid." ]
 }
 
 @test 'Client Credentials happy path' {

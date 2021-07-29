@@ -132,8 +132,7 @@ assign_code() {
       --code-only)
 
   local CODE
-  CODE=$(echo "$code" | jq ".code" | tr -d '"')
-
+  CODE=$(echo "$code" | jq -r .code)
   if [[ -z $CODE ]];
   then
     echo -e "\nFailed to retrieve code."

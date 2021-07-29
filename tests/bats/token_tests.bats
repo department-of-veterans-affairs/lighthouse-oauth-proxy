@@ -217,6 +217,7 @@ do_token "$(jq \
   [ "$(cat "$curl_status")" -eq 401 ]
   [ "$(cat "$curl_body" | jq .error | tr -d '"')" == "invalid_client" ]
   [ "$(cat "$curl_body" | jq .error_description | tr -d '"')" == "The client secret supplied for a confidential client is invalid." ]
+}
 
 @test 'Revoke active token happy path' {
   access_token=$(cat "$TOKEN_FILE" | jq ".access_token" | tr -d '"')

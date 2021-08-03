@@ -431,14 +431,15 @@ if (require.main === module) {
   (async () => {
     try {
       const config = processArgs();
-
+      let custom_http_options = {
+        throwHttpErrors: true,
+      };
       // configure OIDC client
       if (config.upstream_issuer_timeout_ms) {
-        custom.setHttpOptionsDefaults({
-          timeout: config.upstream_issuer_timeout_ms,
-          throwHttpErrors: true,
-        });
+        custom_http_options.timeout = config.upstream_issuer_timeout_ms;
       }
+
+      custom.setHttpOptionsDefaults(custom_http_options);
 
       const isolatedIssuers = {};
       if (config.routes && config.routes.categories) {

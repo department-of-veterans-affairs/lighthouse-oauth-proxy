@@ -238,14 +238,12 @@ describe("handleToken tests", () => {
       getTokenResponseStrategy: buildGetTokenStrategy(err, true),
     });
 
-    let response = await tokenHandlerClient.handleToken();
-
-    expect(tokenIssueCounter.inc).not.toHaveBeenCalled();
-    expect(response.statusCode).toBe(500);
-    expect(response.responseBody.error).toBe("server_error");
-    expect(response.responseBody.error_description).toBe(
-      "An error occurred retrieving the token from the authorization server"
-    );
+    try {
+      await tokenHandlerClient.handleToken();
+      fail("Should have thrown an error");
+    } catch (error) {
+      expect(error).toBe(err);
+    }
   });
 
   it("missing document returns 400 error (without metrics)", async () => {

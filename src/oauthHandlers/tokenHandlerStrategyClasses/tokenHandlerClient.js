@@ -57,14 +57,7 @@ class TokenHandlerClient {
     } catch (error) {
       rethrowIfRuntimeError(error);
       if (!error || !error.statusCode || !error.error) {
-        return {
-          statusCode: 500,
-          responseBody: {
-            error: "server_error",
-            error_description:
-              "An error occurred retrieving the token from the authorization server",
-          },
-        };
+        throw error;
       }
       return {
         statusCode: error.statusCode,

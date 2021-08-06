@@ -126,7 +126,7 @@ function parseBearerAuthorization(authorization) {
  *
  * @param {*} error upstream issuer error.
  */
-const handleError = (error) => {
+const handleOpenIdClientError = (error) => {
   if (!error || !error.response || !error.response.body) {
     throw error;
   }
@@ -160,5 +160,5 @@ module.exports = {
   hashString,
   parseBearerAuthorization,
   minimalError,
-  handleError,
+  handleOpenIdClientError,
 };

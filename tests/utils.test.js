@@ -8,7 +8,7 @@ const {
   parseBearerAuthorization,
   hashString,
   minimalError,
-  handleError,
+  handleOpenIdClientError,
 } = require("../src/utils");
 
 describe("statusCodeFromError", () => {
@@ -211,7 +211,7 @@ describe("minimalError", () => {
   });
 });
 
-describe("handleError tests", () => {
+describe("handleOpenIdClientError tests", () => {
   it("Happy path error_description structure", async () => {
     const error = {
       response: {
@@ -223,7 +223,7 @@ describe("handleError tests", () => {
       },
     };
 
-    let handledError = handleError(error);
+    let handledError = handleOpenIdClientError(error);
     expect(handledError.error).toEqual("client error");
     expect(handledError.error_description).toEqual("this is a client error");
     expect(handledError.statusCode).toEqual(400);
@@ -239,7 +239,7 @@ describe("handleError tests", () => {
         statusCode: 400,
       },
     };
-    let handledError = handleError(error);
+    let handledError = handleOpenIdClientError(error);
     expect(handledError.error).toEqual("client error");
     expect(handledError.error_description).toEqual("this is a client error");
     expect(handledError.statusCode).toEqual(400);
@@ -254,7 +254,7 @@ describe("handleError tests", () => {
         },
       },
     };
-    let handledError = handleError(error);
+    let handledError = handleOpenIdClientError(error);
     expect(handledError.error).toEqual("client error");
     expect(handledError.error_description).toEqual("this is a client error");
     expect(handledError.statusCode).toEqual(500);
@@ -262,10 +262,10 @@ describe("handleError tests", () => {
 
   it("no response in error", async () => {
     const error = {
-      badStructure: "this error is not known by the handleError method",
+      badStructure: "this error is not known by the handleOpenIdClientError method",
     };
     try {
-      handleError(error);
+      handleOpenIdClientError(error);
       fail("should throw an error");
     } catch (err) {
       expect(err).toEqual(error);
@@ -275,11 +275,11 @@ describe("handleError tests", () => {
   it("no body in error", async () => {
     const error = {
       response: {
-        badStructure: "this error is not known by the handleError method",
+        badStructure: "this error is not known by the handleOpenIdClientError method",
       },
     };
     try {
-      handleError(error);
+      handleOpenIdClientError(error);
       fail("should throw an error");
     } catch (err) {
       expect(err).toEqual(error);
@@ -296,7 +296,7 @@ describe("handleError tests", () => {
       },
     };
     try {
-      handleError(error);
+      handleOpenIdClientError(error);
       fail("should throw an error");
     } catch (err) {
       expect(err).toEqual(error);

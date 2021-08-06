@@ -2,7 +2,7 @@ const process = require("process");
 const {
   rethrowIfRuntimeError,
   minimalError,
-  handleError,
+  handleOpenIdClientError,
 } = require("../../../utils");
 const { oktaTokenRefreshGauge, stopTimer } = require("../../../metrics");
 
@@ -68,7 +68,7 @@ class RefreshTokenStrategy {
         tokens = await this.client.refresh(this.req.body.refresh_token);
       } catch (error) {
         rethrowIfRuntimeError(error);
-        let handledError = handleError(error);
+        let handledError = handleOpenIdClientError(error);
         this.logger.error(
           "Could not refresh the client session with the provided refresh token",
           minimalError(handledError)

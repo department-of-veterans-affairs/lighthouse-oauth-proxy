@@ -2,7 +2,7 @@
 
 require("jest");
 const { createFakeConfig, ISSUER_METADATA } = require("./testUtils");
-const { buildIssuer, handleError } = require("../src/issuer_helper");
+const { buildIssuer } = require("../src/issuer_helper");
 const { Issuer } = require("openid-client");
 const { fail } = require("yargs");
 
@@ -67,98 +67,5 @@ describe("happy paths buildIssuer tests", () => {
     );
     expect(issuer.metadata.jwks_uri).toEqual(category.custom_metadata.jwks_uri);
     expect(issuer.metadata.issuer).toEqual(category.custom_metadata.issuer);
-  });
-});
-
-describe("handleError tests", () => {
-  it("Happy path error_description structure", async () => {
-    const error = {
-      response: {
-        body: {
-          error: "client error",
-          error_description: "this is a client error",
-        },
-        statusCode: 400,
-      },
-    };
-
-    let handledError = handleError(error);
-    expect(handledError.error).toEqual("client error");
-    expect(handledError.error_description).toEqual("this is a client error");
-    expect(handledError.statusCode).toEqual(400);
-  });
-
-  it("Happy path errorSummary structure", async () => {
-    const error = {
-      response: {
-        body: {
-          errorCode: "client error",
-          errorSummary: "this is a client error",
-        },
-        statusCode: 400,
-      },
-    };
-    let handledError = handleError(error);
-    expect(handledError.error).toEqual("client error");
-    expect(handledError.error_description).toEqual("this is a client error");
-    expect(handledError.statusCode).toEqual(400);
-  });
-
-  it("Happy path no statusCode", async () => {
-    const error = {
-      response: {
-        body: {
-          errorCode: "client error",
-          errorSummary: "this is a client error",
-        },
-      },
-    };
-    let handledError = handleError(error);
-    expect(handledError.error).toEqual("client error");
-    expect(handledError.error_description).toEqual("this is a client error");
-    expect(handledError.statusCode).toEqual(500);
-  });
-
-  it("no response in error", async () => {
-    const error = {
-      badStructure: "this error is not known by the handleError method",
-    };
-    try {
-      handleError(error);
-      fail("should throw an error");
-    } catch (err) {
-      expect(err).toEqual(error);
-    }
-  });
-
-  it("no body in error", async () => {
-    const error = {
-      response: {
-        badStructure: "this error is not known by the handleError method",
-      },
-    };
-    try {
-      handleError(error);
-      fail("should throw an error");
-    } catch (err) {
-      expect(err).toEqual(error);
-    }
-  });
-
-  it("Unknown error body structure", async () => {
-    const error = {
-      response: {
-        body: {
-          badCode: "client error",
-          badSummary: "this is a client error",
-        },
-      },
-    };
-    try {
-      handleError(error);
-      fail("should throw an error");
-    } catch (err) {
-      expect(err).toEqual(error);
-    }
   });
 });

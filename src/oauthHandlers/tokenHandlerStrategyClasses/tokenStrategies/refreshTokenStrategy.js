@@ -1,7 +1,6 @@
 const process = require("process");
-const { rethrowIfRuntimeError, minimalError } = require("../../../utils");
+const { rethrowIfRuntimeError, minimalError, handleError } = require("../../../utils");
 const { oktaTokenRefreshGauge, stopTimer } = require("../../../metrics");
-const { handleError } = require("../../../issuer_helper");
 
 class RefreshTokenStrategy {
   constructor(req, logger, client, dynamoClient, config, staticTokens) {

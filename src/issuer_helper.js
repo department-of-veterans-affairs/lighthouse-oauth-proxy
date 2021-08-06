@@ -28,33 +28,4 @@ const overrideMetadata = (serviceConfig, discover_metadata) => {
   return discover_metadata;
 };
 
-/**
- * Parses different error responses and returns a common error response.
- *
- * @param {*} error upstream issuer error.
- */
-const handleError = (error) => {
-  if (!error || !error.response || !error.response.body) {
-    throw error;
-  }
-  let err;
-  let error_description;
-
-  if (error.response.body.error) {
-    err = error.response.body.error;
-    error_description = error.response.body.error_description;
-  } else if (error.response.body.errorCode) {
-    err = error.response.body.errorCode;
-    error_description = error.response.body.errorSummary;
-  } else {
-    throw error;
-  }
-
-  return {
-    error: err,
-    error_description: error_description,
-    statusCode: error.response.statusCode ? error.response.statusCode : 500,
-  };
-};
-
-module.exports = { buildIssuer, handleError };
+module.exports = { buildIssuer };

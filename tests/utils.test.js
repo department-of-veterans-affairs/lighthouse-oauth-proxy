@@ -8,6 +8,7 @@ const {
   parseBearerAuthorization,
   hashString,
   minimalError,
+  handleError
 } = require("../src/utils");
 
 describe("statusCodeFromError", () => {
@@ -207,5 +208,98 @@ describe("minimalError", () => {
     expect(result.status).toBe("Internal server error");
     expect(result.error).toBe("ut_token_failure");
     expect(result.error_description).toBe("Failed to retrieve access_token.");
+  });
+});
+
+describe("handleError tests", () => {
+  it("Happy path error_description structure", async () => {
+    const error = {
+      response: {
+        body: {
+          error: "client error",
+          error_description: "this is a client error",
+        },
+        statusCode: 400,
+      },
+    };
+
+    let handledError = handleError(error);
+    expect(handledError.error).toEqual("client error");
+    expect(handledError.error_description).toEqual("this is a client error");
+    expect(handledError.statusCode).toEqual(400);
+  });
+
+  it("Happy path errorSummary structure", async () => {
+    const error = {
+      response: {
+        body: {
+          errorCode: "client error",
+          errorSummary: "this is a client error",
+        },
+        statusCode: 400,
+      },
+    };
+    let handledError = handleError(error);
+    expect(handledError.error).toEqual("client error");
+    expect(handledError.error_description).toEqual("this is a client error");
+    expect(handledError.statusCode).toEqual(400);
+  });
+
+  it("Happy path no statusCode", async () => {
+    const error = {
+      response: {
+        body: {
+          errorCode: "client error",
+          errorSummary: "this is a client error",
+        },
+      },
+    };
+    let handledError = handleError(error);
+    expect(handledError.error).toEqual("client error");
+    expect(handledError.error_description).toEqual("this is a client error");
+    expect(handledError.statusCode).toEqual(500);
+  });
+
+  it("no response in error", async () => {
+    const error = {
+      badStructure: "this error is not known by the handleError method",
+    };
+    try {
+      handleError(error);
+      fail("should throw an error");
+    } catch (err) {
+      expect(err).toEqual(error);
+    }
+  });
+
+  it("no body in error", async () => {
+    const error = {
+      response: {
+        badStructure: "this error is not known by the handleError method",
+      },
+    };
+    try {
+      handleError(error);
+      fail("should throw an error");
+    } catch (err) {
+      expect(err).toEqual(error);
+    }
+  });
+
+  it("Unknown error body structure", async () => {
+    const error = {
+      response: {
+        body: {
+          badCode: "client error",
+          badSummary: "this is a client error",
+        },
+      },
+    };
+    try {
+      handleError(error);
+      fail("should throw an error");
+    } catch (err) {
+      expect(err).toEqual(error);
+    }
   });
 });

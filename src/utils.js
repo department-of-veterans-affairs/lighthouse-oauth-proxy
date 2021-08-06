@@ -121,6 +121,36 @@ function parseBearerAuthorization(authorization) {
   return match[1];
 }
 
+/**
+ * Parses different error responses and returns a common error response.
+ *
+ * @param {*} error upstream issuer error.
+ */
+ const handleError = (error) => {
+  if (!error || !error.response || !error.response.body) {
+    throw error;
+  }
+  let handledError;
+  let error_description;
+
+  if (error.response.body.error) {
+    handledError = error.response.body.error;
+    error_description = error.response.body.error_description;
+  } else if (error.response.body.errorCode) {
+    handledError = error.response.body.errorCode;
+    error_description = error.response.body.errorSummary;
+  } else {
+    throw error;
+  }
+
+  return {
+    error: handledError,
+    error_description: error_description,
+    statusCode: error.response.statusCode ? error.response.statusCode : 500,
+  };
+};
+
+
 module.exports = {
   isRuntimeError,
   rethrowIfRuntimeError,
@@ -131,4 +161,5 @@ module.exports = {
   hashString,
   parseBearerAuthorization,
   minimalError,
+  handleError
 };

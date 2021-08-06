@@ -1,5 +1,9 @@
 const process = require("process");
-const { rethrowIfRuntimeError, minimalError, handleError } = require("../../../utils");
+const {
+  rethrowIfRuntimeError,
+  minimalError,
+  handleError,
+} = require("../../../utils");
 const { oktaTokenRefreshGauge, stopTimer } = require("../../../metrics");
 
 class RefreshTokenStrategy {

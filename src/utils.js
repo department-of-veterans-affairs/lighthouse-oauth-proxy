@@ -126,7 +126,7 @@ function parseBearerAuthorization(authorization) {
  *
  * @param {*} error upstream issuer error.
  */
- const handleError = (error) => {
+const handleError = (error) => {
   if (!error || !error.response || !error.response.body) {
     throw error;
   }
@@ -150,7 +150,6 @@ function parseBearerAuthorization(authorization) {
   };
 };
 
-
 module.exports = {
   isRuntimeError,
   rethrowIfRuntimeError,
@@ -161,5 +160,5 @@ module.exports = {
   hashString,
   parseBearerAuthorization,
   minimalError,
-  handleError
+  handleError,
 };

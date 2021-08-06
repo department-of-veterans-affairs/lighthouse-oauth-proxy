@@ -8,7 +8,7 @@ const {
   parseBearerAuthorization,
   hashString,
   minimalError,
-  handleError
+  handleError,
 } = require("../src/utils");
 
 describe("statusCodeFromError", () => {

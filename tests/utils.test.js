@@ -262,7 +262,8 @@ describe("handleOpenIdClientError tests", () => {
 
   it("no response in error", async () => {
     const error = {
-      badStructure: "this error is not known by the handleOpenIdClientError method",
+      badStructure:
+        "this error is not known by the handleOpenIdClientError method",
     };
     try {
       handleOpenIdClientError(error);
@@ -275,7 +276,8 @@ describe("handleOpenIdClientError tests", () => {
   it("no body in error", async () => {
     const error = {
       response: {
-        badStructure: "this error is not known by the handleOpenIdClientError method",
+        badStructure:
+          "this error is not known by the handleOpenIdClientError method",
       },
     };
     try {

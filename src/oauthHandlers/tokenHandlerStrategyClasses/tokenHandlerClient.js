@@ -56,14 +56,8 @@ class TokenHandlerClient {
       this.tokenIssueCounter.inc();
     } catch (error) {
       rethrowIfRuntimeError(error);
-      if (error.statusCode !== undefined && error.statusCode === 401) {
-        return {
-          statusCode: 401,
-          responseBody: {
-            error: "invalid_client",
-            error_description: "Invalid value for client_id parameter.",
-          },
-        };
+      if (!error || !error.statusCode || !error.error) {
+        throw error;
       }
       return {
         statusCode: error.statusCode,

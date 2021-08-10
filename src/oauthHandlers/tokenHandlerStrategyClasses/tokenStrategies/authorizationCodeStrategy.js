@@ -1,7 +1,7 @@
 const {
   rethrowIfRuntimeError,
-  statusCodeFromError,
   minimalError,
+  handleOpenIdClientError,
 } = require("../../../utils");
 
 class AuthorizationCodeStrategy {
@@ -22,15 +22,12 @@ class AuthorizationCodeStrategy {
       });
     } catch (error) {
       rethrowIfRuntimeError(error);
+      let handledError = handleOpenIdClientError(error);
       this.logger.error(
         "Failed to retrieve tokens using the OpenID client",
-        minimalError(error)
+        minimalError(handledError)
       );
-      throw {
-        error: error.error,
-        error_description: error.error_description,
-        statusCode: statusCodeFromError(error),
-      };
+      throw handledError;
     }
     return token;
   }

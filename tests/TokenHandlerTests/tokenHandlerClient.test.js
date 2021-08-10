@@ -194,6 +194,8 @@ describe("handleToken tests", () => {
   it("getToken 401 Response", async () => {
     let err = {
       statusCode: 401,
+      error: "invalid_client",
+      error_description: "error description",
     };
 
     let tokenHandlerClient = buildTokenClient({
@@ -205,9 +207,7 @@ describe("handleToken tests", () => {
     expect(tokenIssueCounter.inc).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(401);
     expect(response.responseBody.error).toBe("invalid_client");
-    expect(response.responseBody.error_description).toBe(
-      "Invalid value for client_id parameter."
-    );
+    expect(response.responseBody.error_description).toBe("error description");
   });
 
   it("getToken 500 Response", async () => {
@@ -227,6 +227,23 @@ describe("handleToken tests", () => {
     expect(response.statusCode).toBe(500);
     expect(response.responseBody.error).toBe("error");
     expect(response.responseBody.error_description).toBe("error_description");
+  });
+
+  it("getToken non okta error", async () => {
+    let err = {
+      different: "this error does not follow the okta structure.",
+    };
+
+    let tokenHandlerClient = buildTokenClient({
+      getTokenResponseStrategy: buildGetTokenStrategy(err, true),
+    });
+
+    try {
+      await tokenHandlerClient.handleToken();
+      fail("Should have thrown an error");
+    } catch (error) {
+      expect(error).toBe(err);
+    }
   });
 
   it("missing document returns 400 error (without metrics)", async () => {

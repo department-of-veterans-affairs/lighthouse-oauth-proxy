@@ -96,8 +96,12 @@ const realRefreshTests = async () => {
     client = { refresh: jest.fn() };
     client.refresh.mockImplementation(() => {
       throw {
-        error: "client error",
-        error_description: "this is a client error",
+        response: {
+          body: {
+            error: "client error",
+            error_description: "this is a client error",
+          },
+        },
       };
     });
 

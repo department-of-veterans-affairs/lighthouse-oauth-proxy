@@ -859,6 +859,34 @@ describe("OpenID Connect Conformance", () => {
       });
   });
 
+  it("missing authorization on a request for issued lookup", async () => {
+    await axios
+      .get("http://localhost:9090/testServer/issued")
+      .then(() => {
+        expect(true).toEqual(false); // Don't expect to be here
+      })
+      .catch((err) => {
+        expect(err.response.status).toEqual(401);
+        expect(err.response.statusText).toEqual("Unauthorized");
+      });
+  });
+
+  it("bad jwt on a request for issued lookup", async () => {
+    await axios
+      .get("http://localhost:9090/testServer/issued", {
+        headers: {
+          authorization: "Bearer invalid-static-token",
+        },
+      })
+      .then(() => {
+        expect(true).toEqual(false); // Don't expect to be here
+      })
+      .catch((err) => {
+        expect(err.response.status).toEqual(401);
+        expect(err.response.statusText).toEqual("Unauthorized");
+      });
+  });
+
   it("returns an OIDC conformant status 302 on valid authorization request", async () => {
     // By setting the maxRedirects to 0, the redirect uri can be checked without going through the whole flow
     await axios

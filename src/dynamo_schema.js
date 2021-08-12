@@ -260,7 +260,7 @@ function createStaticTokenEntry() {
   let itemParams = {
     TableName: "StaticTokens",
     Item: {
-      static_access_token: { S: "123456789" },
+      access_token: { S: "123456789" },
       static_refresh_token: { S: "987654321" },
       static_scopes: {
         S:

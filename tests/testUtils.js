@@ -330,6 +330,7 @@ const createFakeConfig = () => {
     enable_pkce_authorization_flow: true,
     enable_okta_consent_endpoint: true,
     enable_smart_launch_service: true,
+    enable_issued_service: true,
     enable_static_token_service: true,
     dynamo_static_token_table: "ut_static_tokens_table",
     dynamo_clients_table: "Clients",
@@ -389,6 +390,7 @@ const createFakeConfig = () => {
         jwks: "/keys",
         grants: "/grants",
         smart_launch: "/smart/launch",
+        issued: "/issued",
       },
     },
   };

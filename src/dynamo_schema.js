@@ -196,14 +196,31 @@ dynamo.createTable(tableParams, (err, data) => {
 
 tableParams = {
   AttributeDefinitions: [
+    { AttributeName: "access_token", AttributeType: "S" },
     { AttributeName: "static_refresh_token", AttributeType: "S" },
   ],
-  KeySchema: [{ AttributeName: "static_refresh_token", KeyType: "HASH" }],
+  KeySchema: [{ AttributeName: "access_token", KeyType: "HASH" }],
   ProvisionedThroughput: {
     ReadCapacityUnits: 10,
     WriteCapacityUnits: 10,
   },
   GlobalSecondaryIndexes: [
+    {
+      IndexName: "static_access_token_index",
+      KeySchema: [
+        {
+          AttributeName: "access_token",
+          KeyType: "HASH",
+        },
+      ],
+      Projection: {
+        ProjectionType: "ALL",
+      },
+      ProvisionedThroughput: {
+        ReadCapacityUnits: 10,
+        WriteCapacityUnits: 10,
+      },
+    },
     {
       IndexName: "static_refresh_token_index",
       KeySchema: [
@@ -251,6 +268,7 @@ function createStaticTokenEntry() {
       },
       static_expires_in: { N: "3600" },
       static_icn: { S: "555" },
+      static_aud: { S: "http://localhost:7100/services/static-only" },
     },
   };
 

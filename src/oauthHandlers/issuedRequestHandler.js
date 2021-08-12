@@ -28,7 +28,7 @@ const issuedRequestHandler = async (
     access_token,
     config.dynamo_static_token_table
   );
-  if (documentResponse && documentResponse.static_access_token) {
+  if (documentResponse && documentResponse.access_token) {
     res.json({
       static: true,
       scopes: documentResponse.static_scopes,

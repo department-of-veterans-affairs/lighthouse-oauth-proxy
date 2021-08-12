@@ -105,34 +105,31 @@ function buildMockDynamoClient(mockDynamoClientRecord) {
     const hashed_smart_launch_token =
       "ab29a92e1db44913c896efeed12108faa0b47a944b56cd7cd07d121aefa3769a";
     const fakeLaunchRecord = {
+      access_token: hashed_smart_launch_token,
       launch: "123V456",
     };
     const static_token = "123456789";
     const fakeStaticTokenRecord = {
-      scopes:
+      access_token: static_token,
+      static_scopes:
         "openid profile patient/Medication.read launch/patient offline_access",
-      expires_in: 3600,
-      icn: "555",
-      aud: "http://localhost:7100/services/static-only",
+      static_expires_in: 3600,
+      static_icn: "555",
+      static_aud: "http://localhost:7100/services/static-only",
     };
     return new Promise((resolve, reject) => {
       let searchKey = Object.keys(search_params)[0];
-      console.log(searchKey);
-      console.log(tableName);
-      console.log(search_params);
       if (
         tableName === "launch_context_table" &&
         searchKey === "access_token" &&
         search_params[searchKey] === hashed_smart_launch_token
       ) {
-        mockDynamoClientRecord.access_token = hashed_smart_launch_token;
         resolve({ Item: fakeLaunchRecord });
       } else if (
         tableName === "StaticTokens" &&
         searchKey === "access_token" &&
         search_params[searchKey] === static_token
       ) {
-        mockDynamoClientRecord.access_token = hashed_smart_launch_token;
         resolve({ Item: fakeStaticTokenRecord });
       } else if (
         search_params[searchKey] === mockDynamoClientRecord[searchKey]
@@ -846,7 +843,7 @@ describe("OpenID Connect Conformance", () => {
       })
       .then((resp) => {
         expect(resp.status).toEqual(200);
-        expect(resp.data.static).toEqual("true");
+        expect(resp.data.static).toEqual(true);
         expect(resp.data.scopes).toEqual(
           "openid profile patient/Medication.read launch/patient offline_access"
         );

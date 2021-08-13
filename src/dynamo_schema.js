@@ -197,7 +197,7 @@ dynamo.createTable(tableParams, (err, data) => {
 tableParams = {
   AttributeDefinitions: [
     { AttributeName: "access_token", AttributeType: "S" },
-    { AttributeName: "static_refresh_token", AttributeType: "S" },
+    { AttributeName: "refresh_token", AttributeType: "S" },
   ],
   KeySchema: [{ AttributeName: "access_token", KeyType: "HASH" }],
   ProvisionedThroughput: {
@@ -206,7 +206,7 @@ tableParams = {
   },
   GlobalSecondaryIndexes: [
     {
-      IndexName: "static_access_token_index",
+      IndexName: "access_token_index",
       KeySchema: [
         {
           AttributeName: "access_token",
@@ -222,10 +222,10 @@ tableParams = {
       },
     },
     {
-      IndexName: "static_refresh_token_index",
+      IndexName: "refresh_token_index",
       KeySchema: [
         {
-          AttributeName: "static_refresh_token",
+          AttributeName: "refresh_token",
           KeyType: "HASH",
         },
       ],
@@ -261,14 +261,14 @@ function createStaticTokenEntry() {
     TableName: "StaticTokens",
     Item: {
       access_token: { S: "123456789" },
-      static_refresh_token: { S: "987654321" },
-      static_scopes: {
+      refresh_token: { S: "987654321" },
+      scopes: {
         S:
           "openid profile patient/Medication.read launch/patient offline_access",
       },
-      static_expires_in: { N: "3600" },
-      static_icn: { S: "555" },
-      static_aud: { S: "http://localhost:7100/services/static-only" },
+      expires_in: { N: "3600" },
+      icn: { S: "555" },
+      aud: { S: "http://localhost:7100/services/static-only" },
     },
   };
 

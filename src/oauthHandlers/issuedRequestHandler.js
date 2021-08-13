@@ -31,10 +31,10 @@ const issuedRequestHandler = async (
   if (documentResponse && documentResponse.access_token) {
     res.json({
       static: true,
-      scopes: documentResponse.static_scopes,
-      expires_in: documentResponse.static_expires_in,
-      icn: documentResponse.static_icn,
-      aud: documentResponse.static_aud,
+      scopes: documentResponse.scopes,
+      expires_in: documentResponse.expires_in,
+      icn: documentResponse.icn,
+      aud: documentResponse.aud,
     });
   } else {
     return res.sendStatus(401);

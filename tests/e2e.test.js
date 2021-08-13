@@ -111,11 +111,11 @@ function buildMockDynamoClient(mockDynamoClientRecord) {
     const static_token = "123456789";
     const fakeStaticTokenRecord = {
       access_token: static_token,
-      static_scopes:
+      scopes:
         "openid profile patient/Medication.read launch/patient offline_access",
-      static_expires_in: 3600,
-      static_icn: "555",
-      static_aud: "http://localhost:7100/services/static-only",
+      expires_in: 3600,
+      icn: "555",
+      aud: "http://localhost:7100/services/static-only",
     };
     return new Promise((resolve, reject) => {
       let searchKey = Object.keys(search_params)[0];

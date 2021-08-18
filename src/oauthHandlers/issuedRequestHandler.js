@@ -29,13 +29,23 @@ const issuedRequestHandler = async (
     config.dynamo_static_token_table
   );
   if (documentResponse && documentResponse.access_token) {
-    res.json({
-      static: true,
-      scopes: documentResponse.scopes,
-      expires_in: documentResponse.expires_in,
-      icn: documentResponse.icn,
-      aud: documentResponse.aud,
-    });
+    let cross_check =
+      documentResponse.access_token + "-" + documentResponse.icn;
+    if (
+      hashString(cross_check, config.hmac_secret) ==
+      documentResponse.cross_hash
+    ) {
+      res.json({
+        static: true,
+        scopes: documentResponse.scopes,
+        expires_in: documentResponse.expires_in,
+        icn: documentResponse.icn,
+        aud: documentResponse.aud,
+      });
+    } else {
+      logger.error("Invalid static token usage detected.");
+      return res.sendStatus(401);
+    }
   } else {
     return res.sendStatus(401);
   }

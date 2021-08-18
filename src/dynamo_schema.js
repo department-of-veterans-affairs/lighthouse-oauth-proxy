@@ -269,6 +269,7 @@ function createStaticTokenEntry() {
       expires_in: { N: "3600" },
       icn: { S: "555" },
       aud: { S: "http://localhost:7100/services/static-only" },
+      cross_hash: { S: "ada386dcfd6cbd96c0e345d0599503f488f6a7e103b1096e0bd363180204bce5" },
     },
   };
 

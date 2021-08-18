@@ -29,9 +29,11 @@ const issuedRequestHandler = async (
     config.dynamo_static_token_table
   );
   if (documentResponse && documentResponse.access_token) {
-    let check_sum = documentResponse.access_token + "-" + documentResponse.icn;
+    let token_icn_pair =
+      documentResponse.access_token + "-" + documentResponse.icn;
     if (
-      hashString(check_sum, config.hmac_secret) == documentResponse.check_sum
+      hashString(token_icn_pair, config.hmac_secret) ==
+      documentResponse.checksum
     ) {
       res.json({
         static: true,

@@ -32,8 +32,7 @@ const issuedRequestHandler = async (
     let cross_check =
       documentResponse.access_token + "-" + documentResponse.icn;
     if (
-      hashString(cross_check, config.hmac_secret) ==
-      documentResponse.cross_hash
+      hashString(cross_check, config.hmac_secret) == documentResponse.cross_hash
     ) {
       res.json({
         static: true,

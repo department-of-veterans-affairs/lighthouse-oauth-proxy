@@ -116,6 +116,8 @@ function buildMockDynamoClient(mockDynamoClientRecord) {
       expires_in: 3600,
       icn: "555",
       aud: "http://localhost:7100/services/static-only",
+      cross_hash:
+        "c2f1a907ba44e76e140c334a1bc46e509e6e244cc2e9829a7e324d4791820d79",
     };
     return new Promise((resolve, reject) => {
       let searchKey = Object.keys(search_params)[0];

@@ -32,11 +32,7 @@ const realRefreshTests = async () => {
       },
     });
 
-    let refreshTokenStrategy = new RefreshTokenStrategy(
-      req,
-      logger,
-      client,
-    );
+    let refreshTokenStrategy = new RefreshTokenStrategy(req, logger, client);
 
     let token = await refreshTokenStrategy.getToken();
     expect(token.access_token).toEqual("real-access-token");
@@ -64,11 +60,7 @@ const realRefreshTests = async () => {
       },
     });
 
-    let refreshTokenStrategy = new RefreshTokenStrategy(
-      req,
-      logger,
-      client,
-    );
+    let refreshTokenStrategy = new RefreshTokenStrategy(req, logger, client);
 
     try {
       await refreshTokenStrategy.getToken();

@@ -11,7 +11,6 @@ const {
   buildGetTokenStrategy,
 } = require("./tokenHandlerTestUtils");
 const { buildFakeDynamoClient, createFakeConfig } = require("../testUtils");
-const { encodeBasicAuthHeader } = require("../../src/utils");
 const MockExpressRequest = require("mock-express-request");
 const MockExpressResponse = require("mock-express-response");
 

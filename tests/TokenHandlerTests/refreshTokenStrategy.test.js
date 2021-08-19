@@ -59,13 +59,13 @@ beforeEach(() => {
   });
   dynamoClient = jest.mock();
   setScan({
-    static_icn: "0123456789",
-    static_refresh_token: "static-refresh-token",
-    static_access_token: "static-access-token",
-    static_scopes:
+    icn: "0123456789",
+    refresh_token: "static-refresh-token",
+    access_token: "static-access-token",
+    scopes:
       "openid profile patient/Medication.read launch/patient offline_access",
-    static_expires_in: 3600,
-    static_id_token: "static-id-token",
+    expires_in: 3600,
+    id_token: "static-id-token",
   });
 });
 const realRefreshTests = async () => {
@@ -159,13 +159,13 @@ describe("tokenHandler refreshTokenStrategy", () => {
 
     it("happy path static token size > 0", async () => {
       staticTokens.set("static-refresh-token", {
-        static_icn: "0123456789",
-        static_refresh_token: "static-refresh-token",
-        static_access_token: "static-access-token",
-        static_scopes:
+        icn: "0123456789",
+        refresh_token: "static-refresh-token",
+        access_token: "static-access-token",
+        scopes:
           "openid profile patient/Medication.read launch/patient offline_access",
-        static_expires_in: 3600,
-        static_id_token: "static-id-token",
+        expires_in: 3600,
+        id_token: "static-id-token",
       });
       let req = new MockExpressRequest({
         body: {
@@ -191,12 +191,12 @@ describe("tokenHandler refreshTokenStrategy", () => {
     it("happy path no id icn", async () => {
       delete data.patient;
       setScan({
-        static_refresh_token: "static-refresh-token",
-        static_access_token: "static-access-token",
-        static_scopes:
+        refresh_token: "static-refresh-token",
+        access_token: "static-access-token",
+        scopes:
           "openid profile patient/Medication.read launch/patient offline_access",
-        static_expires_in: 3600,
-        static_id_token: "static-id-token",
+        expires_in: 3600,
+        id_token: "static-id-token",
       });
 
       let req = new MockExpressRequest({
@@ -222,12 +222,12 @@ describe("tokenHandler refreshTokenStrategy", () => {
     it("happy path no id token", async () => {
       delete data.id_token;
       setScan({
-        static_icn: "0123456789",
-        static_refresh_token: "static-refresh-token",
-        static_access_token: "static-access-token",
-        static_scopes:
+        icn: "0123456789",
+        refresh_token: "static-refresh-token",
+        access_token: "static-access-token",
+        scopes:
           "openid profile patient/Medication.read launch/patient offline_access",
-        static_expires_in: 3600,
+        expires_in: 3600,
       });
 
       let req = new MockExpressRequest({
@@ -255,11 +255,11 @@ describe("tokenHandler refreshTokenStrategy", () => {
       delete data.patient;
       delete data.id_token;
       setScan({
-        static_refresh_token: "static-refresh-token",
-        static_access_token: "static-access-token",
-        static_scopes:
+        refresh_token: "static-refresh-token",
+        access_token: "static-access-token",
+        scopes:
           "openid profile patient/Medication.read launch/patient offline_access",
-        static_expires_in: 3600,
+        expires_in: 3600,
       });
 
       let req = new MockExpressRequest({

@@ -30,10 +30,7 @@ class RefreshTokenStrategy {
           );
           let self = this;
           payload.Items.forEach(function (staticToken) {
-            self.staticTokens.set(
-              staticToken.static_refresh_token,
-              staticToken
-            );
+            self.staticTokens.set(staticToken.refresh_token, staticToken);
           });
         }
       } catch (err) {
@@ -42,22 +39,21 @@ class RefreshTokenStrategy {
           minimalError(err)
         );
       }
-
       if (this.staticTokens.has(this.req.body.refresh_token)) {
         let staticToken = this.staticTokens.get(this.req.body.refresh_token);
         tokens = {
           is_static: true,
-          access_token: staticToken.static_access_token,
-          refresh_token: staticToken.static_refresh_token,
+          access_token: staticToken.access_token,
+          refresh_token: staticToken.refresh_token,
           token_type: "Bearer",
-          scope: staticToken.static_scopes,
-          expires_in: staticToken.static_expires_in,
+          scope: staticToken.scopes,
+          expires_in: staticToken.expires_in,
         };
-        if (staticToken.static_id_token) {
-          tokens.id_token = staticToken.static_id_token;
+        if (staticToken.id_token) {
+          tokens.id_token = staticToken.id_token;
         }
-        if (staticToken.static_icn) {
-          tokens.patient = staticToken.static_icn;
+        if (staticToken.icn) {
+          tokens.patient = staticToken.icn;
         }
         return tokens;
       }

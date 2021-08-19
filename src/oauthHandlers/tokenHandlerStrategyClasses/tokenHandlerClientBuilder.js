@@ -73,6 +73,9 @@ const buildTokenHandlerClient = (
     strategies.tokenIssueCounter,
     strategies.dbMissCounter,
     logger,
+    config,
+    staticTokens,
+    dynamoClient,
     req,
     res,
     next
@@ -97,10 +100,7 @@ const getStrategies = (
       getTokenStrategy: new RefreshTokenStrategy(
         req,
         logger,
-        new issuer.Client(clientMetadata),
-        dynamoClient,
-        config,
-        staticTokens
+        new issuer.Client(clientMetadata)
       ),
       getDocumentFromDynamoStrategy: new GetDocumentByRefreshTokenStrategy(
         req,

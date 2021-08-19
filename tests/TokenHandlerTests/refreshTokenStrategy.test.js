@@ -1,50 +1,14 @@
 require("jest");
 const MockExpressRequest = require("mock-express-request");
 const { TokenSet } = require("openid-client");
-const {
-  buildOpenIDClient,
-  buildFakeLogger,
-  createFakeConfig,
-} = require("../testUtils");
+const { buildOpenIDClient, buildFakeLogger } = require("../testUtils");
 const {
   RefreshTokenStrategy,
 } = require("../../src/oauthHandlers/tokenHandlerStrategyClasses/tokenStrategies/refreshTokenStrategy");
 let logger;
-let dynamoClient;
 let client;
-let config;
-let staticTokens;
-let data;
-
-const setScan = (items) => {
-  dynamoClient.scanFromDynamo = (table_name) => {
-    if (table_name === "ut_static_tokens_table") {
-      return {
-        Items: [items],
-        Count: 1,
-        ScannedCount: 1,
-        ConsumedCapacity: null,
-      };
-    } else {
-      throw { message: "no static token here" };
-    }
-  };
-};
 
 beforeEach(() => {
-  data = {
-    is_static: true,
-    token_type: "Bearer",
-    expires_in: 3600,
-    access_token: "static-access-token",
-    scope:
-      "openid profile patient/Medication.read launch/patient offline_access",
-    refresh_token: "static-refresh-token",
-    id_token: "static-id-token",
-    patient: "0123456789",
-  };
-  config = createFakeConfig();
-  staticTokens = new Map();
   logger = buildFakeLogger();
   client = buildOpenIDClient({
     refresh: (resolve) => {
@@ -56,16 +20,6 @@ beforeEach(() => {
         })
       );
     },
-  });
-  dynamoClient = jest.mock();
-  setScan({
-    icn: "0123456789",
-    refresh_token: "static-refresh-token",
-    access_token: "static-access-token",
-    scopes:
-      "openid profile patient/Medication.read launch/patient offline_access",
-    expires_in: 3600,
-    id_token: "static-id-token",
   });
 });
 const realRefreshTests = async () => {
@@ -82,9 +36,6 @@ const realRefreshTests = async () => {
       req,
       logger,
       client,
-      dynamoClient,
-      config,
-      staticTokens
     );
 
     let token = await refreshTokenStrategy.getToken();
@@ -117,9 +68,6 @@ const realRefreshTests = async () => {
       req,
       logger,
       client,
-      dynamoClient,
-      config,
-      staticTokens
     );
 
     try {
@@ -134,176 +82,7 @@ const realRefreshTests = async () => {
   });
 };
 describe("tokenHandler refreshTokenStrategy", () => {
-  describe("static refresh token", () => {
-    it("happy path", async () => {
-      let req = new MockExpressRequest({
-        body: {
-          grant_type: "refresh_token",
-          refresh_token: data.refresh_token,
-          state: "abc123",
-        },
-      });
-
-      let refreshTokenStrategy = new RefreshTokenStrategy(
-        req,
-        logger,
-        client,
-        dynamoClient,
-        config,
-        staticTokens
-      );
-
-      let token = await refreshTokenStrategy.getToken();
-      expect(token).toEqual(data);
-    });
-
-    it("happy path static token size > 0", async () => {
-      staticTokens.set("static-refresh-token", {
-        icn: "0123456789",
-        refresh_token: "static-refresh-token",
-        access_token: "static-access-token",
-        scopes:
-          "openid profile patient/Medication.read launch/patient offline_access",
-        expires_in: 3600,
-        id_token: "static-id-token",
-      });
-      let req = new MockExpressRequest({
-        body: {
-          grant_type: "refresh_token",
-          refresh_token: data.refresh_token,
-          state: "abc123",
-        },
-      });
-
-      let refreshTokenStrategy = new RefreshTokenStrategy(
-        req,
-        logger,
-        client,
-        dynamoClient,
-        config,
-        staticTokens
-      );
-
-      let token = await refreshTokenStrategy.getToken();
-      expect(token).toEqual(data);
-    });
-
-    it("happy path no id icn", async () => {
-      delete data.patient;
-      setScan({
-        refresh_token: "static-refresh-token",
-        access_token: "static-access-token",
-        scopes:
-          "openid profile patient/Medication.read launch/patient offline_access",
-        expires_in: 3600,
-        id_token: "static-id-token",
-      });
-
-      let req = new MockExpressRequest({
-        body: {
-          grant_type: "refresh_token",
-          refresh_token: data.refresh_token,
-          state: "abc123",
-        },
-      });
-
-      let refreshTokenStrategy = new RefreshTokenStrategy(
-        req,
-        logger,
-        client,
-        dynamoClient,
-        config,
-        staticTokens
-      );
-
-      let token = await refreshTokenStrategy.getToken();
-      expect(token).toEqual(data);
-    });
-    it("happy path no id token", async () => {
-      delete data.id_token;
-      setScan({
-        icn: "0123456789",
-        refresh_token: "static-refresh-token",
-        access_token: "static-access-token",
-        scopes:
-          "openid profile patient/Medication.read launch/patient offline_access",
-        expires_in: 3600,
-      });
-
-      let req = new MockExpressRequest({
-        body: {
-          grant_type: "refresh_token",
-          refresh_token: data.refresh_token,
-          state: "abc123",
-        },
-      });
-
-      let refreshTokenStrategy = new RefreshTokenStrategy(
-        req,
-        logger,
-        client,
-        dynamoClient,
-        config,
-        staticTokens
-      );
-
-      let token = await refreshTokenStrategy.getToken();
-      expect(token).toEqual(data);
-    });
-
-    it("happy path no id token no icn", async () => {
-      delete data.patient;
-      delete data.id_token;
-      setScan({
-        refresh_token: "static-refresh-token",
-        access_token: "static-access-token",
-        scopes:
-          "openid profile patient/Medication.read launch/patient offline_access",
-        expires_in: 3600,
-      });
-
-      let req = new MockExpressRequest({
-        body: {
-          grant_type: "refresh_token",
-          refresh_token: data.refresh_token,
-          state: "abc123",
-        },
-      });
-
-      let refreshTokenStrategy = new RefreshTokenStrategy(
-        req,
-        logger,
-        client,
-        dynamoClient,
-        config,
-        staticTokens
-      );
-
-      let token = await refreshTokenStrategy.getToken();
-      expect(token).toEqual(data);
-    });
-  });
-
-  describe("Real refresh static token dynamoClient error", () => {
-    beforeEach(() => {
-      dynamoClient = jest.mock();
-      dynamoClient.dbDocClient = {
-        scan: () => {
-          throw { message: "this is an error message" };
-        },
-      };
-    });
-    realRefreshTests();
-  });
-  describe("Real Refresh Static token service on", () => {
-    realRefreshTests();
-  });
-
   describe("Real Refresh Static token service off", () => {
-    beforeEach(() => {
-      config = createFakeConfig();
-      config.enable_static_token_service = false;
-    });
     realRefreshTests();
   });
 });

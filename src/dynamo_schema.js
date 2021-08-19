@@ -261,7 +261,9 @@ function createStaticTokenEntry() {
     TableName: "StaticTokens",
     Item: {
       access_token: { S: "123456789" },
-      refresh_token: { S: "987654321" },
+      refresh_token: {
+        S: "6a9cf6b1af1d8205b771d7c7b7e1770e630f763a755b2f86833ee8ce544df25e",
+      },
       scopes: {
         S:
           "openid profile patient/Medication.read launch/patient offline_access",

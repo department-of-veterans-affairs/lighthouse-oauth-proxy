@@ -172,7 +172,7 @@ CODE=$(assign_code)
 echo "Running Token Tests ..."
 token_file="$(mktemp)"
 expired_token_file="$(mktemp)"
-HOST="$HOST" CODE="$CODE" TOKEN_FILE="$token_file" EXPIRED_TOKEN_FILE="$expired_token_file" CLIENT_ID="$CLIENT_ID" CLIENT_SECRET="$CLIENT_SECRET" CC_CLIENT_ID="$CC_CLIENT_ID" CC_CLIENT_SECRET="$CC_CLIENT_SECRET" bats ./token_tests.bats
+HOST="$HOST" CODE="$CODE" TOKEN_FILE="$token_file" EXPIRED_TOKEN_FILE="$expired_token_file" CLIENT_ID="$CLIENT_ID" CLIENT_SECRET="$CLIENT_SECRET" CC_CLIENT_ID="$CC_CLIENT_ID" CC_CLIENT_SECRET="$CC_CLIENT_SECRET" STATIC_REFRESH_TOKEN="$STATIC_REFRESH_TOKEN" bats ./token_tests.bats
 status=$(($status + $?))
 # TOKEN and EXPIRED_ACCESS are assigned in token_tests.sh
 

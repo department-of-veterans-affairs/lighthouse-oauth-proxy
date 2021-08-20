@@ -331,7 +331,7 @@ const createFakeConfig = () => {
     enable_okta_consent_endpoint: true,
     enable_smart_launch_service: true,
     enable_issued_service: true,
-    enable_static_token_service: true,
+    enable_static_token_service: false,
     dynamo_static_token_table: "ut_static_tokens_table",
     dynamo_clients_table: "Clients",
     routes: {

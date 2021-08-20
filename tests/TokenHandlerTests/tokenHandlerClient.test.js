@@ -104,7 +104,7 @@ describe("handleToken tests", () => {
 
     req = Object.prototype.hasOwnProperty.call(clientConfig, "req")
       ? clientConfig.req
-      : new MockExpressRequest();
+      : new MockExpressRequest({ body: { grant_type: "authorization_code" } });
 
     res = Object.prototype.hasOwnProperty.call(clientConfig, "res")
       ? clientConfig.res
@@ -179,20 +179,10 @@ describe("handleToken tests", () => {
   });
 
   it("Happy Path no launch/patient", async () => {
-    let req = new MockExpressRequest({
-      body: {
-        grant_type: "authorization_code",
-      },
-    });
-    let config = {
-      enable_static_token_service: true,
-    };
     let token = buildToken(false, false, false, "email.read");
 
     let tokenHandlerClient = buildTokenClient({
       token: token,
-      req: req,
-      config: config,
       getTokenResponseStrategy: buildGetTokenStrategy(token),
       getPatientInfoStrategy: buildGetPatientInfoStrategy("patient"),
     });
@@ -205,19 +195,9 @@ describe("handleToken tests", () => {
   });
 
   it("Happy Path with launch/patient", async () => {
-    let req = new MockExpressRequest({
-      body: {
-        grant_type: "authorization_code",
-      },
-    });
-    let config = {
-      enable_static_token_service: false,
-    };
     let token = buildToken(false, true, true, "launch/patient");
 
     let tokenHandlerClient = buildTokenClient({
-      req: req,
-      config: config,
       token: token,
       getPatientInfoStrategy: buildGetPatientInfoStrategy("patient"),
     });
@@ -231,19 +211,9 @@ describe("handleToken tests", () => {
   });
 
   it("Happy Path with launch", async () => {
-    let req = new MockExpressRequest({
-      body: {
-        grant_type: "authorization_code",
-      },
-    });
-    let config = {
-      enable_static_token_service: false,
-    };
     let token = buildToken(false, true, false, "launch");
 
     let tokenHandlerClient = buildTokenClient({
-      req: req,
-      config: config,
       token: token,
       pullDocumentFromDynamoStrategy: buildGetDocumentStrategy({
         launch: "patient",
@@ -260,19 +230,9 @@ describe("handleToken tests", () => {
   });
 
   it("Happy Path with launch base64", async () => {
-    let req = new MockExpressRequest({
-      body: {
-        grant_type: "authorization_code",
-      },
-    });
-    let config = {
-      enable_static_token_service: false,
-    };
     let token = buildToken(false, true, false, "launch");
 
     let tokenHandlerClient = buildTokenClient({
-      req: req,
-      config: config,
       token: token,
       pullDocumentFromDynamoStrategy: buildGetDocumentStrategy({
         launch:
@@ -290,14 +250,6 @@ describe("handleToken tests", () => {
   });
 
   it("getToken 401 Response", async () => {
-    let req = new MockExpressRequest({
-      body: {
-        grant_type: "authorization_code",
-      },
-    });
-    let config = {
-      enable_static_token_service: false,
-    };
     let err = {
       statusCode: 401,
       error: "invalid_client",
@@ -305,8 +257,6 @@ describe("handleToken tests", () => {
     };
 
     let tokenHandlerClient = buildTokenClient({
-      req: req,
-      config: config,
       getTokenResponseStrategy: buildGetTokenStrategy(err, true),
     });
 
@@ -319,14 +269,6 @@ describe("handleToken tests", () => {
   });
 
   it("getToken 500 Response", async () => {
-    let req = new MockExpressRequest({
-      body: {
-        grant_type: "authorization_code",
-      },
-    });
-    let config = {
-      enable_static_token_service: false,
-    };
     let err = {
       statusCode: 500,
       error: "error",
@@ -334,8 +276,6 @@ describe("handleToken tests", () => {
     };
 
     let tokenHandlerClient = buildTokenClient({
-      req: req,
-      config: config,
       getTokenResponseStrategy: buildGetTokenStrategy(err, true),
     });
 
@@ -348,21 +288,11 @@ describe("handleToken tests", () => {
   });
 
   it("getToken non okta error", async () => {
-    let req = new MockExpressRequest({
-      body: {
-        grant_type: "authorization_code",
-      },
-    });
-    let config = {
-      enable_static_token_service: false,
-    };
     let err = {
       different: "this error does not follow the okta structure.",
     };
 
     let tokenHandlerClient = buildTokenClient({
-      req: req,
-      config: config,
       getTokenResponseStrategy: buildGetTokenStrategy(err, true),
     });
 
@@ -375,17 +305,7 @@ describe("handleToken tests", () => {
   });
 
   it("missing document returns 400 error (without metrics)", async () => {
-    let req = new MockExpressRequest({
-      body: {
-        grant_type: "authorization_code",
-      },
-    });
-    let config = {
-      enable_static_token_service: false,
-    };
     let tokenHandlerClient = buildTokenClient({
-      req: req,
-      config: config,
       pullDocumentFromDynamoStrategy: buildGetDocumentStrategy(undefined),
       dbMissCounter: undefined,
     });
@@ -398,17 +318,7 @@ describe("handleToken tests", () => {
   });
 
   it("missing document returns 400 error (with metrics)", async () => {
-    let req = new MockExpressRequest({
-      body: {
-        grant_type: "authorization_code",
-      },
-    });
-    let config = {
-      enable_static_token_service: false,
-    };
     let tokenHandlerClient = buildTokenClient({
-      req: req,
-      config: config,
       pullDocumentFromDynamoStrategy: buildGetDocumentStrategy(undefined),
       dbMissCounter: {
         inc: jest.fn(),

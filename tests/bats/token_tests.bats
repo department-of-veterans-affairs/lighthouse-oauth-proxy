@@ -139,6 +139,19 @@ do_token() {
     echo "$(cat "$curl_body")" > "$TOKEN_FILE"
   fi
 }
+
+do_static_token() {
+  payload="$1"
+  curl -X POST \
+    -s \
+    -H 'Accept: application/json' \
+    -H 'Content-Type: application/json' \
+    -w "%{http_code}" \
+    -o "$curl_body" \
+    -d "$payload" \
+    "$HOST/TOKEN?redirect_uri=$REDIRECT_URI" > "$curl_status"
+}
+
 @test 'Token Handler code happy path' {
   do_token "$(jq \
                 -scn \
@@ -334,7 +347,7 @@ do_token "$(jq \
     echo "STATIC_REFRESH_TOKEN is not provided for this test environment."
     skip
   fi
-  do_token "$(jq \
+  do_static_token "$(jq \
                 -scn \
                 --arg client_id "$CLIENT_ID" \
                 --arg grant_type "refresh_token" \
@@ -344,7 +357,6 @@ do_token "$(jq \
 
   [ "$(cat "$curl_status")" -eq 200 ]
   [ "$(cat "$curl_body" | jq 'has("access_token")')" == "true" ]
-  [ "$(cat "$curl_body" | jq 'has("id_token")')" == "true" ]
   [ "$(cat "$curl_body" | jq 'has("refresh_token")')" == "true" ]
   [ "$(cat "$curl_body" | jq .token_type | tr -d '"')" == "Bearer" ]
   [ "$(cat "$curl_body" | jq 'has("scope")')" == "true" ]

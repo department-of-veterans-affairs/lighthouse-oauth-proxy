@@ -15,7 +15,7 @@ Example
   export CC_CLIENT_ID={{ client id }}
   export CC_CLIENT_SECRET={{ client secret }}
 
-  ./regression_tests.sh [--test-claims]
+  ./regression_tests.sh [--test-claims] [--test-issued]
 EOF
 exit 1
 }
@@ -25,6 +25,8 @@ do
 case $i in
     --test-claims)
       TEST_CLAIMS="true"; shift ;;
+    --test-issued)
+      TEST_ISSUED="true"; shift ;;
     --help|-h)
       usage ;  exit 1 ;;
     --) shift ; break ;;
@@ -85,6 +87,12 @@ fi
 if [ -z "$CC_CLIENT_SECRET" ];
 then
   echo "ERROR - CC_CLIENT_SECRET is a required parameter."
+  exit 1
+fi
+
+if [ "$TEST_ISSUED" == "true" ] && [ -z "$STATIC_ACCESS_TOKEN" ];
+then
+  echo "ERROR - STATIC_ACCESS_TOKEN is a required parameter."
   exit 1
 fi
 
@@ -164,7 +172,7 @@ CODE=$(assign_code)
 echo "Running Token Tests ..."
 token_file="$(mktemp)"
 expired_token_file="$(mktemp)"
-HOST="$HOST" CODE="$CODE" TOKEN_FILE="$token_file" EXPIRED_TOKEN_FILE="$expired_token_file" CLIENT_ID="$CLIENT_ID" CLIENT_SECRET="$CLIENT_SECRET" CC_CLIENT_ID="$CC_CLIENT_ID" CC_CLIENT_SECRET="$CC_CLIENT_SECRET" bats ./token_tests.bats
+HOST="$HOST" CODE="$CODE" TOKEN_FILE="$token_file" EXPIRED_TOKEN_FILE="$expired_token_file" CLIENT_ID="$CLIENT_ID" CLIENT_SECRET="$CLIENT_SECRET" CC_CLIENT_ID="$CC_CLIENT_ID" CC_CLIENT_SECRET="$CC_CLIENT_SECRET" STATIC_REFRESH_TOKEN="$STATIC_REFRESH_TOKEN" bats ./token_tests.bats
 status=$(($status + $?))
 # TOKEN and EXPIRED_ACCESS are assigned in token_tests.sh
 
@@ -179,6 +187,12 @@ status=$(($status + $?))
 if [ ! -z "$TEST_CLAIMS" ]; then
   echo "Running Claims Tests ..."
   HOST="$HOST" TOKEN_FILE="$token_file" bats "$DIR"/claims_tests.bats
+  status=$(($status + $?))
+fi
+
+if [ ! -z "$TEST_ISSUED" ]; then
+  echo "Running Issued Tests ..."
+  HOST="$HOST" STATIC_ACCESS_TOKEN="$STATIC_ACCESS_TOKEN" bats "$DIR"/issued_tests.bats
   status=$(($status + $?))
 fi
 

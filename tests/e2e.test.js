@@ -39,7 +39,9 @@ const defaultTestingConfig = {
   hmac_secret: "testsecret",
   dynamo_oauth_requests_table: "OAuthRequestsV2",
   dynamo_launch_context_table: "launch_context_table",
+  dynamo_static_token_table: "StaticTokens",
   enable_smart_launch_service: true,
+  enable_issued_service: true,
   enable_static_token_service: true,
   routes: {
     categories: [
@@ -69,6 +71,7 @@ const defaultTestingConfig = {
       redirect: "/redirect",
       grants: "/grants",
       smart_launch: "/smart/launch",
+      issued: "/issued",
     },
   },
 };
@@ -102,7 +105,19 @@ function buildMockDynamoClient(mockDynamoClientRecord) {
     const hashed_smart_launch_token =
       "ab29a92e1db44913c896efeed12108faa0b47a944b56cd7cd07d121aefa3769a";
     const fakeLaunchRecord = {
+      access_token: hashed_smart_launch_token,
       launch: "123V456",
+    };
+    const static_token = "123456789";
+    const fakeStaticTokenRecord = {
+      access_token: static_token,
+      scopes:
+        "openid profile patient/Medication.read launch/patient offline_access",
+      expires_in: 3600,
+      icn: "555",
+      aud: "http://localhost:7100/services/static-only",
+      checksum:
+        "c2f1a907ba44e76e140c334a1bc46e509e6e244cc2e9829a7e324d4791820d79",
     };
     return new Promise((resolve, reject) => {
       let searchKey = Object.keys(search_params)[0];
@@ -111,8 +126,13 @@ function buildMockDynamoClient(mockDynamoClientRecord) {
         searchKey === "access_token" &&
         search_params[searchKey] === hashed_smart_launch_token
       ) {
-        mockDynamoClientRecord.access_token = hashed_smart_launch_token;
         resolve({ Item: fakeLaunchRecord });
+      } else if (
+        tableName === "StaticTokens" &&
+        searchKey === "access_token" &&
+        search_params[searchKey] === static_token
+      ) {
+        resolve({ Item: fakeStaticTokenRecord });
       } else if (
         search_params[searchKey] === mockDynamoClientRecord[searchKey]
       ) {
@@ -805,6 +825,59 @@ describe("OpenID Connect Conformance", () => {
       .get("http://localhost:9090/testServer/smart/launch", {
         headers: {
           authorization: "Bearer xxx.xx.x.x.x-x.x.x",
+        },
+      })
+      .then(() => {
+        expect(true).toEqual(false); // Don't expect to be here
+      })
+      .catch((err) => {
+        expect(err.response.status).toEqual(401);
+        expect(err.response.statusText).toEqual("Unauthorized");
+      });
+  });
+
+  it("returns an issued payload given a static access token", async () => {
+    await axios
+      .get("http://localhost:9090/testServer/issued", {
+        headers: {
+          authorization: "Bearer 123456789",
+        },
+      })
+      .then((resp) => {
+        expect(resp.status).toEqual(200);
+        expect(resp.data.static).toEqual(true);
+        expect(resp.data.scopes).toEqual(
+          "openid profile patient/Medication.read launch/patient offline_access"
+        );
+        expect(resp.data.expires_in).toEqual(3600);
+        expect(resp.data.aud).toEqual(
+          "http://localhost:7100/services/static-only"
+        );
+        expect(resp.data.icn).toEqual("555");
+      })
+      .catch((err) => {
+        console.error(err);
+        expect(true).toEqual(false); // Don't expect to be here
+      });
+  });
+
+  it("missing authorization on a request for issued lookup", async () => {
+    await axios
+      .get("http://localhost:9090/testServer/issued")
+      .then(() => {
+        expect(true).toEqual(false); // Don't expect to be here
+      })
+      .catch((err) => {
+        expect(err.response.status).toEqual(401);
+        expect(err.response.statusText).toEqual("Unauthorized");
+      });
+  });
+
+  it("bad jwt on a request for issued lookup", async () => {
+    await axios
+      .get("http://localhost:9090/testServer/issued", {
+        headers: {
+          authorization: "Bearer invalid-static-token",
         },
       })
       .then(() => {

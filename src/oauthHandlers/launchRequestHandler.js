@@ -20,7 +20,11 @@ const launchRequestHandler = async (
     hashString
   );
 
-  let documentResponse = await getDocumentStrategy.getDocument(res.locals.jwt);
+  let hashedToken = hashString(res.locals.jwt, config.hmac_secret);
+  let documentResponse = await getDocumentStrategy.getDocument(
+    hashedToken,
+    config.dynamo_launch_context_table
+  );
 
   if (documentResponse && documentResponse.launch) {
     res.json({ launch: documentResponse.launch });

@@ -1,4 +1,8 @@
-const { rethrowIfRuntimeError } = require("../../utils");
+const {
+  rethrowIfRuntimeError,
+  hashString,
+  minimalError,
+} = require("../../utils");
 const { translateTokenSet } = require("../tokenResponse");
 
 class TokenHandlerClient {
@@ -10,6 +14,9 @@ class TokenHandlerClient {
     tokenIssueCounter,
     dbMissCounter,
     logger,
+    config,
+    staticTokens,
+    dynamoClient,
     req,
     res,
     next
@@ -21,11 +28,66 @@ class TokenHandlerClient {
     this.tokenIssueCounter = tokenIssueCounter;
     this.dbMissCounter = dbMissCounter;
     this.logger = logger;
+    this.config = config;
+    this.staticTokens = staticTokens;
+    this.dynamoClient = dynamoClient;
     this.req = req;
     this.res = res;
     this.next = next;
   }
   async handleToken() {
+    let tokens;
+    /*
+     * Check against the static token service
+     *
+     * If nothing is found, continue with normal flow
+     */
+    if (
+      this.config.enable_static_token_service &&
+      this.req.body.grant_type == "refresh_token"
+    ) {
+      try {
+        if (this.staticTokens.size == 0) {
+          let payload;
+          payload = await this.dynamoClient.scanFromDynamo(
+            this.config.dynamo_static_token_table
+          );
+          let self = this;
+          payload.Items.forEach(function (staticToken) {
+            self.staticTokens.set(staticToken.refresh_token, staticToken);
+          });
+        }
+      } catch (err) {
+        this.logger.error(
+          "Could not load static tokens list",
+          minimalError(err)
+        );
+      }
+      let hashedRefreshToken = hashString(
+        this.req.body.refresh_token,
+        this.config.hmac_secret
+      );
+      if (this.staticTokens.has(hashedRefreshToken)) {
+        let staticToken = this.staticTokens.get(hashedRefreshToken);
+        tokens = {
+          access_token: staticToken.access_token,
+          refresh_token: this.req.body.refresh_token,
+          token_type: "Bearer",
+          scope: staticToken.scopes,
+          expires_in: staticToken.expires_in,
+        };
+        if (staticToken.id_token) {
+          tokens.id_token = staticToken.id_token;
+        }
+        if (staticToken.icn) {
+          tokens.patient = staticToken.icn;
+        }
+        return {
+          statusCode: 200,
+          responseBody: tokens,
+        };
+      }
+    }
     /*
      * Lookup a previous document (db record) associated with this request.
      *
@@ -50,7 +112,6 @@ class TokenHandlerClient {
       }
     }
 
-    let tokens;
     try {
       tokens = await this.getTokenStrategy.getToken();
       this.tokenIssueCounter.inc();
@@ -65,14 +126,6 @@ class TokenHandlerClient {
           error: error.error,
           error_description: error.error_description,
         },
-      };
-    }
-
-    if (tokens.is_static) {
-      delete tokens.is_static;
-      return {
-        statusCode: 200,
-        responseBody: tokens,
       };
     }
 

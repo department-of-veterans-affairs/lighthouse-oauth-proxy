@@ -196,19 +196,36 @@ dynamo.createTable(tableParams, (err, data) => {
 
 tableParams = {
   AttributeDefinitions: [
-    { AttributeName: "static_refresh_token", AttributeType: "S" },
+    { AttributeName: "access_token", AttributeType: "S" },
+    { AttributeName: "refresh_token", AttributeType: "S" },
   ],
-  KeySchema: [{ AttributeName: "static_refresh_token", KeyType: "HASH" }],
+  KeySchema: [{ AttributeName: "access_token", KeyType: "HASH" }],
   ProvisionedThroughput: {
     ReadCapacityUnits: 10,
     WriteCapacityUnits: 10,
   },
   GlobalSecondaryIndexes: [
     {
-      IndexName: "static_refresh_token_index",
+      IndexName: "access_token_index",
       KeySchema: [
         {
-          AttributeName: "static_refresh_token",
+          AttributeName: "access_token",
+          KeyType: "HASH",
+        },
+      ],
+      Projection: {
+        ProjectionType: "ALL",
+      },
+      ProvisionedThroughput: {
+        ReadCapacityUnits: 10,
+        WriteCapacityUnits: 10,
+      },
+    },
+    {
+      IndexName: "refresh_token_index",
+      KeySchema: [
+        {
+          AttributeName: "refresh_token",
           KeyType: "HASH",
         },
       ],
@@ -243,14 +260,20 @@ function createStaticTokenEntry() {
   let itemParams = {
     TableName: "StaticTokens",
     Item: {
-      static_access_token: { S: "123456789" },
-      static_refresh_token: { S: "987654321" },
-      static_scopes: {
+      access_token: { S: "123456789" },
+      refresh_token: {
+        S: "6a9cf6b1af1d8205b771d7c7b7e1770e630f763a755b2f86833ee8ce544df25e",
+      },
+      scopes: {
         S:
           "openid profile patient/Medication.read launch/patient offline_access",
       },
-      static_expires_in: { N: "3600" },
-      static_icn: { S: "555" },
+      expires_in: { N: "3600" },
+      icn: { S: "555" },
+      aud: { S: "http://localhost:7100/services/static-only" },
+      checksum: {
+        S: "ada386dcfd6cbd96c0e345d0599503f488f6a7e103b1096e0bd363180204bce5",
+      },
     },
   };
 

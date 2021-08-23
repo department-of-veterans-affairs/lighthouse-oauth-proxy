@@ -200,6 +200,14 @@ function buildApp(
     );
   }
 
+  if (config.enable_issued_service) {
+    router.get(config.routes.app_routes.issued, async (req, res, next) => {
+      await oauthHandlers
+        .issuedRequestHandler(config, logger, dynamoClient, req, res, next)
+        .catch(next);
+    });
+  }
+
   if (config.enable_claims_service) {
     router.post(config.routes.app_routes.claims, async (req, res, next) => {
       await oauthHandlers

@@ -7,14 +7,12 @@ const {
   buildFakeDynamoClient,
   buildFakeLogger,
   createFakeConfig,
-  createFakeHashingFunction,
 } = require("../testUtils");
 
 describe("getDocument Tests", () => {
   let logger = buildFakeLogger();
   let dynamoClient;
   let config = createFakeConfig();
-  let hashingFunction = createFakeHashingFunction();
 
   it("Happy Path", async () => {
     dynamoClient = buildFakeDynamoClient({
@@ -25,9 +23,8 @@ describe("getDocument Tests", () => {
     let document = await new GetDocumentByAccessTokenStrategy(
       logger,
       dynamoClient,
-      config,
-      hashingFunction
-    ).getDocument("access_token");
+      config
+    ).getDocument("access_token", "launch_table");
 
     expect(document.access_token).toBe("access_token");
     expect(document.launch).toBe("launch");
@@ -42,9 +39,8 @@ describe("getDocument Tests", () => {
     let document = await new GetDocumentByAccessTokenStrategy(
       logger,
       dynamoClient,
-      config,
-      hashingFunction
-    ).getDocument("not_access_token");
+      config
+    ).getDocument("not_access_token", "launch_table");
 
     expect(document).toBe(undefined);
   });

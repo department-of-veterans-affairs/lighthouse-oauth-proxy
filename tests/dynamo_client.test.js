@@ -92,12 +92,12 @@ describe("dynamo client tests", () => {
     let payloadDoc = {
       Items: [
         {
-          static_icn: "0123456789",
-          static_refresh_token: "ut_refresh_token",
-          static_access_token: "ut_access_token",
-          static_scopes:
+          icn: "0123456789",
+          refresh_token: "ut_refresh_token",
+          access_token: "ut_access_token",
+          scopes:
             "openid profile patient/Medication.read launch/patient offline_access",
-          static_expires_in: 3600,
+          expires_in: 3600,
         },
       ],
       Count: 1,
@@ -117,8 +117,8 @@ describe("dynamo client tests", () => {
     try {
       let result = await dynamoclient.scanFromDynamo("TestTable");
       expect(isCalled).toEqual(true);
-      expect(result.Items[0].static_access_token).toEqual("ut_access_token");
-      expect(result.Items[0].static_refresh_token).toEqual("ut_refresh_token");
+      expect(result.Items[0].access_token).toEqual("ut_access_token");
+      expect(result.Items[0].refresh_token).toEqual("ut_refresh_token");
     } catch (err) {
       // should not reach here
       fail("Should not reach here");

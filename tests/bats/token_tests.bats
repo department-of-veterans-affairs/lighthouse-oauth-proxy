@@ -139,6 +139,19 @@ do_token() {
     echo "$(cat "$curl_body")" > "$TOKEN_FILE"
   fi
 }
+
+do_static_token() {
+  payload="$1"
+  curl -X POST \
+    -s \
+    -H 'Accept: application/json' \
+    -H 'Content-Type: application/json' \
+    -w "%{http_code}" \
+    -o "$curl_body" \
+    -d "$payload" \
+    "$HOST/TOKEN?redirect_uri=$REDIRECT_URI" > "$curl_status"
+}
+
 @test 'Token Handler code happy path' {
   do_token "$(jq \
                 -scn \
@@ -327,4 +340,29 @@ do_token "$(jq \
   [ "$(cat "$curl_status")" -eq 400 ]
   [ "$(cat "$curl_body" | jq .error | tr -d '"')" == "invalid_request" ]
   [ "$(cat "$curl_body" | jq .error_description | tr -d '"')" == "A grant type is required. Supported grant types are authorization_code, refresh_token, and client_credentials." ]
+}
+
+@test 'Token Handler static refresh happy path' {
+  if [ -z "$STATIC_REFRESH_TOKEN" ]; then
+    echo "STATIC_REFRESH_TOKEN is not provided for this test environment."
+    skip
+  fi
+  do_static_token "$(jq \
+                -scn \
+                --arg client_id "$CLIENT_ID" \
+                --arg grant_type "refresh_token" \
+                --arg refresh_token "$STATIC_REFRESH_TOKEN" \
+                --arg secret "$CLIENT_SECRET" \
+                '{"client_id": $client_id, "grant_type": $grant_type, "refresh_token": $refresh_token, "client_secret": $secret}')"
+
+  [ "$(cat "$curl_status")" -eq 200 ]
+  [ "$(cat "$curl_body" | jq 'has("access_token")')" == "true" ]
+  [ "$(cat "$curl_body" | jq 'has("refresh_token")')" == "true" ]
+  [ "$(cat "$curl_body" | jq .token_type | tr -d '"')" == "Bearer" ]
+  [ "$(cat "$curl_body" | jq 'has("scope")')" == "true" ]
+  [ "$(cat "$curl_body" | jq 'has("expires_in")')" == "true" ]
+  if [[ "$(cat "$curl_body" | jq .scope | tr -d '"')" == *"launch/patient"* ]];
+  then
+    [ "$(cat "$curl_body" | jq 'has("patient")')" == "true" ]
+  fi
 }

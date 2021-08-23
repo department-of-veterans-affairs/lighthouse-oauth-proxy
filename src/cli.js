@@ -111,6 +111,11 @@ function processArgs() {
         required: false,
         default: false,
       },
+      enable_issued_service: {
+        description: "Enable Lighthouse issued lookup service?",
+        required: false,
+        default: false,
+      },
       enable_static_token_service: {
         description: "Enable static token lookup service?",
         required: false,
@@ -268,6 +273,11 @@ function processArgs() {
             description: "The path component for the SMART launch service",
             required: true,
             default: "/smart/launch",
+          },
+          issued: {
+            description: "The path component for the Lighthouse issued service",
+            required: true,
+            default: "/issued",
           },
           claims: {
             description: "The path component for the claims service",

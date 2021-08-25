@@ -12,7 +12,7 @@ class GetPatientInfoFromValidateEndpointStrategy {
         tokens.access_token,
         this.audience
       );
-      patient = validation_result.va_identifiers.icn;
+      patient = validation_result.launch.patient;
     } catch (error) {
       rethrowIfRuntimeError(error);
       if (error.response) {

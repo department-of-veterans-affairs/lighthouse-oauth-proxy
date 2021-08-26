@@ -202,8 +202,8 @@ describe("OpenID Connect Conformance", () => {
 
     const fakeTokenValidator = () => {
       return {
-        va_identifiers: {
-          icn: "0000000000000",
+        launch: {
+          patient: "0000000000000",
         },
       };
     };

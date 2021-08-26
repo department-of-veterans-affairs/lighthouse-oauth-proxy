@@ -14,7 +14,7 @@ describe("getPatientInfoFromValidateEndpointStrategy tests", () => {
   });
   it("Happy Path", async () => {
     mockValidate = buildValidateToken(
-      { va_identifiers: { icn: "patient" } },
+      { launch: { patient: "patient" } },
       false
     );
     let strategy = new GetPatientInfoFromValidateEndpointStrategy(

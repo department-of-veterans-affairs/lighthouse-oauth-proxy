@@ -8,6 +8,16 @@ const {
 } = require("date-fns");
 
 class SaveDocumentStateStrategy {
+  /**
+   * @param {express.Request} req - The HTTP request.
+   * @param {winston.Logger} logger - The logger.
+   * @param {DynamoClient} dynamoClient - The dynamo client.
+   * @param {*} config - The app config.
+   * @param {string} issuer - The token's issuer.
+   * @param {client.Histogram} refreshTokenLifeCycleHistogram - The prometheus metric.
+   * @param {string} temp_client_id - The client ID.
+   * @param {*} temp_api_category - The proxy route config.
+   */
   constructor(
     req,
     logger,
@@ -15,7 +25,8 @@ class SaveDocumentStateStrategy {
     config,
     issuer,
     refreshTokenLifeCycleHistogram,
-    temp_client_id
+    temp_client_id,
+    temp_api_category
   ) {
     this.req = req;
     this.logger = logger;
@@ -24,6 +35,7 @@ class SaveDocumentStateStrategy {
     this.issuer = issuer;
     this.refreshTokenLifeCycleHistogram = refreshTokenLifeCycleHistogram;
     this.temp_client_id = temp_client_id;
+    this.temp_api_category = temp_api_category;
   }
   async saveDocumentToDynamo(document, tokens) {
     try {
@@ -36,6 +48,18 @@ class SaveDocumentStateStrategy {
           iss: this.issuer,
           issued_on: getUnixTime(Date.now()),
         };
+
+        /*
+         * Legacy records may not have a proxy. This back-fills those records.
+         * This logic can be removed once all records are updated (~42 days from
+         * commit/release).
+         *
+         * "New" records get this set at authorization.
+         */
+        updated_document.proxy =
+          this.config.host +
+          this.config.well_known_base_path +
+          this.temp_api_category;
 
         /*
          * Legacy records may not have a client_id. This back-fills those records.

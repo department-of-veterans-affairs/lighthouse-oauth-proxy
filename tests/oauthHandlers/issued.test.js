@@ -2,7 +2,7 @@
 
 require("jest");
 
-const { claimsHandler } = require("../../src/oauthHandlers");
+const { issuedRequestHandler } = require("../../src/oauthHandlers");
 const { hashString } = require("../../src/utils");
 const { defaultConfig, mockLogger } = require("../testUtils");
 let { beforeEach, describe, it } = global; // ESLint
@@ -26,30 +26,40 @@ describe("Non Static Token Flow", () => {
   let req;
   let dynamoClient;
   beforeEach(() => {
-    req = { body: { token: token } };
+    req = { headers: { authorization: `Bearer ${token}` } };
     dynamoClient = {};
   });
 
-  it("iss not found returns 403", async () => {
-    fail("Maybe there will be another path?");
+  it("proxy not found returns 403", async () => {
+    dynamoClient = {
+      getPayloadFromDynamo: jest.fn().mockReturnValue([]),
+      queryFromDynamo: jest.fn().mockReturnValue({
+        Items: [
+          {
+            access_token: dynamoQueryParams.access_token,
+          },
+        ],
+      }),
+    };
+
+    await issuedRequestHandler(config, logger, dynamoClient, req, res, next);
+    expect(res.sendStatus).toHaveBeenCalledWith(403);
   });
 
   it("token found", async () => {
     dynamoClient = {
-      getPayloadFromDynamo: jest
-        .fn()
-        .mockReturnValueOnce(null)
-        .mockReturnValueOnce({
-          Items: [
-            {
-              access_token: dynamoQueryParams.access_token,
-              proxy: "proxy",
-            },
-          ],
-        }),
+      getPayloadFromDynamo: jest.fn().mockReturnValue([]),
+      queryFromDynamo: jest.fn().mockReturnValue({
+        Items: [
+          {
+            access_token: dynamoQueryParams.access_token,
+            proxy: "proxy",
+          },
+        ],
+      }),
     };
 
-    await claimsHandler(config, logger, dynamoClient, req, res, next);
+    await issuedRequestHandler(config, logger, dynamoClient, req, res, next);
     expect(res.json).toHaveBeenCalledWith({ static: false, proxy: "proxy" });
     expect(next).toHaveBeenCalledWith();
   });
@@ -59,51 +69,44 @@ describe("Static Token Flow", () => {
   let req;
   let dynamoClient;
   beforeEach(() => {
-    req = { body: { token: token } };
+    req = { headers: { authorization: `Bearer ${token}` } };
     dynamoClient = {};
   });
 
   it("Checksum does not match", async () => {
     dynamoClient = {
-      getPayloadFromDynamo: jest
-        .fn()
-        .mockReturnValueOnce({
-          Items: [
-            {
-              access_token: dynamoQueryParams.access_token,
-              refresh_token: "static_refresh",
-              icn: "icn",
-              checksum: "checksum",
-              scopes: "scopes",
-              expires_in: 1234,
-            },
-          ],
-        })
-        .mockReturnValueOnce(null),
+      getPayloadFromDynamo: jest.fn().mockReturnValue({
+        Item: {
+          access_token: token,
+          refresh_token: "static_refresh",
+          icn: "icn",
+          checksum: "checksumbad",
+          scopes: "scopes",
+          expires_in: 1234,
+        },
+      }),
     };
-    await claimsHandler(config, logger, dynamoClient, req, res, next);
+    await issuedRequestHandler(config, logger, dynamoClient, req, res, next);
     expect(res.sendStatus).toHaveBeenCalledWith(401);
   });
 
   it("Static token found", async () => {
     dynamoClient = {
-      getPayloadFromDynamo: jest
-        .fn()
-        .mockReturnValueOnce({
-          Items: [
-            {
-              access_token: dynamoQueryParams.access_token,
-              refresh_token: "static_refresh",
-              icn: "icn",
-              checksum: "checksum",
-              scopes: "scopes",
-              expires_in: 1234,
-            },
-          ],
-        })
-        .mockReturnValueOnce(null),
+      getPayloadFromDynamo: jest.fn().mockReturnValue({
+        Item: {
+          access_token: token,
+          refresh_token: "static_refresh",
+          icn: "icn",
+          checksum:
+            "166a6e4184d814ce811695954744c244e1715285d8fcbdaed827fbb231249d44",
+          scopes: "scopes",
+          expires_in: 1234,
+          aud: "aud"
+        },
+      }),
     };
-    await claimsHandler(config, logger, dynamoClient, req, res, next);
+
+    await issuedRequestHandler(config, logger, dynamoClient, req, res, next);
     expect(res.json).toHaveBeenCalledWith({
       static: true,
       scopes: "scopes",
@@ -119,30 +122,25 @@ describe("General Flow", () => {
   let req;
   let dynamoClient;
   beforeEach(() => {
-    req = { body: { token: token } };
+    req = { headers: { authorization: `Bearer ${token}` } };
     dynamoClient = {};
   });
-  it("missing token parameter returns 400 / 401??", async () => {
+  it("missing token parameter returns 401", async () => {
     req = {};
 
-    await claimsHandler(config, logger, dynamoClient, req, res, next);
-    expect(res.status).toHaveBeenCalledWith(400);
-    expect(res.json).toHaveBeenCalledWith({
-      error: "invalid_request",
-      error_description: "Missing parameter: token",
-    });
+    await issuedRequestHandler(config, logger, dynamoClient, req, res, next);
+    expect(res.sendStatus).toHaveBeenCalledWith(401);
     expect(next).not.toHaveBeenCalled();
   });
 
-  it("token not found returns 403", async () => {
+  it("token not found returns 401", async () => {
     dynamoClient = {
-      queryFromDynamo: jest.fn(() => {
-        return null;
-      }),
+      queryFromDynamo: jest.fn().mockReturnValue({}),
+      getPayloadFromDynamo: jest.fn().mockReturnValue([])
     };
 
-    await claimsHandler(config, logger, dynamoClient, req, res, next);
-    expect(res.sendStatus).toHaveBeenCalledWith(403);
-    expect(next).not.toHaveBeenCalled();
+    await issuedRequestHandler(config, logger, dynamoClient, req, res, next);
+    expect(res.sendStatus).toHaveBeenCalledWith(401);
+    expect(next).toHaveBeenCalled();
   });
 });

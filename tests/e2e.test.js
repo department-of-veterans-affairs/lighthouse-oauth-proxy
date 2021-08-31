@@ -6,9 +6,7 @@ const qs = require("qs");
 const { Issuer } = require("openid-client");
 const { randomBytes } = require("crypto");
 
-const {
-  buildFakeOktaClient,
-} = require("./testUtils");
+const { buildFakeOktaClient } = require("./testUtils");
 const { buildBackgroundServerModule } = require("./backgroundServer");
 const upstreamOAuthTestServer = require("./upstreamOAuthTestServer");
 const {

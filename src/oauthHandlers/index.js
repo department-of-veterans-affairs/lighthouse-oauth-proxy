@@ -7,5 +7,4 @@ module.exports = {
   revokeUserGrantHandler: require("./revokeUserGrantHandler"),
   launchRequestHandler: require("./launchRequestHandler"),
   issuedRequestHandler: require("./issuedRequestHandler"),
-  claimsHandler: require("./claimsHandler"),
 };

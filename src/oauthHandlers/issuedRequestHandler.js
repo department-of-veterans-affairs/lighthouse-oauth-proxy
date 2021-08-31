@@ -20,7 +20,11 @@ const issuedRequestHandler = async (
     config,
     hashString
   );
-  let access_token = parseBearerAuthorization(req?.headers?.authorization);
+  let access_token;
+
+  if (req.headers && req.headers.authorization) {
+    access_token = parseBearerAuthorization(req.headers.authorization);
+  }
   if (!access_token) {
     return res.sendStatus(401);
   }

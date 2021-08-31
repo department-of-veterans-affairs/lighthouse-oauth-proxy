@@ -101,7 +101,7 @@ describe("Static Token Flow", () => {
             "166a6e4184d814ce811695954744c244e1715285d8fcbdaed827fbb231249d44",
           scopes: "scopes",
           expires_in: 1234,
-          aud: "aud"
+          aud: "aud",
         },
       }),
     };
@@ -136,7 +136,7 @@ describe("General Flow", () => {
   it("token not found returns 401", async () => {
     dynamoClient = {
       queryFromDynamo: jest.fn().mockReturnValue({}),
-      getPayloadFromDynamo: jest.fn().mockReturnValue([])
+      getPayloadFromDynamo: jest.fn().mockReturnValue([]),
     };
 
     await issuedRequestHandler(config, logger, dynamoClient, req, res, next);

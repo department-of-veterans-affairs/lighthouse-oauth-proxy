@@ -24,32 +24,71 @@ const issuedRequestHandler = async (
   if (!access_token) {
     return res.sendStatus(401);
   }
-  let documentResponse = await getDocumentStrategy.getDocument(
+  let staticDocumentResponse = await getDocumentStrategy.getDocument(
     access_token,
     config.dynamo_static_token_table
   );
-  if (documentResponse && documentResponse.access_token) {
+  if (staticDocumentResponse && staticDocumentResponse.access_token) {
     let token_icn_pair =
-      documentResponse.access_token + "-" + documentResponse.icn;
+      staticDocumentResponse.access_token + "-" + staticDocumentResponse.icn;
     if (
       hashString(token_icn_pair, config.hmac_secret) ==
-      documentResponse.checksum
+      staticDocumentResponse.checksum
     ) {
       res.json({
         static: true,
-        scopes: documentResponse.scopes,
-        expires_in: documentResponse.expires_in,
-        icn: documentResponse.icn,
-        aud: documentResponse.aud,
+        scopes: staticDocumentResponse.scopes,
+        expires_in: staticDocumentResponse.expires_in,
+        icn: staticDocumentResponse.icn,
+        aud: staticDocumentResponse.aud,
       });
+      return next();
     } else {
       logger.error("Invalid static token usage detected.");
       return res.sendStatus(401);
     }
-  } else {
-    return res.sendStatus(401);
   }
 
+  let nonStaticDocumentResponse;
+
+  /*
+   * Lookup token and claims using hash.
+   */
+  try {
+    const nonStaticDocumentResponses = await dynamoClient.queryFromDynamo(
+      {
+        access_token: hashString(access_token, config.hmac_secret),
+      },
+      config.dynamo_oauth_requests_table,
+      "oauth_access_token_index"
+    );
+
+    if (
+      nonStaticDocumentResponses.Items &&
+      nonStaticDocumentResponses.Items[0]
+    ) {
+      nonStaticDocumentResponse = nonStaticDocumentResponses.Items[0];
+    }
+  } catch (error) {
+    /*
+     * If data can't be queried, log the error and bail.
+     */
+    logger.error("Error retrieving token claims", error);
+    return next(error);
+  }
+
+  if (nonStaticDocumentResponse && nonStaticDocumentResponse.access_token) {
+    if (!nonStaticDocumentResponse.proxy) {
+      return res.sendStatus(403);
+    }
+    res.json({
+      static: false,
+      proxy: nonStaticDocumentResponse.proxy,
+    });
+    return next();
+  }
+
+  res.sendStatus(401);
   return next();
 };
 

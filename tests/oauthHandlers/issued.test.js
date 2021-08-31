@@ -7,7 +7,6 @@ const { hashString } = require("../../src/utils");
 const { defaultConfig, mockLogger } = require("../testUtils");
 let { beforeEach, describe, it } = global; // ESLint
 
-const issuer = "issuer";
 const token = "token";
 const config = defaultConfig();
 const dynamoQueryParams = {
@@ -44,7 +43,7 @@ describe("Non Static Token Flow", () => {
           Items: [
             {
               access_token: dynamoQueryParams.access_token,
-              iss: issuer,
+              proxy: "proxy",
             },
           ],
         }),

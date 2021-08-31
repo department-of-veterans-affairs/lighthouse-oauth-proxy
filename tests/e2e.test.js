@@ -861,6 +861,24 @@ describe("OpenID Connect Conformance", () => {
       });
   });
 
+  it("returns an issued payload given an access token", async () => {
+    await axios
+      .get("http://localhost:9090/testServer/issued", {
+        headers: {
+          authorization: "Bearer token",
+        },
+      })
+      .then((resp) => {
+        expect(resp.status).toEqual(200);
+        expect(resp.data.static).toEqual(false);
+        expect(resp.data.proxy).toEqual("555");
+      })
+      .catch((err) => {
+        console.error(err);
+        expect(true).toEqual(false); // Don't expect to be here
+      });
+  });
+
   it("missing authorization on a request for issued lookup", async () => {
     await axios
       .get("http://localhost:9090/testServer/issued")

@@ -5,7 +5,7 @@ cat <<EOF
 Tests the Oauth Proxy's token endpoint.
 
 Example
-  HOST="https://sandbox-api.va.gov/oauth2" STATIC_ACCESS_TOKEN=$STATIC_ACCESS_TOKEN bats ./issued_tests.bats
+  HOST="https://sandbox-api.va.gov/oauth2" TOKEN_FILE={ Token File } STATIC_ACCESS_TOKEN=$STATIC_ACCESS_TOKEN bats ./issued_tests.bats
 EOF
 }
 
@@ -18,6 +18,12 @@ setup() {
 
   if [ -z "$STATIC_ACCESS_TOKEN" ]; then
     echo "ERROR STATIC_ACCESS_TOKEN is a required parameter."
+    usage
+    exit 0
+  fi
+
+  if [ -z "$TOKEN_FILE" ]; then
+    echo "ERROR TOKEN_FILE is a required parameter."
     usage
     exit 0
   fi
@@ -44,7 +50,9 @@ do_issued() {
     "$HOST/issued" > "$curl_status"
 }
 
-@test 'Valid static token' {
+# static tokens
+
+@test 'Static Token. Valid' {
   do_issued $STATIC_ACCESS_TOKEN
   cat $curl_body
   cat $curl_status
@@ -56,8 +64,21 @@ do_issued() {
   [ "$(cat "$curl_body" | jq .aud | tr -d '"')" == "http://localhost:7100/services/static-only" ]
 }
 
-@test 'Invalid static token' {
+@test 'Non-Static. Valid token' {
+  do_issued $(cat "$TOKEN_FILE" | jq .access_token | tr -d '"')
+  cat "$curl_status"
+  [ "$(cat "$curl_status")" -eq 200 ]
+  [ "$(cat "$curl_body" | jq 'has("iss")')" == "true" ]
+}
+
+@test 'General. Invalid token' {
   do_issued bad
   [ "$(cat "$curl_status")" -eq 401 ]
   [ "$(cat "$curl_body")" == "Unauthorized" ]
+}
+
+@test 'General. Missing token' {
+  do_issued
+  cat "$curl_status"
+  [ "$(cat "$curl_status")" -eq 400 ]
 }

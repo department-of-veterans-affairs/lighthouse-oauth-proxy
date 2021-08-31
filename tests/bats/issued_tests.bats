@@ -64,7 +64,7 @@ do_issued() {
   [ "$(cat "$curl_body" | jq .aud | tr -d '"')" == "http://localhost:7100/services/static-only" ]
 }
 
-@test 'Non-Static. Valid token' {
+@test 'Non-Static. Valid' {
   do_issued $(cat "$TOKEN_FILE" | jq .access_token | tr -d '"')
   cat "$curl_status"
   [ "$(cat "$curl_status")" -eq 200 ]

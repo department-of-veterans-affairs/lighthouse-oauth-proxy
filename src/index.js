@@ -307,9 +307,7 @@ function buildApp(
           okta_client,
           slugHelper,
           app_category,
-          config.dynamo_oauth_requests_table,
-          config.dynamo_clients_table,
-          config.idp,
+          config,
           req,
           res,
           next
@@ -328,7 +326,7 @@ function buildApp(
           dynamoClient,
           validateToken,
           staticTokens,
-          app_category.audience,
+          app_category,
           req,
           res,
           next

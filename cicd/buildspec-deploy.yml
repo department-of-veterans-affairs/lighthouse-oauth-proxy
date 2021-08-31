@@ -127,5 +127,5 @@ phases:
     commands:
       - |
         if [[ ${CODEBUILD_BUILD_SUCCEEDING} -eq 0 ]]; then
-          slackpost.sh -t failure "There was an error with the deployment process of OAuth Proxy to ${env}!"
+          slackpost.sh -t failure "There was an error with the deployment process of OAuth Proxy!"
         fi

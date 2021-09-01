@@ -9,7 +9,7 @@ const User = require("@okta/okta-sdk-nodejs/src/models/User");
 const { authorizeHandler } = require("../src/oauthHandlers");
 const {
   FakeIssuer,
-  buildFakeDynamoClient,
+  mockDynamoClient,
   buildFakeOktaClient,
   buildFakeGetAuthorizationServerInfoResponse,
 } = require("./testUtils");
@@ -43,6 +43,13 @@ let oktaClient;
 let req;
 let res;
 let api_category;
+const config = {
+  dynamo_oauth_requests_table: "OAuthRequestsV2",
+  dynamo_clients_table: "Clients",
+  idp: "idp1",
+  host: "http://localhost:7100",
+  well_known_base_path: "/oauth2",
+};
 
 const buildRedirectErrorUri = (err, redirect_uri) => {
   let uri = new URL(redirect_uri);
@@ -63,10 +70,9 @@ beforeEach(() => {
   res.json = jest.fn();
   api_category = {
     api_category: "/veteran-verification/v1",
-    upstream_issuer: "https://deptva-eval.okta.com/oauth2/aus7y0sefudDrg2HI2p7",
+    upstream_issuer: "https://example.com/oauth2/authz-server-id",
     audience: "testAudience",
   };
-
   oktaClient = buildFakeOktaClient(
     {
       client_id: "clientId123",
@@ -81,7 +87,7 @@ beforeEach(() => {
     userCollection
   );
 
-  dynamoClient = buildFakeDynamoClient({
+  dynamoClient = mockDynamoClient({
     state: "abc123",
     code: "the_fake_authorization_code",
     refresh_token: "",
@@ -115,14 +121,24 @@ describe("Happy Path", () => {
       oktaClient,
       mockSlugHelper,
       api_category,
-      "OAuthRequestsV2",
-      "Clients",
-      "idp1",
+      config,
       req,
       res,
       next
     );
     expect(res.redirect).toHaveBeenCalled();
+    expect(dynamoClient.savePayloadToDynamo).toHaveBeenCalledWith(
+      expect.objectContaining({
+        client_id: req.query.client_id,
+        expires_on: expect.any(Number),
+        internal_state: expect.any(String),
+        proxy:
+          config.host + config.well_known_base_path + api_category.api_category,
+        redirect_uri: req.query.redirect_uri,
+        state: req.query.state,
+      }),
+      config.dynamo_oauth_requests_table
+    );
   });
 
   it("Happy Path Redirect using slug", async () => {
@@ -148,9 +164,7 @@ describe("Happy Path", () => {
       oktaClient,
       mockSlugHelper,
       api_category,
-      "OAuthRequestsV2",
-      "Clients",
-      "idp1",
+      config,
       req,
       res,
       next
@@ -184,9 +198,7 @@ describe("Happy Path", () => {
       oktaClient,
       mockSlugHelper,
       api_category,
-      "OAuthRequestsV2",
-      "Clients",
-      "idp1",
+      config,
       req,
       res,
       next
@@ -218,9 +230,7 @@ describe("Happy Path", () => {
       oktaClient,
       mockSlugHelper,
       api_category,
-      "OAuthRequestsV2",
-      "Clients",
-      "idp1",
+      config,
       req,
       res,
       next
@@ -252,9 +262,7 @@ describe("Happy Path", () => {
       oktaClient,
       mockSlugHelper,
       api_category,
-      "OAuthRequestsV2",
-      "Clients",
-      "idp1",
+      config,
       req,
       res,
       next
@@ -288,9 +296,7 @@ describe("Happy Path", () => {
       oktaClient,
       mockSlugHelper,
       api_category,
-      "OAuthRequestsV2",
-      "Clients",
-      "idp1",
+      config,
       req,
       res,
       next
@@ -300,7 +306,7 @@ describe("Happy Path", () => {
   });
 
   it("Happy path auth with local client flag", async () => {
-    dynamoClient = buildFakeDynamoClient({
+    dynamoClient = mockDynamoClient({
       client_id: "clientId123",
       redirect_uris: { values: ["http://localhost:8080/oauth/redirect"] },
     });
@@ -328,9 +334,7 @@ describe("Happy Path", () => {
       oktaClient,
       mockSlugHelper,
       api_category,
-      "OAuthRequestsV2",
-      "Clients",
-      "idp1",
+      config,
       req,
       res,
       next
@@ -340,7 +344,7 @@ describe("Happy Path", () => {
     expect(next).not.toHaveBeenCalled();
     expect(dynamoClient.getPayloadFromDynamo).toHaveBeenCalledWith(
       { client_id: "clientId123" },
-      "Clients"
+      config.dynamo_clients_table
     );
   });
 });
@@ -365,9 +369,7 @@ describe("Invalid Request", () => {
       oktaClient,
       mockSlugHelper,
       api_category,
-      "OAuthRequestsV2",
-      "Clients",
-      "idp1",
+      config,
       req,
       res,
       next
@@ -397,9 +399,7 @@ describe("Invalid Request", () => {
       oktaClient,
       mockSlugHelper,
       api_category,
-      "OAuthRequestsV2",
-      "Clients",
-      "idp1",
+      config,
       req,
       res,
       next
@@ -431,9 +431,7 @@ describe("Invalid Request", () => {
       oktaClient,
       mockSlugHelper,
       api_category,
-      "OAuthRequestsV2",
-      "Clients",
-      "idp1",
+      config,
       req,
       res,
       next
@@ -471,9 +469,7 @@ describe("Invalid Request", () => {
       oktaClient,
       mockSlugHelper,
       api_category,
-      "OAuthRequestsV2",
-      "Clients",
-      "idp1",
+      config,
       req,
       res,
       next
@@ -495,9 +491,7 @@ describe("Invalid Request", () => {
       oktaClient,
       mockSlugHelper,
       api_category,
-      "OAuthRequestsV2",
-      "Clients",
-      "idp1",
+      config,
       req,
       res,
       next
@@ -526,9 +520,7 @@ describe("Invalid Request", () => {
       oktaClient,
       mockSlugHelper,
       api_category,
-      "OAuthRequestsV2",
-      "Clients",
-      "idp1",
+      config,
       req,
       res,
       next
@@ -563,9 +555,7 @@ describe("Invalid Request", () => {
       oktaClient,
       mockSlugHelper,
       api_category,
-      "OAuthRequestsV2",
-      "Clients",
-      "idp1",
+      config,
       req,
       res,
       next
@@ -597,9 +587,7 @@ describe("Invalid Request", () => {
       oktaClient,
       mockSlugHelper,
       api_category,
-      "OAuthRequestsV2",
-      "Clients",
-      "idp1",
+      config,
       req,
       res,
       next
@@ -631,9 +619,7 @@ describe("Invalid Request", () => {
       oktaClient,
       mockSlugHelper,
       api_category,
-      "OAuthRequestsV2",
-      "Clients",
-      "idp1",
+      config,
       req,
       res,
       next
@@ -659,9 +645,7 @@ describe("Invalid Request", () => {
       oktaClient,
       mockSlugHelper,
       api_category,
-      "OAuthRequestsV2",
-      "Clients",
-      "idp1",
+      config,
       req,
       res,
       next
@@ -675,7 +659,7 @@ describe("Invalid Request", () => {
     });
   });
   it("Invalid path in request", async () => {
-    dynamoClient = buildFakeDynamoClient({
+    dynamoClient = mockDynamoClient({
       client_id: "clientId123",
       redirect_uris: { values: ["http://localhost:8080/oauth/redirect"] },
     });
@@ -695,9 +679,7 @@ describe("Invalid Request", () => {
       oktaClient,
       mockSlugHelper,
       api_category,
-      "OAuthRequestsV2",
-      "Clients",
-      "idp1",
+      config,
       req,
       res,
       next
@@ -715,7 +697,7 @@ describe("Invalid Request", () => {
   });
 
   it("Invalid redirect_uri in request, local client config", async () => {
-    dynamoClient = buildFakeDynamoClient({
+    dynamoClient = mockDynamoClient({
       client_id: "clientId123",
       redirect_uris: { values: ["http://localhost:8080/oauth/redirect"] },
     });
@@ -737,9 +719,7 @@ describe("Invalid Request", () => {
       oktaClient,
       mockSlugHelper,
       api_category,
-      "OAuthRequestsV2",
-      "Clients",
-      "idp1",
+      config,
       req,
       res,
       next
@@ -791,9 +771,7 @@ describe("Server Error", () => {
       oktaClient,
       mockSlugHelper,
       api_category,
-      "OAuthRequestsV2",
-      "Clients",
-      "idp1",
+      config,
       req,
       res,
       next
@@ -808,7 +786,7 @@ describe("Server Error", () => {
 
 describe("Unauthorized Client", () => {
   it("Invalid client in request, local client config, mimic no db table", async () => {
-    dynamoClient = buildFakeDynamoClient({
+    dynamoClient = mockDynamoClient({
       client_id: "clientId123xxxx",
       redirect_uris: { values: ["http://localhost:8080/oauth/redirect"] },
     });
@@ -830,9 +808,7 @@ describe("Unauthorized Client", () => {
       oktaClient,
       mockSlugHelper,
       api_category,
-      "OAuthRequestsV2",
-      "Clients",
-      "idp1",
+      config,
       req,
       res,
       next
@@ -853,7 +829,7 @@ describe("Unauthorized Client", () => {
 
   it("Invalid client in request, local client config, empty response from db", async () => {
     api_category.client_store = "local";
-    dynamoClient = buildFakeDynamoClient({
+    dynamoClient = mockDynamoClient({
       client_id: "clientId123xxxx",
       redirect_uris: { values: ["http://localhost:8080/oauth/redirect"] },
     });
@@ -881,9 +857,7 @@ describe("Unauthorized Client", () => {
       oktaClient,
       mockSlugHelper,
       api_category,
-      "OAuthRequestsV2",
-      "Clients",
-      "idp1",
+      config,
       req,
       res,
       next

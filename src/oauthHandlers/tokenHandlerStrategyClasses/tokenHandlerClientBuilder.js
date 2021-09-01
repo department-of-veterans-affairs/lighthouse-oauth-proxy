@@ -41,6 +41,23 @@ const {
   missRefreshTokenCounter,
   missAuthorizationCodeCounter,
 } = require("../../metrics");
+
+/**
+ * Token handler client builder.
+ *
+ * @param {string} redirect_uri - The redirect URI.
+ * @param {Issuer} issuer - The OIDC issuer.
+ * @param {winston.Logger} logger - The logger.
+ * @param {DynamoClient} dynamoClient - The dynamo client.
+ * @param {*} config - The app config.
+ * @param {express.Request} req - The HTTP request.
+ * @param {express.Response} res - The HTTP response.
+ * @param {Function} next - The express next function.
+ * @param {Function} validateToken - Function used to validate a token.
+ * @param {Map} staticTokens - Map of static tokens.
+ * @param {*} app_category - The proxy route config.
+ * @returns {TokenHandlerClient} a token handler client.
+ */
 const buildTokenHandlerClient = (
   redirect_uri,
   issuer,
@@ -52,7 +69,7 @@ const buildTokenHandlerClient = (
   next,
   validateToken,
   staticTokens,
-  audience
+  app_category
 ) => {
   const strategies = getStrategies(
     redirect_uri,
@@ -63,7 +80,7 @@ const buildTokenHandlerClient = (
     req,
     validateToken,
     staticTokens,
-    audience
+    app_category
   );
   return new TokenHandlerClient(
     strategies.getTokenStrategy,
@@ -82,6 +99,20 @@ const buildTokenHandlerClient = (
   );
 };
 
+/**
+ * Build an object of strategies for token handling.
+ *
+ * @param {string} redirect_uri - The redirect URI.
+ * @param {Issuer} issuer - The OIDC issuer.
+ * @param {winston.Logger} logger - The logger.
+ * @param {DynamoClient} dynamoClient - The dynamo client.
+ * @param {*} config - The app config.
+ * @param {express.Request} req - The HTTP request.
+ * @param {Function} validateToken - Function used to validate a token.
+ * @param {Map} staticTokens - Map of static tokens.
+ * @param {*} app_category - The proxy route config.
+ * @returns {*} an object of strategies.
+ */
 const getStrategies = (
   redirect_uri,
   issuer,
@@ -91,7 +122,7 @@ const getStrategies = (
   req,
   validateToken,
   staticTokens,
-  audience
+  app_category
 ) => {
   let strategies;
   if (req.body.grant_type === "refresh_token") {
@@ -115,12 +146,13 @@ const getStrategies = (
         config,
         issuer.issuer,
         refreshTokenLifeCycleHistogram,
-        clientMetadata.client_id
+        clientMetadata.client_id,
+        app_category.api_category
       ),
       getPatientInfoStrategy: new GetPatientInfoFromValidateEndpointStrategy(
         validateToken,
         logger,
-        audience
+        app_category.audience
       ),
       tokenIssueCounter: refreshTokenIssueCounter,
       dbMissCounter: missRefreshTokenCounter,
@@ -147,12 +179,13 @@ const getStrategies = (
         config,
         issuer.issuer,
         refreshTokenLifeCycleHistogram,
-        clientMetadata.client_id
+        clientMetadata.client_id,
+        app_category.api_category
       ),
       getPatientInfoStrategy: new GetPatientInfoFromValidateEndpointStrategy(
         validateToken,
         logger,
-        audience
+        app_category.audience
       ),
       tokenIssueCounter: codeTokenIssueCounter,
       dbMissCounter: missAuthorizationCodeCounter,

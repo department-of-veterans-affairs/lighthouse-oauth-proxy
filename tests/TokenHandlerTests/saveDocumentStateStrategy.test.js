@@ -1,8 +1,8 @@
 require("jest");
 const {
-  buildFakeDynamoClient,
+  mockDynamoClient,
   buildFakeLogger,
-  createFakeConfig,
+  defaultConfig,
 } = require("../testUtils");
 const MockExpressRequest = require("mock-express-request");
 const {
@@ -28,6 +28,7 @@ const REFRESH_TOKEN_HASH_PAIR = [
   "9b4dba523ad0a7e323452871556d691787cd90c6fe959b040c5864979db5e337",
 ];
 const REDIRECT_URI = "http://localhost/thisDoesNotMatter";
+const API_CATEGORY = { api_category: "/health/v1" };
 
 let dynamoClient;
 let config;
@@ -39,7 +40,7 @@ let mockRefreshTokenLifeCycleHistogram;
 
 describe("saveDocumentStateStrategy tests", () => {
   beforeEach(() => {
-    config = createFakeConfig();
+    config = defaultConfig();
     config.hmac_secret = HMAC_SECRET;
     logger = buildFakeLogger();
     req = new MockExpressRequest({
@@ -71,7 +72,47 @@ describe("saveDocumentStateStrategy tests", () => {
   });
 
   it("Happy Path", async () => {
-    dynamoClient = buildFakeDynamoClient({
+    const issuer = "issuer";
+    dynamoClient = mockDynamoClient({
+      state: STATE,
+      code: CODE_HASH_PAIR[1],
+      refresh_token: REFRESH_TOKEN_HASH_PAIR[1],
+      redirect_uri: REDIRECT_URI,
+    });
+    let strategy = new SaveDocumentStateStrategy(
+      req,
+      logger,
+      dynamoClient,
+      config,
+      issuer,
+      mockRefreshTokenLifeCycleHistogram,
+      CLIENT_ID,
+      API_CATEGORY
+    );
+    await strategy.saveDocumentToDynamo(document, tokens);
+    expect(logger.error).not.toHaveBeenCalled();
+    expect(dynamoClient.updateToDynamo).toHaveBeenCalledWith(
+      { internal_state: document.internal_state },
+      expect.objectContaining({
+        access_token:
+          "4116ff9d9b7bb73aff7680b14eb012670eb93cfc7266f142f13bd1486ae6cbb1",
+        client_id: CLIENT_ID,
+        expires_on: expect.any(Number),
+        iss: issuer,
+        issued_on: expect.any(Number),
+        proxy: config.host + config.well_known_base_path + API_CATEGORY,
+        refresh_token: REFRESH_TOKEN_HASH_PAIR[1],
+      }),
+      config.dynamo_oauth_requests_table
+    );
+    expect(mockRefreshTokenLifeCycleHistogram.labels).toHaveBeenCalledWith({
+      client_id: CLIENT_ID,
+    });
+    expect(mockRefreshTokenLifeCycleHistogram.observe).toHaveBeenCalledWith(1);
+  });
+
+  it("Happy Path Code Flow", async () => {
+    dynamoClient = mockDynamoClient({
       state: STATE,
       code: CODE_HASH_PAIR[1],
       refresh_token: REFRESH_TOKEN_HASH_PAIR[1],
@@ -84,30 +125,8 @@ describe("saveDocumentStateStrategy tests", () => {
       config,
       "issuer",
       mockRefreshTokenLifeCycleHistogram,
-      CLIENT_ID
-    );
-    await strategy.saveDocumentToDynamo(document, tokens);
-    expect(logger.error).not.toHaveBeenCalled();
-    expect(mockRefreshTokenLifeCycleHistogram.labels).toHaveBeenCalledWith({
-      client_id: CLIENT_ID,
-    });
-    expect(mockRefreshTokenLifeCycleHistogram.observe).toHaveBeenCalledWith(1);
-  });
-
-  it("Happy Path Code Flow", async () => {
-    dynamoClient = buildFakeDynamoClient({
-      state: STATE,
-      code: CODE_HASH_PAIR[1],
-      refresh_token: REFRESH_TOKEN_HASH_PAIR[1],
-      redirect_uri: REDIRECT_URI,
-    });
-    let strategy = new SaveDocumentStateStrategy(
-      req,
-      logger,
-      dynamoClient,
-      config,
-      "issuer",
-      mockRefreshTokenLifeCycleHistogram
+      CLIENT_ID,
+      API_CATEGORY
     );
     delete document.refresh_token;
     await strategy.saveDocumentToDynamo(document, tokens);
@@ -117,7 +136,7 @@ describe("saveDocumentStateStrategy tests", () => {
 
   it("Happy Path with launch", async () => {
     document.launch = LAUNCH;
-    dynamoClient = buildFakeDynamoClient({
+    dynamoClient = mockDynamoClient({
       state: STATE,
       code: CODE_HASH_PAIR[1],
       launch: LAUNCH,
@@ -131,7 +150,8 @@ describe("saveDocumentStateStrategy tests", () => {
       config,
       "issuer",
       mockRefreshTokenLifeCycleHistogram,
-      CLIENT_ID
+      CLIENT_ID,
+      API_CATEGORY
     );
     await strategy.saveDocumentToDynamo(document, tokens);
     expect(dynamoClient.savePayloadToDynamo).toHaveBeenCalledWith(
@@ -152,7 +172,7 @@ describe("saveDocumentStateStrategy tests", () => {
 
   it("Launch in Document not in Tokens", async () => {
     document.launch = LAUNCH;
-    dynamoClient = buildFakeDynamoClient({
+    dynamoClient = mockDynamoClient({
       state: STATE,
       code: CODE_HASH_PAIR[1],
       launch: LAUNCH,
@@ -166,7 +186,8 @@ describe("saveDocumentStateStrategy tests", () => {
       config,
       "issuer",
       mockRefreshTokenLifeCycleHistogram,
-      CLIENT_ID
+      CLIENT_ID,
+      API_CATEGORY
     );
     tokens = buildToken(false, true, false, "");
     await strategy.saveDocumentToDynamo(document, tokens);
@@ -193,7 +214,8 @@ describe("saveDocumentStateStrategy tests", () => {
       config,
       "issuer",
       mockRefreshTokenLifeCycleHistogram,
-      CLIENT_ID
+      CLIENT_ID,
+      API_CATEGORY
     );
     try {
       await strategy.saveDocumentToDynamo(document, tokens);
@@ -211,7 +233,7 @@ describe("saveDocumentStateStrategy tests", () => {
   });
   it("Happy Path no Refresh in Token", async () => {
     document.launch = LAUNCH;
-    dynamoClient = buildFakeDynamoClient({
+    dynamoClient = mockDynamoClient({
       state: STATE,
       code: CODE_HASH_PAIR[1],
       launch: LAUNCH,
@@ -223,7 +245,9 @@ describe("saveDocumentStateStrategy tests", () => {
       dynamoClient,
       config,
       "issuer",
-      mockRefreshTokenLifeCycleHistogram
+      mockRefreshTokenLifeCycleHistogram,
+      CLIENT_ID,
+      API_CATEGORY
     );
 
     delete tokens.refresh_token;
@@ -244,7 +268,7 @@ describe("saveDocumentStateStrategy tests", () => {
 
   it("No Document State", async () => {
     document.state = null;
-    dynamoClient = buildFakeDynamoClient({
+    dynamoClient = mockDynamoClient({
       state: STATE,
       code: CODE_HASH_PAIR[1],
       refresh_token: REFRESH_TOKEN_HASH_PAIR[1],
@@ -256,7 +280,9 @@ describe("saveDocumentStateStrategy tests", () => {
       dynamoClient,
       config,
       "issuer",
-      mockRefreshTokenLifeCycleHistogram
+      mockRefreshTokenLifeCycleHistogram,
+      CLIENT_ID,
+      API_CATEGORY
     );
     await strategy.saveDocumentToDynamo(document, tokens);
     expect(mockRefreshTokenLifeCycleHistogram.observe).not.toHaveBeenCalled();
@@ -275,7 +301,8 @@ describe("saveDocumentStateStrategy tests", () => {
       config,
       "issuer",
       mockRefreshTokenLifeCycleHistogram,
-      CLIENT_ID
+      CLIENT_ID,
+      API_CATEGORY
     );
     await strategy.saveDocumentToDynamo(document, tokens);
     expect(mockRefreshTokenLifeCycleHistogram.labels).toHaveBeenCalledWith({

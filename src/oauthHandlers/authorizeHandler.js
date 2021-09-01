@@ -1,4 +1,3 @@
-/** @module issuer_helper */
 const { URLSearchParams, URL } = require("url");
 const { loginBegin } = require("../metrics");
 const { v4: uuidv4 } = require("uuid");
@@ -8,18 +7,16 @@ const { addMinutes, getUnixTime } = require("date-fns");
  * Checks for valid authorization request and proxies to authorization server.
  *
  * @param {string} redirect_uri uri the authorization response will be sent to.
- * @param {*} logger logs information.
- * @param {*} issuer holds information and sends request to token issuer.
- * @param {*} dynamoClient interacts with dynamodb.
- * @param {*} oktaClient interacts with okta api.
- * @param {*} slugHelper rewrites identity provider id to slug.
+ * @param {winston.Logger} logger logs information.
+ * @param {Issuer} issuer holds information and sends request to token issuer.
+ * @param {DynamoClient} dynamoClient interacts with dynamodb.
+ * @param {okta.Client} oktaClient interacts with okta api.
+ * @param {SlugHelper} slugHelper rewrites identity provider id to slug.
  * @param {*} app_category contains information on the route's specific issuer and auth server.
- * @param {string} dynamo_oauth_requests_table table that stores oauth request information.
- * @param {string} dynamo_clients_table table that stores client information.
- * @param {*} idp id of identify provider.
- * @param {*} req express request object.
- * @param {*} res express response object.
- * @param {*} next express next object.
+ * @param {*} config application configuration.
+ * @param {express.Request} req express request object.
+ * @param {express.Response} res express response object.
+ * @param {Function} next express next function.
  */
 const authorizeHandler = async (
   redirect_uri,
@@ -29,9 +26,7 @@ const authorizeHandler = async (
   oktaClient,
   slugHelper,
   app_category,
-  dynamo_oauth_requests_table,
-  dynamo_clients_table,
-  idp,
+  config,
   req,
   res,
   next
@@ -44,7 +39,7 @@ const authorizeHandler = async (
     client_id,
     client_redirect,
     dynamoClient,
-    dynamo_clients_table,
+    config.dynamo_clients_table,
     oktaClient,
     app_category
   );
@@ -78,6 +73,8 @@ const authorizeHandler = async (
       redirect_uri: client_redirect,
       expires_on: getUnixTime(addMinutes(Date.now(), 10)),
       client_id: client_id,
+      proxy:
+        config.host + config.well_known_base_path + app_category.api_category,
     };
 
     // If the launch scope is included then also
@@ -92,7 +89,7 @@ const authorizeHandler = async (
 
     await dynamoClient.savePayloadToDynamo(
       authorizePayload,
-      dynamo_oauth_requests_table
+      config.dynamo_oauth_requests_table
     );
   } catch (error) {
     logger.error(
@@ -107,7 +104,11 @@ const authorizeHandler = async (
   params.set("state", internal_state);
 
   // Set the optional IDP (using a preferred order)
-  const oktaIdp = slugHelper.rewrite(params.get("idp"), app_category.idp, idp);
+  const oktaIdp = slugHelper.rewrite(
+    params.get("idp"),
+    app_category.idp,
+    config.idp
+  );
   if (oktaIdp) {
     params.set("idp", oktaIdp);
   }

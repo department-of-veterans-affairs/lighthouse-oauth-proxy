@@ -32,6 +32,7 @@ const issuedRequestHandler = async (
     access_token,
     config.dynamo_static_token_table
   );
+
   if (staticDocumentResponse && staticDocumentResponse.access_token) {
     let token_icn_pair =
       staticDocumentResponse.access_token + "-" + staticDocumentResponse.icn;
@@ -46,18 +47,15 @@ const issuedRequestHandler = async (
         icn: staticDocumentResponse.icn,
         aud: staticDocumentResponse.aud,
       });
-      return next();
     } else {
       logger.error("Invalid static token usage detected.");
-      return res.sendStatus(401);
+      res.sendStatus(401);
     }
+    return next();
   }
 
   let nonStaticDocumentResponse;
 
-  /*
-   * Lookup token and claims using hash.
-   */
   try {
     const nonStaticDocumentResponses = await dynamoClient.queryFromDynamo(
       {
@@ -74,21 +72,19 @@ const issuedRequestHandler = async (
       nonStaticDocumentResponse = nonStaticDocumentResponses.Items[0];
     }
   } catch (error) {
-    /*
-     * If data can't be queried, log the error and bail.
-     */
     logger.error("Error retrieving token claims", error);
     return next(error);
   }
 
   if (nonStaticDocumentResponse && nonStaticDocumentResponse.access_token) {
     if (!nonStaticDocumentResponse.proxy) {
-      return res.sendStatus(403);
+      res.sendStatus(403);
+    } else {
+      res.json({
+        static: false,
+        proxy: nonStaticDocumentResponse.proxy,
+      });
     }
-    res.json({
-      static: false,
-      proxy: nonStaticDocumentResponse.proxy,
-    });
     return next();
   }
 

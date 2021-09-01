@@ -68,7 +68,7 @@ do_issued() {
   do_issued $(cat "$TOKEN_FILE" | jq .access_token | tr -d '"')
   cat "$curl_status"
   [ "$(cat "$curl_status")" -eq 200 ]
-  [ "$(cat "$curl_body" | jq 'has("iss")')" == "true" ]
+  [ "$(cat "$curl_body" | jq 'has("proxy")')" == "true" ]
 }
 
 @test 'General. Invalid token' {
@@ -80,5 +80,5 @@ do_issued() {
 @test 'General. Missing token' {
   do_issued
   cat "$curl_status"
-  [ "$(cat "$curl_status")" -eq 400 ]
+  [ "$(cat "$curl_status")" -eq 401 ]
 }

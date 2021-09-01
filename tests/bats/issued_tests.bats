@@ -68,6 +68,7 @@ do_issued() {
   do_issued $(cat "$TOKEN_FILE" | jq .access_token | tr -d '"')
   cat "$curl_status"
   [ "$(cat "$curl_status")" -eq 200 ]
+  [ "$(cat "$curl_body" | jq .static | tr -d '"')" == "false" ]
   [ "$(cat "$curl_body" | jq 'has("proxy")')" == "true" ]
 }
 

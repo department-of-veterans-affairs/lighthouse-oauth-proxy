@@ -16,7 +16,7 @@ const dynamoQueryParams = {
 // Static mocks
 const res = {
   sendStatus: jest.fn(),
-  status: jest.fn(() => res),
+  status: jest.fn(),
   json: jest.fn(() => res),
 };
 const next = jest.fn();
@@ -43,7 +43,7 @@ describe("Non Static Token Flow", () => {
     };
 
     await issuedRequestHandler(config, logger, dynamoClient, req, res, next);
-    expect(res.sendStatus).toHaveBeenCalledWith(403);
+    expect(res.status).toHaveBeenCalledWith(403);
   });
 
   it("token found", async () => {
@@ -87,7 +87,7 @@ describe("Static Token Flow", () => {
       }),
     };
     await issuedRequestHandler(config, logger, dynamoClient, req, res, next);
-    expect(res.sendStatus).toHaveBeenCalledWith(401);
+    expect(res.status).toHaveBeenCalledWith(401);
   });
 
   it("Static token found", async () => {
@@ -141,6 +141,6 @@ describe("General Flow", () => {
 
     await issuedRequestHandler(config, logger, dynamoClient, req, res, next);
     expect(res.sendStatus).toHaveBeenCalledWith(401);
-    expect(next).toHaveBeenCalled();
+    expect(next).not.toHaveBeenCalled();
   });
 });

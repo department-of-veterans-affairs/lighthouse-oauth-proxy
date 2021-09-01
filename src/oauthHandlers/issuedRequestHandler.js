@@ -1,3 +1,4 @@
+const { errors } = require("openid-client");
 const { hashString, parseBearerAuthorization } = require("../utils");
 const {
   GetDocumentByAccessTokenStrategy,
@@ -33,27 +34,51 @@ const issuedRequestHandler = async (
     config.dynamo_static_token_table
   );
 
-  if (staticDocumentResponse && staticDocumentResponse.access_token) {
-    let token_icn_pair =
-      staticDocumentResponse.access_token + "-" + staticDocumentResponse.icn;
-    if (
-      hashString(token_icn_pair, config.hmac_secret) ==
-      staticDocumentResponse.checksum
-    ) {
-      res.json({
+  let response =
+    staticDocumentResponse && staticDocumentResponse.access_token
+      ? staticTokenHandler(staticDocumentResponse, logger, config)
+      : await nonStaticTokenHandler(dynamoClient, access_token, config);
+
+  if (!response) {
+    return res.sendStatus(401);
+  }
+
+  if (response.error) {
+    return next(response.error);
+  }
+
+  res.status(response.status);
+  if (response.json) {
+    res.json(response.json);
+  }
+  return next();
+};
+
+const staticTokenHandler = (staticDocumentResponse, logger, config) => {
+  let token_icn_pair =
+    staticDocumentResponse.access_token + "-" + staticDocumentResponse.icn;
+  if (
+    hashString(token_icn_pair, config.hmac_secret) ==
+    staticDocumentResponse.checksum
+  ) {
+    return {
+      status: 200,
+      json: {
         static: true,
         scopes: staticDocumentResponse.scopes,
         expires_in: staticDocumentResponse.expires_in,
         icn: staticDocumentResponse.icn,
         aud: staticDocumentResponse.aud,
-      });
-    } else {
-      logger.error("Invalid static token usage detected.");
-      res.sendStatus(401);
-    }
-    return next();
+      },
+    };
   }
+  logger.error("Invalid static token usage detected.");
+  return {
+    status: 401,
+  };
+};
 
+const nonStaticTokenHandler = async (dynamoClient, access_token, config) => {
   let nonStaticDocumentResponse;
 
   try {
@@ -78,18 +103,19 @@ const issuedRequestHandler = async (
 
   if (nonStaticDocumentResponse && nonStaticDocumentResponse.access_token) {
     if (!nonStaticDocumentResponse.proxy) {
-      res.sendStatus(403);
+      return {
+        status: 403,
+      };
     } else {
-      res.json({
-        static: false,
-        proxy: nonStaticDocumentResponse.proxy,
-      });
+      return {
+        status: 200,
+        json: {
+          static: false,
+          proxy: nonStaticDocumentResponse.proxy,
+        },
+      };
     }
-    return next();
   }
-
-  res.sendStatus(401);
-  return next();
 };
 
 module.exports = issuedRequestHandler;

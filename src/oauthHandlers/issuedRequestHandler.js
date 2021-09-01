@@ -1,4 +1,3 @@
-const { errors } = require("openid-client");
 const { hashString, parseBearerAuthorization } = require("../utils");
 const {
   GetDocumentByAccessTokenStrategy,
@@ -37,7 +36,7 @@ const issuedRequestHandler = async (
   let response =
     staticDocumentResponse && staticDocumentResponse.access_token
       ? staticTokenHandler(staticDocumentResponse, logger, config)
-      : await nonStaticTokenHandler(dynamoClient, access_token, config);
+      : await nonStaticTokenHandler(dynamoClient, access_token, config, logger);
 
   if (!response) {
     return res.sendStatus(401);
@@ -78,7 +77,12 @@ const staticTokenHandler = (staticDocumentResponse, logger, config) => {
   };
 };
 
-const nonStaticTokenHandler = async (dynamoClient, access_token, config) => {
+const nonStaticTokenHandler = async (
+  dynamoClient,
+  access_token,
+  config,
+  logger
+) => {
   let nonStaticDocumentResponse;
 
   try {
@@ -98,7 +102,7 @@ const nonStaticTokenHandler = async (dynamoClient, access_token, config) => {
     }
   } catch (error) {
     logger.error("Error retrieving token claims", error);
-    return next(error);
+    return { error: error };
   }
 
   if (nonStaticDocumentResponse && nonStaticDocumentResponse.access_token) {

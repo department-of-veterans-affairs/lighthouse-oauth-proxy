@@ -121,11 +121,6 @@ function processArgs() {
         required: false,
         default: false,
       },
-      enable_claims_service: {
-        description: "Enable claims service?",
-        required: false,
-        default: false,
-      },
       routes: {
         description:
           "An object that describes route configurations for isolated api categories",

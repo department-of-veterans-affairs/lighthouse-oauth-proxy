@@ -208,14 +208,6 @@ function buildApp(
     });
   }
 
-  if (config.enable_claims_service) {
-    router.post(config.routes.app_routes.claims, async (req, res, next) => {
-      await oauthHandlers
-        .claimsHandler(config, logger, dynamoClient, req, res, next)
-        .catch(next);
-    });
-  }
-
   app.use(well_known_base_path, router);
 
   // Error handlers. Keep as last middlewares

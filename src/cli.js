@@ -121,11 +121,6 @@ function processArgs() {
         required: false,
         default: false,
       },
-      enable_claims_service: {
-        description: "Enable claims service?",
-        required: false,
-        default: false,
-      },
       routes: {
         description:
           "An object that describes route configurations for isolated api categories",
@@ -278,10 +273,6 @@ function processArgs() {
             description: "The path component for the Lighthouse issued service",
             required: true,
             default: "/issued",
-          },
-          claims: {
-            description: "The path component for the claims service",
-            required: false,
           },
         },
       },

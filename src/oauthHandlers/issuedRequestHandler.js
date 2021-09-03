@@ -135,15 +135,14 @@ const nonStaticTokenHandler = async (
       return {
         status: 403,
       };
-    } else {
-      return {
-        status: 200,
-        json: {
-          static: false,
-          proxy: nonStaticDocumentResponse.proxy,
-        },
-      };
     }
+    return {
+      status: 200,
+      json: {
+        static: false,
+        proxy: nonStaticDocumentResponse.proxy,
+      },
+    };
   }
 };
 

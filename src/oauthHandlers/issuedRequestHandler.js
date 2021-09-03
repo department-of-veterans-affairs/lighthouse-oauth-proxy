@@ -7,7 +7,7 @@ const {
  * Handler for looking up tokens issued via the oauth-proxy by access_token.
  *
  * @param {*} config - The app config.
- * @param {wisston.Logger} logger - The logger.
+ * @param {winston.Logger} logger - The logger.
  * @param {DynamoClient} dynamoClient - The dynamo client.
  * @param {express.Request} req - The request object.
  * @param {express.Response} res - The next object.

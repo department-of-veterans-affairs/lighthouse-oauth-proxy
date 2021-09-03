@@ -44,8 +44,7 @@
       "jwks": "/keys",
       "grants": "/grants",
       "smart_launch": "/smart/launch",
-      "issued": "/issued",
-      "claims": "/claims"
+      "issued": "/issued"
     }
   },
   "idps": [

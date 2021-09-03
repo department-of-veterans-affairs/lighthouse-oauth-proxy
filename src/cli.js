@@ -274,10 +274,6 @@ function processArgs() {
             required: true,
             default: "/issued",
           },
-          claims: {
-            description: "The path component for the claims service",
-            required: false,
-          },
         },
       },
       idps: {

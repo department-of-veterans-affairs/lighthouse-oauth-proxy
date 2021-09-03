@@ -125,8 +125,16 @@ describe("General Flow", () => {
     req = { headers: { authorization: `Bearer ${token}` } };
     dynamoClient = {};
   });
-  it("missing token parameter returns 401", async () => {
+  it("missing authorization header returns 401", async () => {
     req = {};
+
+    await issuedRequestHandler(config, logger, dynamoClient, req, res, next);
+    expect(res.sendStatus).toHaveBeenCalledWith(401);
+    expect(next).not.toHaveBeenCalled();
+  });
+
+  it("missing bearer token returns 401", async () => {
+    req = { headers: { authorization: "Bearer " } };
 
     await issuedRequestHandler(config, logger, dynamoClient, req, res, next);
     expect(res.sendStatus).toHaveBeenCalledWith(401);

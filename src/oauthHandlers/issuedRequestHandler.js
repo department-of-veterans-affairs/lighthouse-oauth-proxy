@@ -3,8 +3,16 @@ const {
   GetDocumentByAccessTokenStrategy,
 } = require("./tokenHandlerStrategyClasses/documentStrategies/getDocumentByAccessTokenStrategy");
 
-/*
- * Handler for looking up Lighthouse issued tokens by access_token.
+/**
+ * Handler for looking up tokens issued via the oauth-proxy by access_token.
+ *
+ * @param {*} config - The app config.
+ * @param {wisston.Logger} logger - The logger.
+ * @param {DynamoClient} dynamoClient - The dynamo client.
+ * @param {express.Request} req - The request object.
+ * @param {express.Response} res - The next object.
+ * @param {Function} next - The next function.
+ * @returns {Promise<this|*>}
  */
 const issuedRequestHandler = async (
   config,
@@ -53,6 +61,14 @@ const issuedRequestHandler = async (
   return next();
 };
 
+/**
+ * Static token handler.
+ *
+ * @param {DynamoDB.BatchStatementResponse.Item} staticDocumentResponse - Dynamo document.
+ * @param {winston.Logger} logger - The logger.
+ * @param {*} config - The app config.
+ * @returns {{json: {aud: (string|string|string[]|*), static: boolean, icn: (string|{S: string}), scopes: *, expires_in: *}, status: number}|{status: number}}
+ */
 const staticTokenHandler = (staticDocumentResponse, logger, config) => {
   let token_icn_pair =
     staticDocumentResponse.access_token + "-" + staticDocumentResponse.icn;
@@ -77,6 +93,15 @@ const staticTokenHandler = (staticDocumentResponse, logger, config) => {
   };
 };
 
+/**
+ * Non-static token handler.
+ *
+ * @param {DynamoClient} dynamoClient - The dynamo client.
+ * @param {string} access_token - The un-hashed access token.
+ * @param {*} config - The app config.
+ * @param {winston.Logger} logger - The logger.
+ * @returns {Promise<{json: {proxy: *, static: boolean}, status: number}|{error: *}|{status: number}>}
+ */
 const nonStaticTokenHandler = async (
   dynamoClient,
   access_token,

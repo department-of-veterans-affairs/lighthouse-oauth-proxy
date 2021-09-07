@@ -61,6 +61,10 @@ describe("buildTokenHandlerClient Tests", () => {
   let next = jest.fn();
   let validateToken = {};
   let staticTokens = {};
+  const app_category = {
+    api_category: "/health/v1",
+    audience: "audience",
+  };
 
   it("Refresh Client Basic Auth", () => {
     req = new MockExpressRequest({
@@ -82,7 +86,8 @@ describe("buildTokenHandlerClient Tests", () => {
       res,
       next,
       validateToken,
-      staticTokens
+      staticTokens,
+      app_category
     );
 
     expect(response.getTokenStrategy).toBeInstanceOf(RefreshTokenStrategy);
@@ -116,7 +121,8 @@ describe("buildTokenHandlerClient Tests", () => {
       res,
       next,
       validateToken,
-      staticTokens
+      staticTokens,
+      app_category
     );
 
     expect(response.getTokenStrategy).toBeInstanceOf(RefreshTokenStrategy);
@@ -149,7 +155,8 @@ describe("buildTokenHandlerClient Tests", () => {
       res,
       next,
       validateToken,
-      staticTokens
+      staticTokens,
+      app_category
     );
 
     expect(response.getTokenStrategy).toBeInstanceOf(AuthorizationCodeStrategy);
@@ -183,7 +190,8 @@ describe("buildTokenHandlerClient Tests", () => {
       res,
       next,
       validateToken,
-      staticTokens
+      staticTokens,
+      app_category
     );
 
     expect(response.getTokenStrategy).toBeInstanceOf(ClientCredentialsStrategy);
@@ -220,7 +228,8 @@ describe("buildTokenHandlerClient Tests", () => {
         res,
         next,
         validateToken,
-        staticTokens
+        staticTokens,
+        app_category
       );
       fail("Requests with no grants should not return a client.");
     } catch (err) {
@@ -244,7 +253,8 @@ describe("buildTokenHandlerClient Tests", () => {
       res,
       next,
       validateToken,
-      staticTokens
+      staticTokens,
+      app_category
     );
 
     expect(response.getTokenStrategy).toBeInstanceOf(UnsupportedGrantStrategy);
@@ -268,7 +278,8 @@ describe("buildTokenHandlerClient Tests", () => {
         res,
         next,
         validateToken,
-        staticTokens
+        staticTokens,
+        app_category
       );
       fail("Invalid auth error should have been thrown.");
     } catch (err) {
@@ -298,7 +309,8 @@ describe("buildTokenHandlerClient Tests", () => {
         res,
         next,
         validateToken,
-        staticTokens
+        staticTokens,
+        app_category
       );
       fail("Invalid assertion type error should have been thrown.");
     } catch (err) {

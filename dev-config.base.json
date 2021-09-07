@@ -16,7 +16,6 @@
   "enable_smart_launch_service": true,
   "enable_issued_service": true,
   "enable_static_token_service": true,
-  "enable_claims_service": true,
   "routes": {
     "categories": [
       {
@@ -45,8 +44,7 @@
       "jwks": "/keys",
       "grants": "/grants",
       "smart_launch": "/smart/launch",
-      "issued": "/issued",
-      "claims": "/claims"
+      "issued": "/issued"
     }
   },
   "idps": [

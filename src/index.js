@@ -191,10 +191,9 @@ function buildApp(
   if (config.enable_smart_launch_service) {
     router.get(
       config.routes.app_routes.smart_launch,
-      jwtAuthorizationHandler,
       async (req, res, next) => {
         await oauthHandlers
-          .launchRequestHandler(config, logger, dynamoClient, res, next)
+          .launchRequestHandler(config, logger, dynamoClient, req, res, next)
           .catch(next);
       }
     );

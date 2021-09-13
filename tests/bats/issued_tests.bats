@@ -70,6 +70,7 @@ do_issued() {
   [ "$(cat "$curl_status")" -eq 200 ]
   [ "$(cat "$curl_body" | jq .static | tr -d '"')" == "false" ]
   [ "$(cat "$curl_body" | jq 'has("proxy")')" == "true" ]
+  [ "$(cat "$curl_body" | jq 'has("aud")')" == "true" ]
 }
 
 @test 'General. Invalid token' {

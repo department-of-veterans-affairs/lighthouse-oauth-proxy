@@ -54,13 +54,18 @@ describe("Non Static Token Flow", () => {
           {
             access_token: dynamoQueryParams.access_token,
             proxy: "proxy",
+            aud: "aud",
           },
         ],
       }),
     };
 
     await issuedRequestHandler(config, logger, dynamoClient, req, res, next);
-    expect(res.json).toHaveBeenCalledWith({ static: false, proxy: "proxy" });
+    expect(res.json).toHaveBeenCalledWith({
+      static: false,
+      proxy: "proxy",
+      aud: "aud",
+    });
     expect(next).toHaveBeenCalledWith();
   });
 });

@@ -141,6 +141,7 @@ const nonStaticTokenHandler = async (
       json: {
         static: false,
         proxy: nonStaticDocumentResponse.proxy,
+        aud: nonStaticDocumentResponse.aud,
       },
     };
   }

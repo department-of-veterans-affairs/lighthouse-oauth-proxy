@@ -131,7 +131,7 @@ get_labels:
 ## check_tag: Verifies that the tag exists in the repository
 .PHONY: check_tag
 check_tag:
-	@:$(call check_defined, IMAGE, IMAGE variable should be saml-proxy)
+	@:$(call check_defined, IMAGE, IMAGE variable should be oauth-proxy)
 	@{ \
 	CHECK_TAG=$$(aws ecr list-images  --repository-name $(NAMESPACE)/$(IMAGE) --query 'imageIds[?imageTag==`"$(TAG)"`]' --output text);\
 	if [[ -z "$${CHECK_TAG}" ]];then\

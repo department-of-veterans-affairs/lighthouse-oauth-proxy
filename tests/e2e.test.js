@@ -6,10 +6,7 @@ const qs = require("qs");
 const { Issuer } = require("openid-client");
 const { randomBytes } = require("crypto");
 
-const {
-  convertObjectToDynamoAttributeValues,
-  buildFakeOktaClient,
-} = require("./testUtils");
+const { buildFakeOktaClient } = require("./testUtils");
 const { buildBackgroundServerModule } = require("./backgroundServer");
 const upstreamOAuthTestServer = require("./upstreamOAuthTestServer");
 const {
@@ -86,18 +83,20 @@ function buildMockDynamoClient(mockDynamoClientRecord) {
       resolve({ pk: tok.state });
     });
   };
-  mockDynamoClient.queryFromDynamo = (queryParams, tableName) => {
-    return new Promise((resolve, reject) => {
+  mockDynamoClient.queryFromDynamo = (queryParams) => {
+    return new Promise((resolve) => {
       if (
         mockDynamoClientRecord &&
         mockDynamoClientRecord[Object.keys(queryParams)[0]] ===
           Object.values(queryParams)[0]
       ) {
         resolve({
-          Items: [convertObjectToDynamoAttributeValues(mockDynamoClientRecord)],
+          Items: [mockDynamoClientRecord],
         });
       } else {
-        reject(`no such ${queryParams} value on ${tableName}`);
+        resolve({
+          Items: [],
+        });
       }
     });
   };
@@ -119,6 +118,7 @@ function buildMockDynamoClient(mockDynamoClientRecord) {
       checksum:
         "c2f1a907ba44e76e140c334a1bc46e509e6e244cc2e9829a7e324d4791820d79",
     };
+
     return new Promise((resolve, reject) => {
       let searchKey = Object.keys(search_params)[0];
       if (
@@ -192,12 +192,15 @@ describe("OpenID Connect Conformance", () => {
      * Mock DynamoDB record. Note that `code` is a hash of "xzy789".
      */
     mockDynamoClient = buildMockDynamoClient({
+      access_token:
+        "e0c0ea59d52c8138944ab84d6388d6d1f32e2e4c85ff278d5983be63aa95fdcf",
       state: "abc123",
       internal_state: "1234-5678-9100-0000",
       code: "57f1cb54483a01af1fc88c6bef6c872ba4138384bf8d7444aef426269e5e8216",
       launch: "123V456",
       refresh_token: "jkl456",
       redirect_uri: FAKE_CLIENT_APP_REDIRECT_URL,
+      proxy: "proxy",
     });
 
     const fakeTokenValidator = () => {
@@ -854,6 +857,24 @@ describe("OpenID Connect Conformance", () => {
           "http://localhost:7100/services/static-only"
         );
         expect(resp.data.icn).toEqual("555");
+      })
+      .catch((err) => {
+        console.error(err);
+        expect(true).toEqual(false); // Don't expect to be here
+      });
+  });
+
+  it("returns an issued payload given an access token", async () => {
+    await axios
+      .get("http://localhost:9090/testServer/issued", {
+        headers: {
+          authorization: "Bearer token",
+        },
+      })
+      .then((resp) => {
+        expect(resp.status).toEqual(200);
+        expect(resp.data.static).toEqual(false);
+        expect(resp.data.proxy).toEqual("proxy");
       })
       .catch((err) => {
         console.error(err);

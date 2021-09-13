@@ -208,14 +208,6 @@ function buildApp(
     });
   }
 
-  if (config.enable_claims_service) {
-    router.post(config.routes.app_routes.claims, async (req, res, next) => {
-      await oauthHandlers
-        .claimsHandler(config, logger, dynamoClient, req, res, next)
-        .catch(next);
-    });
-  }
-
   app.use(well_known_base_path, router);
 
   // Error handlers. Keep as last middlewares
@@ -307,9 +299,7 @@ function buildApp(
           okta_client,
           slugHelper,
           app_category,
-          config.dynamo_oauth_requests_table,
-          config.dynamo_clients_table,
-          config.idp,
+          config,
           req,
           res,
           next
@@ -328,7 +318,7 @@ function buildApp(
           dynamoClient,
           validateToken,
           staticTokens,
-          app_category.audience,
+          app_category,
           req,
           res,
           next

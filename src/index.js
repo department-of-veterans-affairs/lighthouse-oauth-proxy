@@ -14,7 +14,6 @@ const axios = require("axios");
 const querystring = require("querystring");
 const { middlewareLogFormat, winstonMiddleware, logger } = require("./logger");
 
-const { jwtAuthorizationHandler } = require("./jwtAuthorizationHandler");
 const oauthHandlers = require("./oauthHandlers");
 const { configureTokenValidator } = require("./tokenValidation");
 const rTracer = require("cls-rtracer");

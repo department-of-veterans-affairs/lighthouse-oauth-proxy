@@ -1,4 +1,4 @@
-const { hashString } = require("../utils");
+const { hashString, parseBearerAuthorization } = require("../utils");
 const {
   GetDocumentByAccessTokenStrategy,
 } = require("./tokenHandlerStrategyClasses/documentStrategies/getDocumentByAccessTokenStrategy");
@@ -10,6 +10,7 @@ const launchRequestHandler = async (
   config,
   logger,
   dynamoClient,
+  req,
   res,
   next
 ) => {
@@ -20,7 +21,15 @@ const launchRequestHandler = async (
     hashString
   );
 
-  let hashedToken = hashString(res.locals.jwt, config.hmac_secret);
+  let access_token;
+
+  if (req.headers && req.headers.authorization) {
+    access_token = parseBearerAuthorization(req.headers.authorization);
+  }
+  if (!access_token) {
+    return res.sendStatus(401);
+  }
+  let hashedToken = hashString(access_token, config.hmac_secret);
   let documentResponse = await getDocumentStrategy.getDocument(
     hashedToken,
     config.dynamo_launch_context_table

@@ -14,7 +14,6 @@ const axios = require("axios");
 const querystring = require("querystring");
 const { middlewareLogFormat, winstonMiddleware, logger } = require("./logger");
 
-const { jwtAuthorizationHandler } = require("./jwtAuthorizationHandler");
 const oauthHandlers = require("./oauthHandlers");
 const { configureTokenValidator } = require("./tokenValidation");
 const rTracer = require("cls-rtracer");
@@ -191,10 +190,9 @@ function buildApp(
   if (config.enable_smart_launch_service) {
     router.get(
       config.routes.app_routes.smart_launch,
-      jwtAuthorizationHandler,
       async (req, res, next) => {
         await oauthHandlers
-          .launchRequestHandler(config, logger, dynamoClient, res, next)
+          .launchRequestHandler(config, logger, dynamoClient, req, res, next)
           .catch(next);
       }
     );

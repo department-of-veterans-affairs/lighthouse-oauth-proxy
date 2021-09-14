@@ -107,6 +107,12 @@ function buildMockDynamoClient(mockDynamoClientRecord) {
       access_token: hashed_smart_launch_token,
       launch: "123V456",
     };
+    const hashed_smart_launch_opaque_token =
+      "8cfe6257886a3b44bca17b204ff5900777b2501e976ca9260139aceb32c4fcd8";
+    const fakeOpaqueLaunchRecord = {
+      access_token: hashed_smart_launch_opaque_token,
+      launch: "123V456",
+    };
     const static_token = "123456789";
     const fakeStaticTokenRecord = {
       access_token: static_token,
@@ -127,6 +133,12 @@ function buildMockDynamoClient(mockDynamoClientRecord) {
         search_params[searchKey] === hashed_smart_launch_token
       ) {
         resolve({ Item: fakeLaunchRecord });
+      } else if (
+        tableName === "launch_context_table" &&
+        searchKey === "access_token" &&
+        search_params[searchKey] === hashed_smart_launch_opaque_token
+      ) {
+        resolve({ Item: fakeOpaqueLaunchRecord });
       } else if (
         tableName === "StaticTokens" &&
         searchKey === "access_token" &&
@@ -836,6 +848,23 @@ describe("OpenID Connect Conformance", () => {
       .catch((err) => {
         expect(err.response.status).toEqual(401);
         expect(err.response.statusText).toEqual("Unauthorized");
+      });
+  });
+
+  it("returns a launch context given an opaque token", async () => {
+    await axios
+      .get("http://localhost:9090/testServer/smart/launch", {
+        headers: {
+          authorization: "Bearer non-jwt-but-valid-access-token",
+        },
+      })
+      .then((resp) => {
+        expect(resp.status).toEqual(200);
+        expect(resp.data.launch).toEqual("123V456");
+      })
+      .catch((err) => {
+        console.error(err);
+        expect(true).toEqual(false); // Don't expect to be here
       });
   });
 

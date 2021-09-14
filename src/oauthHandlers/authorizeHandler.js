@@ -75,6 +75,7 @@ const authorizeHandler = async (
       client_id: client_id,
       proxy:
         config.host + config.well_known_base_path + app_category.api_category,
+      aud: app_category.audience,
     };
 
     // If the launch scope is included then also

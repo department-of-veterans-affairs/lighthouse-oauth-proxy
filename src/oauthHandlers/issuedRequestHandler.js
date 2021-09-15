@@ -36,10 +36,14 @@ const issuedRequestHandler = async (
   if (!access_token) {
     return res.sendStatus(401);
   }
-  let staticDocumentResponse = await getDocumentStrategy.getDocument(
-    access_token,
-    config.dynamo_static_token_table
-  );
+
+  let staticDocumentResponse;
+  if (config.enable_static_token_service) {
+    staticDocumentResponse = await getDocumentStrategy.getDocument(
+      access_token,
+      config.dynamo_static_token_table
+    );
+  }
 
   let response =
     staticDocumentResponse && staticDocumentResponse.access_token

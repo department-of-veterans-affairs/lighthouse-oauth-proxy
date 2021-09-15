@@ -76,6 +76,7 @@ describe("Static Token Flow", () => {
   beforeEach(() => {
     req = { headers: { authorization: `Bearer ${token}` } };
     dynamoClient = {};
+    config.enable_static_token_service = true;
   });
 
   it("Checksum does not match", async () => {
@@ -120,6 +121,23 @@ describe("Static Token Flow", () => {
       aud: "aud",
     });
     expect(next).toHaveBeenCalledWith();
+  });
+
+  it("Static token but not enabled", async () => {
+    config.enable_static_token_service = false;
+    dynamoClient = {
+      getPayloadFromDynamo: jest.fn().mockReturnValue([]),
+      queryFromDynamo: jest.fn().mockReturnValue({
+        Items: [
+          {
+            access_token: dynamoQueryParams.access_token,
+          },
+        ],
+      }),
+    };
+
+    await issuedRequestHandler(config, logger, dynamoClient, req, res, next);
+    expect(res.status).toHaveBeenCalledWith(403);
   });
 });
 

@@ -37,7 +37,7 @@ const issuedRequestHandler = async (
     return res.sendStatus(401);
   }
 
-  let staticDocumentResponse
+  let staticDocumentResponse;
   if (config.enable_static_token_service) {
     staticDocumentResponse = await getDocumentStrategy.getDocument(
       access_token,

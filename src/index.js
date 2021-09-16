@@ -112,19 +112,35 @@ function buildApp(
    */
   const proxyRequest = (req, res, redirectUrl, requestMethod, bodyencoder) => {
     delete req.headers.host;
+
+    let proxyRequest = {
+      method: requestMethod,
+      url: redirectUrl,
+      headers: req.headers,
+      responseType: "stream",
+    };
+
+    /*
+     * Build the proxied request body.
+     *
+     * Use the original request body and optionally encode it.
+     *
+     * If resulting body is empty, omit it from the proxied request.
+     */
+
     let payload = req.body;
 
     if (bodyencoder !== undefined) {
       payload = bodyencoder.stringify(req.body);
     }
 
-    axios({
-      method: requestMethod,
-      data: payload,
-      url: redirectUrl,
-      headers: req.headers,
-      responseType: "stream",
-    })
+    if (payload && Object.keys(payload).length) {
+      proxyRequest.data = payload;
+    }
+
+    // Proxy request
+
+    axios(proxyRequest)
       .then((response) => {
         setProxyResponse(response, res);
       })

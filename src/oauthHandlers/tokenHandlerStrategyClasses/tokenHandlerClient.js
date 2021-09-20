@@ -4,6 +4,7 @@ const {
   minimalError,
 } = require("../../utils");
 const { translateTokenSet } = require("../tokenResponse");
+const { staticRefreshTokenIssueCounter } = require("../../metrics");
 
 class TokenHandlerClient {
   constructor(
@@ -82,6 +83,7 @@ class TokenHandlerClient {
         if (staticToken.icn) {
           tokens.patient = staticToken.icn;
         }
+        staticRefreshTokenIssueCounter.inc();
         return {
           statusCode: 200,
           responseBody: tokens,

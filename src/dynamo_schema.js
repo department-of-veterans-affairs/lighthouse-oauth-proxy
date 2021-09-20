@@ -256,6 +256,7 @@ dynamo.createTable(tableParams, (err, data) => {
   }
 });
 
+// Unhashed refresh_token is 987654321
 function createStaticTokenEntry() {
   let itemParams = {
     TableName: "StaticTokens",

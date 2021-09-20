@@ -40,7 +40,8 @@ const refreshTokenIssueCounter = new client.Counter({
 
 const staticRefreshTokenIssueCounter = new client.Counter({
   name: "static_refresh_token_issue_counter",
-  help: "counter of number static_access_tokens issued by the static refresh flow.",
+  help:
+    "counter of number static_access_tokens issued by the static refresh flow.",
 });
 
 const clientCredentialsTokenIssueCounter = new client.Counter({
@@ -79,5 +80,5 @@ module.exports = {
   refreshTokenLifeCycleHistogram,
   missRefreshTokenCounter,
   missAuthorizationCodeCounter,
-  staticRefreshTokenIssueCounter
+  staticRefreshTokenIssueCounter,
 };

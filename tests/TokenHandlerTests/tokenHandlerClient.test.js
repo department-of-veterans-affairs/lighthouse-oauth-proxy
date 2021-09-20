@@ -133,7 +133,10 @@ describe("handleToken tests", () => {
   };
 
   it("Happy Path Static", async () => {
-    const staticRefreshCounterSpy = jest.spyOn(staticRefreshTokenIssueCounter, 'inc');
+    const staticRefreshCounterSpy = jest.spyOn(
+      staticRefreshTokenIssueCounter,
+      "inc"
+    );
     let req = new MockExpressRequest({
       body: {
         grant_type: "refresh_token",

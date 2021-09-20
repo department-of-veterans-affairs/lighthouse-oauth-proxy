@@ -13,6 +13,7 @@ const {
 const { buildFakeDynamoClient, createFakeConfig } = require("../testUtils");
 const MockExpressRequest = require("mock-express-request");
 const MockExpressResponse = require("mock-express-response");
+const { staticRefreshTokenIssueCounter } = require("../../src/metrics");
 
 describe("handleToken tests", () => {
   let getTokenResponseStrategy;
@@ -132,6 +133,7 @@ describe("handleToken tests", () => {
   };
 
   it("Happy Path Static", async () => {
+    const staticRefreshCounterSpy = jest.spyOn(staticRefreshTokenIssueCounter, 'inc');
     let req = new MockExpressRequest({
       body: {
         grant_type: "refresh_token",
@@ -174,6 +176,7 @@ describe("handleToken tests", () => {
 
     let response = await tokenHandlerClient.handleToken();
 
+    expect(staticRefreshCounterSpy).toHaveBeenCalledTimes(1);
     expect(response.statusCode).toBe(200);
     expect(response.responseBody).toStrictEqual(token);
   });

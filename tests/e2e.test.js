@@ -32,7 +32,7 @@ const defaultTestingConfig = {
   well_known_base_path: "/testServer",
   upstream_issuer: upstreamOAuthTestServer.baseUrl(),
   validate_post_endpoint: "http://localhost",
-  validate_apiKey: "fakeApiKey",
+  validate_api_key: "fakeApiKey",
   hmac_secret: "testsecret",
   dynamo_oauth_requests_table: "OAuthRequestsV2",
   dynamo_launch_context_table: "launch_context_table",

@@ -10,7 +10,7 @@
   "refresh_token_ttl": 42,
   "okta_url": "https://example.okta.com",
   "validate_post_endpoint": "https://example.com/validation",
-  "validate_api_key": "fakeApiKey",
+  "validate_apiKey": "fakeApiKey",
   "okta_token": "fakeOktaToken",
   "enable_pkce_authorization_flow": true,
   "enable_smart_launch_service": true,

@@ -8,9 +8,9 @@
 client_id=clientId123
 tests/ut_key
 
-config.validate_api_key$
-validate_api_key:\s{$
-\"?validate_api_key*\"?:\s"fakeApiKey",$
+config.validate_apiKey$
+validate_apiKey:\s{$
+\"?validate_apiKey*\"?:\s"fakeApiKey",$
 
 .*config.okta_token,$
 okta_token:\s{$

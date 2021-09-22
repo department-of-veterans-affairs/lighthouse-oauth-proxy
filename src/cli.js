@@ -79,7 +79,7 @@ function processArgs() {
         required: true,
         default: "https://sandbox-api.va.gov/internal/auth/v1/validation",
       },
-      validate_api_key: {
+      validate_apiKey: {
         description: "apiKey permitting access to validate endpoint",
       },
       idp: {

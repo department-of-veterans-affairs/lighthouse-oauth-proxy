@@ -411,7 +411,7 @@ function startApp(config, isolatedIssuers) {
 
   const validateToken = configureTokenValidator(
     config.validate_post_endpoint,
-    config.validate_api_key
+    config.validate_apiKey
   );
   const app = buildApp(
     config,

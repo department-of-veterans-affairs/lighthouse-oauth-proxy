@@ -7,3 +7,6 @@
 .*client_secret=\"*\$[A-z]*[0-9]*\"*
 client_id=clientId123
 tests/ut_key
+config.validate_api_key$
+validate_api_key:\s{$
+\"?validate_api_key*\"?:\s"fakeApiKey",$

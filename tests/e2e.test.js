@@ -262,7 +262,7 @@ describe("OpenID Connect Conformance", () => {
     );
   });
 
-  it("responds to the endpoints described in the OIDC metadata response", async (done) => {
+  it("responds to the endpoints described in the OIDC metadata response", async () => {
     // This test is making multiple requests. Theoretically it could be broken
     // up, with each request being made in a separate test. That would make it
     // much more difficult to use the metadata response to drive the requests
@@ -318,7 +318,6 @@ describe("OpenID Connect Conformance", () => {
         auth: { username: "clientId123", password: "secretXyz" },
       }
     );
-    done();
     // TODO: We should really call the token endpoint using the refresh_token
     // grant type here. Right now the openid-client library makes this a little
     // difficult. It automatically verifies the signature of the new access
@@ -329,7 +328,7 @@ describe("OpenID Connect Conformance", () => {
     // signature requirement.
   });
 
-  it("responds to the isolated api category endpoints described in the OIDC metadata response", async (done) => {
+  it("responds to the isolated api category endpoints described in the OIDC metadata response", async () => {
     // This test is making multiple requests. Theoretically it could be broken
     // up, with each request being made in a separate test. That would make it
     // much more difficult to use the metadata response to drive the requests
@@ -395,7 +394,6 @@ describe("OpenID Connect Conformance", () => {
         auth: { username: "clientId123", password: "secretXyz" },
       }
     );
-    done();
   });
 
   it("redirects the user back to the client app", async () => {

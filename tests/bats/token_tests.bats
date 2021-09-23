@@ -344,8 +344,7 @@ do_token "$(jq \
 
 @test 'Token Handler static refresh happy path' {
   if [ -z "$STATIC_REFRESH_TOKEN" ]; then
-    echo "STATIC_REFRESH_TOKEN is not provided for this test environment."
-    skip
+    skip "STATIC_REFRESH_TOKEN is not provided for this test environment."
   fi
   do_static_token "$(jq \
                 -scn \

@@ -325,8 +325,8 @@ const createFakeConfig = () => {
     okta_url: "https://deptva-eval.okta.com",
     validate_post_endpoint:
       "https://sandbox-api.va.gov/internal/auth/v1/validation",
-    validate_apiKey: "validate_apiKey",
-    okta_token: "okta_token",
+    validate_apiKey: "fakeApiKey",
+    okta_token: "fakeOktaToken",
     enable_pkce_authorization_flow: true,
     enable_okta_consent_endpoint: true,
     enable_smart_launch_service: true,

@@ -24,7 +24,7 @@ by downloading and running it following [Amazon's instructions](https://docs.aws
 git-secrets must be installed and configured to scan for AWS entries and the patterns in
 [.git-secrets-patterns](.git-secrets-patterns). Exclusions are managed in
 [.gitallowed](.gitallowed).
-The [init-git-secrets.sh](common/scripts/init-git-secrets.sh) script can be used to simply set up.
+The [init-git-secrets.sh](src/scripts/init-git-secrets.sh) script can be used to simply set up.
 This is a slim proxy for transforming and storing values from Okta's OpenID Connect service in order to be compatible with the SMART-on-FHIR auth specification.
 
 ## Requirements

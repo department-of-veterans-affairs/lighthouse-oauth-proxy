@@ -1,11 +1,5 @@
 #!/bin/sh
 
-# Will not run CI Build
-echo $BUILD_NUMBER
-if [ ! -z $BUILD_NUMBER ]; then
-  exit 0
-fi
-
 git secrets 2>&1 | grep "is not a git command" > /dev/null
 [ $? == 0 ] && echo -e "git secrets is not installed\nSee https://github.com/awslabs/git-secrets" && exit 1
 

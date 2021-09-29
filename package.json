@@ -11,7 +11,7 @@
     "lint": "npx eslint .",
     "lint-fix": "npx eslint . --fix",
     "help": "node src/index.js --help",
-    "prepare": "husky install && src/scripts/check_for_git_secrets.sh"
+    "prepare": "husky install"
   },
   "jest": {
     "clearMocks": true,

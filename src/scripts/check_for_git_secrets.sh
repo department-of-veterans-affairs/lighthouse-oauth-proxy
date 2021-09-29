@@ -1,12 +1,9 @@
 #!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
-
-set +e
 
 git secrets 2>&1 | grep "is not a git command" > /dev/null
 [ $? == 0 ] && echo -e "git secrets is not installed\nSee https://github.com/awslabs/git-secrets" && exit 1
 
-REPO=$(cd $(dirname $0)/.. && pwd)
+REPO=$(cd $(dirname $0)/../.. && pwd)
 
 if ! git config --get-all secrets.providers | grep -Fq "git secrets --aws-provider"; then
   echo "Registering AWS git-secrets-patterns"

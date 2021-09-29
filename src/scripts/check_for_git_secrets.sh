@@ -1,8 +1,8 @@
 #!/bin/sh
 
 # Will not run CI Build
-echo $CODEBUILD_BUILD_ID
-if [ ! -z $CODEBUILD_BUILD_ID ]; then
+echo $BUILD_NUMBER
+if [ ! -z $BUILD_NUMBER ]; then
   exit 0
 fi
 

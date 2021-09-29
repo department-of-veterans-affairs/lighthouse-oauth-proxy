@@ -6,6 +6,7 @@ USER node
 RUN git config --global url."https://".insteadOf git://
 COPY --chown=node:node ./package.json package.json
 COPY --chown=node:node ./package-lock.json package-lock.json
+COPY --chown=node:node ./src/scripts/check_for_git_secrets.sh src/scripts/check_for_git_secrets.sh
 RUN npm install
 
 COPY --chown=node:node ./ ./

@@ -1,9 +1,7 @@
 #!/bin/sh
 
-INODE_NUM=`ls -ali / | sed '2!d' |awk {'print $1'}`
-if [ $INODE_NUM == '1' ];
-then
-  exit 0
+if grep -sq 'docker\|lxc' /proc/1/cgroup; then
+   exit 0
 fi
 
 git secrets 2>&1 | grep "is not a git command" > /dev/null

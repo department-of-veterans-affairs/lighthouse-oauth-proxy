@@ -345,7 +345,7 @@ function buildApp(
     );
 
     router.options(api_category + app_routes.token, corsHandler);
-cors
+
     if (app_category.manage_endpoint) {
       router.get(api_category + app_routes.manage, (req, res) =>
         res.redirect(app_category.manage_endpoint)

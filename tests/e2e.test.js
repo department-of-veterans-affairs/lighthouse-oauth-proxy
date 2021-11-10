@@ -262,6 +262,27 @@ describe("OpenID Connect Conformance", () => {
     );
   });
 
+  it("allows CORS on the OIDC token endpoint", async () => {
+    const randomHeaderName = randomBytes(20).toString("hex");
+    const options = {
+      headers: {
+        origin: "http://localhost:8080",
+        "access-control-request-headers": randomHeaderName,
+      },
+    };
+    const resp = await axios.options(
+      "http://localhost:9090/testServer/token",
+      options
+    );
+    expect(resp.status).toEqual(200);
+    expect(resp.headers["access-control-allow-headers"]).toMatch(
+      randomHeaderName
+    );
+    expect(resp.headers["access-control-allow-origin"]).toMatch(
+      FAKE_CLIENT_APP_URL_PATTERN
+    );
+  });
+
   it("responds to the endpoints described in the OIDC metadata response", async () => {
     // This test is making multiple requests. Theoretically it could be broken
     // up, with each request being made in a separate test. That would make it

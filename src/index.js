@@ -322,23 +322,29 @@ function buildApp(
     });
 
     const staticTokens = new Map();
-    router.post(api_category + app_routes.token, async (req, res, next) => {
-      await oauthHandlers
-        .tokenHandler(
-          config,
-          redirect_uri,
-          logger,
-          service_issuer,
-          dynamoClient,
-          validateToken,
-          staticTokens,
-          app_category,
-          req,
-          res,
-          next
-        )
-        .catch(next);
-    });
+    router.post(
+      api_category + app_routes.token,
+      corsHandler,
+      async (req, res, next) => {
+        await oauthHandlers
+          .tokenHandler(
+            config,
+            redirect_uri,
+            logger,
+            service_issuer,
+            dynamoClient,
+            validateToken,
+            staticTokens,
+            app_category,
+            req,
+            res,
+            next
+          )
+          .catch(next);
+      }
+    );
+
+    router.options(api_category + app_routes.token, corsHandler);
 
     if (app_category.manage_endpoint) {
       router.get(api_category + app_routes.manage, (req, res) =>

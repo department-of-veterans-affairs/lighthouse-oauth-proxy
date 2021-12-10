@@ -78,7 +78,7 @@ describe("saveDocumentStateStrategy tests", () => {
       state: STATE,
       code: CODE_HASH_PAIR[1],
       refresh_token: REFRESH_TOKEN_HASH_PAIR[1],
-      redirect_uri: REDIRECT_URI
+      redirect_uri: REDIRECT_URI,
     });
     let strategy = new SaveDocumentStateStrategy(
       req,

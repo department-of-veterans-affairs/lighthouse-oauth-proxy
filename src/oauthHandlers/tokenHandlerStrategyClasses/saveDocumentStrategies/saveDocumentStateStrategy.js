@@ -2,7 +2,6 @@ const { hashString } = require("../../../utils");
 const {
   addDays,
   getUnixTime,
-  subDays,
   fromUnixTime,
   differenceInDays,
 } = require("date-fns");
@@ -15,8 +14,6 @@ class SaveDocumentStateStrategy {
    * @param {*} config - The app config.
    * @param {string} issuer - The token's issuer.
    * @param {client.Histogram} refreshTokenLifeCycleHistogram - The prometheus metric.
-   * @param {string} temp_client_id - The client ID.
-   * @param {*} temp_api_category - The proxy route config.
    */
   constructor(
     req,
@@ -24,9 +21,7 @@ class SaveDocumentStateStrategy {
     dynamoClient,
     config,
     issuer,
-    refreshTokenLifeCycleHistogram,
-    temp_client_id,
-    temp_api_category
+    refreshTokenLifeCycleHistogram
   ) {
     this.req = req;
     this.logger = logger;
@@ -34,8 +29,6 @@ class SaveDocumentStateStrategy {
     this.config = config;
     this.issuer = issuer;
     this.refreshTokenLifeCycleHistogram = refreshTokenLifeCycleHistogram;
-    this.temp_client_id = temp_client_id;
-    this.temp_api_category = temp_api_category;
   }
   async saveDocumentToDynamo(document, tokens) {
     try {
@@ -49,28 +42,6 @@ class SaveDocumentStateStrategy {
           issued_on: getUnixTime(Date.now()),
         };
 
-        /*
-         * Legacy records may not have a proxy. This back-fills those records.
-         * This logic can be removed once all records are updated (~42 days from
-         * commit/release).
-         *
-         * "New" records get this set at authorization.
-         */
-        updated_document.proxy =
-          this.config.host +
-          this.config.well_known_base_path +
-          this.temp_api_category;
-
-        /*
-         * Legacy records may not have a client_id. This back-fills those records.
-         * This logic can be removed once all records are updated (~42 days from
-         * commit/release).
-         *
-         * "New" records get this set at authorization.
-         */
-        document.client_id = this.temp_client_id;
-        updated_document.client_id = document.client_id;
-
         if (tokens.refresh_token) {
           updated_document.refresh_token = hashString(
             tokens.refresh_token,
@@ -79,19 +50,9 @@ class SaveDocumentStateStrategy {
 
           /*
            * If replacing a refresh token, record metrics about its usage.
-           *
-           * Legacy records may not have an issued_on value. Assume these to be
-           * issued 42 days prior to its expiration. This logic can be removed
-           * once all documents are updated (~42 days from commit/release).
-           *
-           * Note this number is intentionally hardcoded to not change when the
-           * config.refresh_token_ttl value is updated.
            */
           if (document.refresh_token) {
             let issued_on = fromUnixTime(document.issued_on);
-            if (!document.issued_on) {
-              issued_on = subDays(fromUnixTime(document.expires_on), 42);
-            }
 
             this.refreshTokenLifeCycleHistogram
               .labels({ client_id: document.client_id })

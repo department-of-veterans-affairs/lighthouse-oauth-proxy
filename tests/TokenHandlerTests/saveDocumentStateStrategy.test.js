@@ -28,7 +28,6 @@ const REFRESH_TOKEN_HASH_PAIR = [
   "9b4dba523ad0a7e323452871556d691787cd90c6fe959b040c5864979db5e337",
 ];
 const REDIRECT_URI = "http://localhost/thisDoesNotMatter";
-const API_CATEGORY = { api_category: "/health/v1" };
 
 let dynamoClient;
 let config;
@@ -55,6 +54,8 @@ describe("saveDocumentStateStrategy tests", () => {
       refresh_token: REFRESH_TOKEN_HASH_PAIR[0],
       redirect_uri: REDIRECT_URI,
       expires_on: new Date("1995-08-03T00:00:00.000+08:00").getTime() / 1000,
+      client_id: CLIENT_ID,
+      issued_on: new Date("1995-06-22T00:00:00.000+08:00").getTime() / 1000,
     };
     tokens = buildToken(false, true, true, "launch");
     jest.useFakeTimers("modern");
@@ -85,9 +86,7 @@ describe("saveDocumentStateStrategy tests", () => {
       dynamoClient,
       config,
       issuer,
-      mockRefreshTokenLifeCycleHistogram,
-      CLIENT_ID,
-      API_CATEGORY
+      mockRefreshTokenLifeCycleHistogram
     );
     await strategy.saveDocumentToDynamo(document, tokens);
     expect(logger.error).not.toHaveBeenCalled();
@@ -96,11 +95,9 @@ describe("saveDocumentStateStrategy tests", () => {
       expect.objectContaining({
         access_token:
           "4116ff9d9b7bb73aff7680b14eb012670eb93cfc7266f142f13bd1486ae6cbb1",
-        client_id: CLIENT_ID,
         expires_on: expect.any(Number),
         iss: issuer,
         issued_on: expect.any(Number),
-        proxy: config.host + config.well_known_base_path + API_CATEGORY,
         refresh_token: REFRESH_TOKEN_HASH_PAIR[1],
       }),
       config.dynamo_oauth_requests_table
@@ -124,9 +121,7 @@ describe("saveDocumentStateStrategy tests", () => {
       dynamoClient,
       config,
       "issuer",
-      mockRefreshTokenLifeCycleHistogram,
-      CLIENT_ID,
-      API_CATEGORY
+      mockRefreshTokenLifeCycleHistogram
     );
     delete document.refresh_token;
     await strategy.saveDocumentToDynamo(document, tokens);
@@ -149,9 +144,7 @@ describe("saveDocumentStateStrategy tests", () => {
       dynamoClient,
       config,
       "issuer",
-      mockRefreshTokenLifeCycleHistogram,
-      CLIENT_ID,
-      API_CATEGORY
+      mockRefreshTokenLifeCycleHistogram
     );
     await strategy.saveDocumentToDynamo(document, tokens);
     expect(dynamoClient.savePayloadToDynamo).toHaveBeenCalledWith(
@@ -185,9 +178,7 @@ describe("saveDocumentStateStrategy tests", () => {
       dynamoClient,
       config,
       "issuer",
-      mockRefreshTokenLifeCycleHistogram,
-      CLIENT_ID,
-      API_CATEGORY
+      mockRefreshTokenLifeCycleHistogram
     );
     tokens = buildToken(false, true, false, "");
     await strategy.saveDocumentToDynamo(document, tokens);
@@ -213,9 +204,7 @@ describe("saveDocumentStateStrategy tests", () => {
       dynamoClient,
       config,
       "issuer",
-      mockRefreshTokenLifeCycleHistogram,
-      CLIENT_ID,
-      API_CATEGORY
+      mockRefreshTokenLifeCycleHistogram
     );
     try {
       await strategy.saveDocumentToDynamo(document, tokens);
@@ -245,9 +234,7 @@ describe("saveDocumentStateStrategy tests", () => {
       dynamoClient,
       config,
       "issuer",
-      mockRefreshTokenLifeCycleHistogram,
-      CLIENT_ID,
-      API_CATEGORY
+      mockRefreshTokenLifeCycleHistogram
     );
 
     delete tokens.refresh_token;
@@ -280,9 +267,7 @@ describe("saveDocumentStateStrategy tests", () => {
       dynamoClient,
       config,
       "issuer",
-      mockRefreshTokenLifeCycleHistogram,
-      CLIENT_ID,
-      API_CATEGORY
+      mockRefreshTokenLifeCycleHistogram
     );
     await strategy.saveDocumentToDynamo(document, tokens);
     expect(mockRefreshTokenLifeCycleHistogram.observe).not.toHaveBeenCalled();
@@ -300,9 +285,7 @@ describe("saveDocumentStateStrategy tests", () => {
       dynamoClient,
       config,
       "issuer",
-      mockRefreshTokenLifeCycleHistogram,
-      CLIENT_ID,
-      API_CATEGORY
+      mockRefreshTokenLifeCycleHistogram
     );
     await strategy.saveDocumentToDynamo(document, tokens);
     expect(mockRefreshTokenLifeCycleHistogram.labels).toHaveBeenCalledWith({

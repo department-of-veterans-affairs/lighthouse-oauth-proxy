@@ -145,9 +145,7 @@ const getStrategies = (
         dynamoClient,
         config,
         issuer.issuer,
-        refreshTokenLifeCycleHistogram,
-        clientMetadata.client_id,
-        app_category.api_category
+        refreshTokenLifeCycleHistogram
       ),
       getPatientInfoStrategy: new GetPatientInfoFromValidateEndpointStrategy(
         validateToken,
@@ -178,9 +176,7 @@ const getStrategies = (
         dynamoClient,
         config,
         issuer.issuer,
-        refreshTokenLifeCycleHistogram,
-        clientMetadata.client_id,
-        app_category.api_category
+        refreshTokenLifeCycleHistogram
       ),
       getPatientInfoStrategy: new GetPatientInfoFromValidateEndpointStrategy(
         validateToken,

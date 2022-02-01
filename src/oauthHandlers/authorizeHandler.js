@@ -162,6 +162,12 @@ const validateClient = async (
     };
   }
 
+  let serverClientId = await screenForV2ClientId(
+    client_id,
+    dynamoClient,
+    dynamo_clients_table
+  );
+
   if (!client_redirect) {
     logger.error("No valid redirect_uri was found.");
     return {
@@ -175,7 +181,7 @@ const validateClient = async (
   if (app_category.client_store && app_category.client_store === "local") {
     return await localValidateClient(
       logger,
-      client_id,
+      serverClientId,
       client_redirect,
       dynamoClient,
       dynamo_clients_table
@@ -185,9 +191,33 @@ const validateClient = async (
   return await serverValidateClient(
     oktaClient,
     logger,
-    client_id,
+    serverClientId,
     client_redirect
   );
+};
+
+const screenForV2ClientId = async (
+  client_id,
+  dynamoClient,
+  dynamo_clients_table
+) => {
+  let clientId = client_id;
+  try {
+    let clientInfo = await dynamoClient.getPayloadFromDynamo(
+      {
+        client_id: client_id,
+      },
+      dynamo_clients_table
+    );
+    if (clientInfo.Item) {
+      clientId = clientInfo.Item.v2_client_id
+        ? clientInfo.Item.v2_client_id
+        : client_id;
+    }
+  } catch (err) {
+    // No client entry
+  }
+  return clientId;
 };
 
 /**

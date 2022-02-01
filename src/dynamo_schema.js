@@ -313,4 +313,26 @@ function createTestClientEntry() {
       console.log(data);
     }
   });
+  itemParams = {
+    TableName: "Clients",
+    Item: {
+      client_id: { S: "testclient2" },
+      redirect_uris: {
+        SS: ["http://localhost:8080/auth/cb", "http://localhost:18080/auth/cb"],
+      },
+      system: { S: "oauthi" },
+      v2_client_id: { S: "v2_testclient2" },
+    },
+  };
+  dynamo.putItem(itemParams, (err, data) => {
+    if (err) {
+      console.error(
+        "Unable to create test client. Error JSON:",
+        JSON.stringify(err, null, 2)
+      );
+    } else {
+      console.log("Created test client.");
+      console.log(data);
+    }
+  });
 }

@@ -150,6 +150,30 @@ const handleOpenIdClientError = (error) => {
   };
 };
 
+const screenForV2ClientId = async (
+  client_id,
+  dynamoClient,
+  dynamo_clients_table
+) => {
+  let clientId = client_id;
+  try {
+    let clientInfo = await dynamoClient.getPayloadFromDynamo(
+      {
+        client_id: client_id,
+      },
+      dynamo_clients_table
+    );
+    if (clientInfo.Item) {
+      clientId = clientInfo.Item.v2_client_id
+        ? clientInfo.Item.v2_client_id
+        : client_id;
+    }
+  } catch (err) {
+    // No client entry
+  }
+  return clientId;
+};
+
 module.exports = {
   isRuntimeError,
   rethrowIfRuntimeError,
@@ -161,4 +185,5 @@ module.exports = {
   parseBearerAuthorization,
   minimalError,
   handleOpenIdClientError,
+  screenForV2ClientId,
 };

@@ -2,7 +2,7 @@ const { URLSearchParams, URL } = require("url");
 const { loginBegin } = require("../metrics");
 const { v4: uuidv4 } = require("uuid");
 const { addMinutes, getUnixTime } = require("date-fns");
-
+const { screenForV2ClientId } = require("../utils");
 /**
  * Checks for valid authorization request and proxies to authorization server.
  *
@@ -195,30 +195,6 @@ const validateClient = async (
     client_id,
     client_redirect
   );
-};
-
-const screenForV2ClientId = async (
-  client_id,
-  dynamoClient,
-  dynamo_clients_table
-) => {
-  let clientId = client_id;
-  try {
-    let clientInfo = await dynamoClient.getPayloadFromDynamo(
-      {
-        client_id: client_id,
-      },
-      dynamo_clients_table
-    );
-    if (clientInfo.Item) {
-      clientId = clientInfo.Item.v2_client_id
-        ? clientInfo.Item.v2_client_id
-        : client_id;
-    }
-  } catch (err) {
-    // No client entry
-  }
-  return clientId;
 };
 
 /**

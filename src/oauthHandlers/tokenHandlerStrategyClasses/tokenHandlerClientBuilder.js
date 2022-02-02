@@ -58,7 +58,7 @@ const {
  * @param {*} app_category - The proxy route config.
  * @returns {TokenHandlerClient} a token handler client.
  */
-const buildTokenHandlerClient = (
+const buildTokenHandlerClient = async (
   redirect_uri,
   issuer,
   logger,
@@ -71,7 +71,7 @@ const buildTokenHandlerClient = (
   staticTokens,
   app_category
 ) => {
-  const strategies = getStrategies(
+  const strategies = await getStrategies(
     redirect_uri,
     issuer,
     logger,
@@ -113,7 +113,7 @@ const buildTokenHandlerClient = (
  * @param {*} app_category - The proxy route config.
  * @returns {*} an object of strategies.
  */
-const getStrategies = (
+const getStrategies = async (
   redirect_uri,
   issuer,
   logger,
@@ -161,7 +161,7 @@ const getStrategies = (
       dbMissCounter: missRefreshTokenCounter,
     };
   } else if (req.body.grant_type === "authorization_code") {
-    const clientMetadata = createClientMetadata(
+    const clientMetadata = await createClientMetadata(
       redirect_uri,
       req,
       config,
@@ -237,7 +237,7 @@ const getStrategies = (
   return strategies;
 };
 
-function createClientMetadata(redirect_uri, req, config, dynamoClient) {
+async function createClientMetadata(redirect_uri, req, config, dynamoClient) {
   let clientMetadata = {
     redirect_uris: [redirect_uri],
   };
@@ -262,18 +262,13 @@ function createClientMetadata(redirect_uri, req, config, dynamoClient) {
       error_description: "Client authentication failed",
     };
   }
-  screenForV2ClientId(
+  clientMetadata.client_id = await screenForV2ClientId(
     clientMetadata.client_id,
     dynamoClient,
     config.dynamo_clients_table
-  )
-    .then((screenedClientId) => {
-      clientMetadata.client_id = screenedClientId;
-      return clientMetadata;
-    })
-    .catch(() => {
-      return clientMetadata;
-    });
+  );
+
+  return clientMetadata;
 }
 
 module.exports = { buildTokenHandlerClient };

@@ -34,7 +34,7 @@ const tokenHandler = async (
 ) => {
   let tokenHandlerClient;
   try {
-    tokenHandlerClient = buildTokenHandlerClient(
+    tokenHandlerClient = await buildTokenHandlerClient(
       redirect_uri,
       issuer,
       logger,

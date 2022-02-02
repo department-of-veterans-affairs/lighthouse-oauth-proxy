@@ -34,9 +34,15 @@ const authorizeHandler = async (
   loginBegin.inc();
   const { state, client_id, redirect_uri: client_redirect } = req.query;
 
+  let screenedClientId = await screenForV2ClientId(
+    client_id,
+    dynamoClient,
+    config.dynamo_clients_table
+  );
+
   let clientValidation = await validateClient(
     logger,
-    client_id,
+    screenedClientId,
     client_redirect,
     dynamoClient,
     config.dynamo_clients_table,
@@ -72,7 +78,7 @@ const authorizeHandler = async (
       state: state,
       redirect_uri: client_redirect,
       expires_on: getUnixTime(addMinutes(Date.now(), 10)),
-      client_id: client_id,
+      client_id: screenedClientId,
       proxy:
         config.host + config.well_known_base_path + app_category.api_category,
       aud: app_category.audience,
@@ -100,6 +106,7 @@ const authorizeHandler = async (
   }
 
   const params = new URLSearchParams(req.query);
+  params.set("client_id", screenedClientId);
   params.set("redirect_uri", redirect_uri);
   // Rewrite to an internally maintained state
   params.set("state", internal_state);
@@ -162,12 +169,6 @@ const validateClient = async (
     };
   }
 
-  let serverClientId = await screenForV2ClientId(
-    client_id,
-    dynamoClient,
-    dynamo_clients_table
-  );
-
   if (!client_redirect) {
     logger.error("No valid redirect_uri was found.");
     return {
@@ -181,7 +182,7 @@ const validateClient = async (
   if (app_category.client_store && app_category.client_store === "local") {
     return await localValidateClient(
       logger,
-      serverClientId,
+      client_id,
       client_redirect,
       dynamoClient,
       dynamo_clients_table
@@ -191,7 +192,7 @@ const validateClient = async (
   return await serverValidateClient(
     oktaClient,
     logger,
-    serverClientId,
+    client_id,
     client_redirect
   );
 };

@@ -32,7 +32,7 @@ const {
 const {
   GetPatientInfoFromLaunchStrategy,
 } = require("./getPatientInfoStrategies/getPatientInfoFromLaunchStrategy");
-const { parseBasicAuth } = require("../../utils");
+const { parseBasicAuth, screenForV2ClientId } = require("../../utils");
 const {
   codeTokenIssueCounter,
   refreshTokenIssueCounter,
@@ -126,7 +126,12 @@ const getStrategies = (
 ) => {
   let strategies;
   if (req.body.grant_type === "refresh_token") {
-    const clientMetadata = createClientMetadata(redirect_uri, req, config);
+    const clientMetadata = createClientMetadata(
+      redirect_uri,
+      req,
+      config,
+      dynamoClient
+    );
     strategies = {
       getTokenStrategy: new RefreshTokenStrategy(
         req,
@@ -156,13 +161,19 @@ const getStrategies = (
       dbMissCounter: missRefreshTokenCounter,
     };
   } else if (req.body.grant_type === "authorization_code") {
-    const clientMetadata = createClientMetadata(redirect_uri, req, config);
+    const clientMetadata = createClientMetadata(
+      redirect_uri,
+      req,
+      config,
+      dynamoClient
+    );
+    let issuerClient = new issuer.Client(clientMetadata);
     strategies = {
       getTokenStrategy: new AuthorizationCodeStrategy(
         req,
         logger,
         redirect_uri,
-        new issuer.Client(clientMetadata)
+        issuerClient
       ),
       getDocumentFromDynamoStrategy: new GetDocumentByCodeStrategy(
         req,
@@ -226,7 +237,7 @@ const getStrategies = (
   return strategies;
 };
 
-function createClientMetadata(redirect_uri, req, config) {
+function createClientMetadata(redirect_uri, req, config, dynamoClient) {
   let clientMetadata = {
     redirect_uris: [redirect_uri],
   };
@@ -251,7 +262,18 @@ function createClientMetadata(redirect_uri, req, config) {
       error_description: "Client authentication failed",
     };
   }
-  return clientMetadata;
+  screenForV2ClientId(
+    clientMetadata.client_id,
+    dynamoClient,
+    config.dynamo_clients_table
+  )
+    .then((screenedClientId) => {
+      clientMetadata.client_id = screenedClientId;
+      return clientMetadata;
+    })
+    .catch(() => {
+      return clientMetadata;
+    });
 }
 
 module.exports = { buildTokenHandlerClient };

@@ -32,7 +32,7 @@ const {
 const {
   GetPatientInfoFromLaunchStrategy,
 } = require("./getPatientInfoStrategies/getPatientInfoFromLaunchStrategy");
-const { parseBasicAuth } = require("../../utils");
+const { parseBasicAuth, screenForV2ClientId } = require("../../utils");
 const {
   codeTokenIssueCounter,
   refreshTokenIssueCounter,
@@ -58,7 +58,7 @@ const {
  * @param {*} app_category - The proxy route config.
  * @returns {TokenHandlerClient} a token handler client.
  */
-const buildTokenHandlerClient = (
+const buildTokenHandlerClient = async (
   redirect_uri,
   issuer,
   logger,
@@ -71,7 +71,7 @@ const buildTokenHandlerClient = (
   staticTokens,
   app_category
 ) => {
-  const strategies = getStrategies(
+  const strategies = await getStrategies(
     redirect_uri,
     issuer,
     logger,
@@ -113,7 +113,7 @@ const buildTokenHandlerClient = (
  * @param {*} app_category - The proxy route config.
  * @returns {*} an object of strategies.
  */
-const getStrategies = (
+const getStrategies = async (
   redirect_uri,
   issuer,
   logger,
@@ -126,7 +126,12 @@ const getStrategies = (
 ) => {
   let strategies;
   if (req.body.grant_type === "refresh_token") {
-    const clientMetadata = createClientMetadata(redirect_uri, req, config);
+    const clientMetadata = createClientMetadata(
+      redirect_uri,
+      req,
+      config,
+      dynamoClient
+    );
     strategies = {
       getTokenStrategy: new RefreshTokenStrategy(
         req,
@@ -156,13 +161,19 @@ const getStrategies = (
       dbMissCounter: missRefreshTokenCounter,
     };
   } else if (req.body.grant_type === "authorization_code") {
-    const clientMetadata = createClientMetadata(redirect_uri, req, config);
+    const clientMetadata = await createClientMetadata(
+      redirect_uri,
+      req,
+      config,
+      dynamoClient
+    );
+    let issuerClient = new issuer.Client(clientMetadata);
     strategies = {
       getTokenStrategy: new AuthorizationCodeStrategy(
         req,
         logger,
         redirect_uri,
-        new issuer.Client(clientMetadata)
+        issuerClient
       ),
       getDocumentFromDynamoStrategy: new GetDocumentByCodeStrategy(
         req,
@@ -226,7 +237,7 @@ const getStrategies = (
   return strategies;
 };
 
-function createClientMetadata(redirect_uri, req, config) {
+async function createClientMetadata(redirect_uri, req, config, dynamoClient) {
   let clientMetadata = {
     redirect_uris: [redirect_uri],
   };
@@ -251,6 +262,12 @@ function createClientMetadata(redirect_uri, req, config) {
       error_description: "Client authentication failed",
     };
   }
+  clientMetadata.client_id = await screenForV2ClientId(
+    clientMetadata.client_id,
+    dynamoClient,
+    config.dynamo_clients_table
+  );
+
   return clientMetadata;
 }
 

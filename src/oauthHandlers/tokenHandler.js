@@ -32,38 +32,38 @@ const tokenHandler = async (
   res,
   next
 ) => {
-  buildTokenHandlerClient(
-    redirect_uri,
-    issuer,
-    logger,
-    dynamoClient,
-    config,
-    req,
-    res,
-    next,
-    validateToken,
-    staticTokens,
-    app_category
-  )
-    .then((tokenHandlerClient) => {
-      tokenHandlerClient
-        .handleToken()
-        .then((tokenResponse) => {
-          res.status(tokenResponse.statusCode).json(tokenResponse.responseBody);
-          return next();
-        })
-        .catch((err) => {
-          return next(err);
-        });
-    })
-    .catch((error) => {
-      rethrowIfRuntimeError(error);
-      res.status(error.status).json({
-        error: error.error,
-        error_description: error.error_description,
-      });
-      return next();
+  let tokenHandlerClient;
+  try {
+    tokenHandlerClient = await buildTokenHandlerClient(
+      redirect_uri,
+      issuer,
+      logger,
+      dynamoClient,
+      config,
+      req,
+      res,
+      next,
+      validateToken,
+      staticTokens,
+      app_category
+    );
+  } catch (error) {
+    rethrowIfRuntimeError(error);
+    res.status(error.status).json({
+      error: error.error,
+      error_description: error.error_description,
     });
+    return next();
+  }
+
+  let tokenResponse;
+  try {
+    tokenResponse = await tokenHandlerClient.handleToken();
+  } catch (err) {
+    return next(err);
+  }
+  res.status(tokenResponse.statusCode).json(tokenResponse.responseBody);
+  return next();
 };
 
 module.exports = tokenHandler;

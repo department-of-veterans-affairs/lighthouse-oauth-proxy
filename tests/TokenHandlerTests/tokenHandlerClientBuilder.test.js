@@ -50,7 +50,7 @@ const {
 } = require("../../src/metrics");
 
 require("jest");
-
+jest.f;
 describe("buildTokenHandlerClient Tests", () => {
   let redirect_uri = "https://redirect.com";
   let issuer = new FakeIssuer();
@@ -270,33 +270,41 @@ describe("buildTokenHandlerClient Tests", () => {
   });
 
   it("Code Client Invalid Auth", () => {
-    req.body.grant_type = "authorization_code";
     req = new MockExpressRequest({
       body: {
         grant_type: "authorization_code",
       },
     });
 
-    buildTokenHandlerClient(
-      redirect_uri,
-      issuer,
-      logger,
-      dynamoClient,
-      config,
-      req,
-      res,
-      next,
-      validateToken,
-      staticTokens,
-      app_category
-    )
-      .then(fail("Invalid auth error should have been thrown."))
-      .catch((err) => {
-        expect(err.status).toBe(401);
-        expect(err.error).toBe("invalid_client");
-        expect(err.error_description).toBe("Client authentication failed");
-        return;
-      });
+    try {
+      buildTokenHandlerClient(
+        redirect_uri,
+        issuer,
+        logger,
+        dynamoClient,
+        config,
+        req,
+        res,
+        next,
+        validateToken,
+        staticTokens,
+        app_category
+      )
+        .then(() => {
+          throw new Error("Invalid auth error should have been thrown.");
+        })
+        .catch((err) => {
+          expect(err.status).toBe(401);
+          expect(err.error).toBe("invalid_client");
+          expect(err.error_description).toBe("Client authentication failed");
+          return;
+        });
+    } catch (err) {
+      expect(err.status).toBe(401);
+      expect(err.error).toBe("invalid_client");
+      expect(err.error_description).toBe("Client authentication failed");
+      return;
+    }
   });
 
   it("ClientCredentials Client Invalid Assertion Type", () => {

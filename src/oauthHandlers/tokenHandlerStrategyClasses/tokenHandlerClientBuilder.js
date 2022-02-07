@@ -126,7 +126,7 @@ const getStrategies = async (
 ) => {
   let strategies;
   if (req.body.grant_type === "refresh_token") {
-    const clientMetadata = createClientMetadata(
+    const clientMetadata = await createClientMetadata(
       redirect_uri,
       req,
       config,

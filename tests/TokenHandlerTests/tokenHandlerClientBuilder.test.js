@@ -48,8 +48,9 @@ const {
   refreshTokenIssueCounter,
   clientCredentialsTokenIssueCounter,
 } = require("../../src/metrics");
-require("jest");
 
+require("jest");
+jest.f;
 describe("buildTokenHandlerClient Tests", () => {
   let redirect_uri = "https://redirect.com";
   let issuer = new FakeIssuer();
@@ -76,7 +77,7 @@ describe("buildTokenHandlerClient Tests", () => {
       },
     });
 
-    let response = buildTokenHandlerClient(
+    buildTokenHandlerClient(
       redirect_uri,
       issuer,
       logger,
@@ -88,19 +89,19 @@ describe("buildTokenHandlerClient Tests", () => {
       validateToken,
       staticTokens,
       app_category
-    );
-
-    expect(response.getTokenStrategy).toBeInstanceOf(RefreshTokenStrategy);
-    expect(response.getDocumentStrategy).toBeInstanceOf(
-      GetDocumentByRefreshTokenStrategy
-    );
-    expect(response.saveDocumentToDynamoStrategy).toBeInstanceOf(
-      SaveDocumentStateStrategy
-    );
-    expect(response.getPatientInfoStrategy).toBeInstanceOf(
-      GetPatientInfoFromValidateEndpointStrategy
-    );
-    expect(response.tokenIssueCounter).toBe(refreshTokenIssueCounter);
+    ).then((response) => {
+      expect(response.getTokenStrategy).toBeInstanceOf(RefreshTokenStrategy);
+      expect(response.getDocumentStrategy).toBeInstanceOf(
+        GetDocumentByRefreshTokenStrategy
+      );
+      expect(response.saveDocumentToDynamoStrategy).toBeInstanceOf(
+        SaveDocumentStateStrategy
+      );
+      expect(response.getPatientInfoStrategy).toBeInstanceOf(
+        GetPatientInfoFromValidateEndpointStrategy
+      );
+      expect(response.tokenIssueCounter).toBe(refreshTokenIssueCounter);
+    });
   });
 
   it("Refresh Client Body Auth", () => {
@@ -111,7 +112,7 @@ describe("buildTokenHandlerClient Tests", () => {
         client_secret: "client secret",
       },
     });
-    let response = buildTokenHandlerClient(
+    buildTokenHandlerClient(
       redirect_uri,
       issuer,
       logger,
@@ -123,19 +124,19 @@ describe("buildTokenHandlerClient Tests", () => {
       validateToken,
       staticTokens,
       app_category
-    );
-
-    expect(response.getTokenStrategy).toBeInstanceOf(RefreshTokenStrategy);
-    expect(response.getDocumentStrategy).toBeInstanceOf(
-      GetDocumentByRefreshTokenStrategy
-    );
-    expect(response.saveDocumentToDynamoStrategy).toBeInstanceOf(
-      SaveDocumentStateStrategy
-    );
-    expect(response.getPatientInfoStrategy).toBeInstanceOf(
-      GetPatientInfoFromValidateEndpointStrategy
-    );
-    expect(response.tokenIssueCounter).toBe(refreshTokenIssueCounter);
+    ).then((response) => {
+      expect(response.getTokenStrategy).toBeInstanceOf(RefreshTokenStrategy);
+      expect(response.getDocumentStrategy).toBeInstanceOf(
+        GetDocumentByRefreshTokenStrategy
+      );
+      expect(response.saveDocumentToDynamoStrategy).toBeInstanceOf(
+        SaveDocumentStateStrategy
+      );
+      expect(response.getPatientInfoStrategy).toBeInstanceOf(
+        GetPatientInfoFromValidateEndpointStrategy
+      );
+      expect(response.tokenIssueCounter).toBe(refreshTokenIssueCounter);
+    });
   });
 
   it("Code Client PKCE Auth", () => {
@@ -145,7 +146,7 @@ describe("buildTokenHandlerClient Tests", () => {
         client_id: "client id",
       },
     });
-    let response = buildTokenHandlerClient(
+    buildTokenHandlerClient(
       redirect_uri,
       issuer,
       logger,
@@ -157,19 +158,21 @@ describe("buildTokenHandlerClient Tests", () => {
       validateToken,
       staticTokens,
       app_category
-    );
-
-    expect(response.getTokenStrategy).toBeInstanceOf(AuthorizationCodeStrategy);
-    expect(response.getDocumentStrategy).toBeInstanceOf(
-      GetDocumentByCodeStrategy
-    );
-    expect(response.saveDocumentToDynamoStrategy).toBeInstanceOf(
-      SaveDocumentStateStrategy
-    );
-    expect(response.getPatientInfoStrategy).toBeInstanceOf(
-      GetPatientInfoFromValidateEndpointStrategy
-    );
-    expect(response.tokenIssueCounter).toBe(codeTokenIssueCounter);
+    ).then((response) => {
+      expect(response.getTokenStrategy).toBeInstanceOf(
+        AuthorizationCodeStrategy
+      );
+      expect(response.getDocumentStrategy).toBeInstanceOf(
+        GetDocumentByCodeStrategy
+      );
+      expect(response.saveDocumentToDynamoStrategy).toBeInstanceOf(
+        SaveDocumentStateStrategy
+      );
+      expect(response.getPatientInfoStrategy).toBeInstanceOf(
+        GetPatientInfoFromValidateEndpointStrategy
+      );
+      expect(response.tokenIssueCounter).toBe(codeTokenIssueCounter);
+    });
   });
 
   it("ClientCredentials Client", () => {
@@ -180,7 +183,7 @@ describe("buildTokenHandlerClient Tests", () => {
           "urn:ietf:params:oauth:client-assertion-type:jwt-bearer",
       },
     });
-    let response = buildTokenHandlerClient(
+    buildTokenHandlerClient(
       redirect_uri,
       issuer,
       logger,
@@ -192,19 +195,23 @@ describe("buildTokenHandlerClient Tests", () => {
       validateToken,
       staticTokens,
       app_category
-    );
-
-    expect(response.getTokenStrategy).toBeInstanceOf(ClientCredentialsStrategy);
-    expect(response.getDocumentStrategy).toBeInstanceOf(
-      GetDocumentByLaunchStrategy
-    );
-    expect(response.saveDocumentToDynamoStrategy).toBeInstanceOf(
-      SaveDocumentLaunchStrategy
-    );
-    expect(response.getPatientInfoStrategy).toBeInstanceOf(
-      GetPatientInfoFromLaunchStrategy
-    );
-    expect(response.tokenIssueCounter).toBe(clientCredentialsTokenIssueCounter);
+    ).then((response) => {
+      expect(response.getTokenStrategy).toBeInstanceOf(
+        ClientCredentialsStrategy
+      );
+      expect(response.getDocumentStrategy).toBeInstanceOf(
+        GetDocumentByLaunchStrategy
+      );
+      expect(response.saveDocumentToDynamoStrategy).toBeInstanceOf(
+        SaveDocumentLaunchStrategy
+      );
+      expect(response.getPatientInfoStrategy).toBeInstanceOf(
+        GetPatientInfoFromLaunchStrategy
+      );
+      expect(response.tokenIssueCounter).toBe(
+        clientCredentialsTokenIssueCounter
+      );
+    });
   });
 
   it("Request with No Grant. Throws Error.", () => {
@@ -217,33 +224,8 @@ describe("buildTokenHandlerClient Tests", () => {
       error_description:
         "A grant type is required. Supported grant types are authorization_code, refresh_token, and client_credentials.",
     };
-    try {
-      buildTokenHandlerClient(
-        redirect_uri,
-        issuer,
-        logger,
-        dynamoClient,
-        config,
-        req,
-        res,
-        next,
-        validateToken,
-        staticTokens,
-        app_category
-      );
-      fail("Requests with no grants should not return a client.");
-    } catch (err) {
-      expect(err).toEqual(error);
-    }
-  });
 
-  it("Unsupported Grant Client", () => {
-    req = new MockExpressRequest({
-      body: {
-        grant_type: "unsupported",
-      },
-    });
-    let response = buildTokenHandlerClient(
+    buildTokenHandlerClient(
       redirect_uri,
       issuer,
       logger,
@@ -255,18 +237,45 @@ describe("buildTokenHandlerClient Tests", () => {
       validateToken,
       staticTokens,
       app_category
-    );
+    )
+      .then(() => fail("Requests with no grants should not return a client."))
+      .catch((err) => {
+        expect(err).toEqual(error);
+      });
+  });
 
-    expect(response.getTokenStrategy).toBeInstanceOf(UnsupportedGrantStrategy);
+  it("Unsupported Grant Client", () => {
+    req = new MockExpressRequest({
+      body: {
+        grant_type: "unsupported",
+      },
+    });
+    buildTokenHandlerClient(
+      redirect_uri,
+      issuer,
+      logger,
+      dynamoClient,
+      config,
+      req,
+      res,
+      next,
+      validateToken,
+      staticTokens,
+      app_category
+    ).then((response) => {
+      expect(response.getTokenStrategy).toBeInstanceOf(
+        UnsupportedGrantStrategy
+      );
+    });
   });
 
   it("Code Client Invalid Auth", () => {
-    req.body.grant_type = "authorization_code";
     req = new MockExpressRequest({
       body: {
         grant_type: "authorization_code",
       },
     });
+
     try {
       buildTokenHandlerClient(
         redirect_uri,
@@ -280,8 +289,16 @@ describe("buildTokenHandlerClient Tests", () => {
         validateToken,
         staticTokens,
         app_category
-      );
-      fail("Invalid auth error should have been thrown.");
+      )
+        .then(() => {
+          throw new Error("Invalid auth error should have been thrown.");
+        })
+        .catch((err) => {
+          expect(err.status).toBe(401);
+          expect(err.error).toBe("invalid_client");
+          expect(err.error_description).toBe("Client authentication failed");
+          return;
+        });
     } catch (err) {
       expect(err.status).toBe(401);
       expect(err.error).toBe("invalid_client");
@@ -298,28 +315,27 @@ describe("buildTokenHandlerClient Tests", () => {
       },
     });
 
-    try {
-      buildTokenHandlerClient(
-        redirect_uri,
-        issuer,
-        logger,
-        dynamoClient,
-        config,
-        req,
-        res,
-        next,
-        validateToken,
-        staticTokens,
-        app_category
-      );
-      fail("Invalid assertion type error should have been thrown.");
-    } catch (err) {
-      expect(err.status).toBe(400);
-      expect(err.error).toBe("invalid_request");
-      expect(err.error_description).toBe(
-        "Client assertion type must be jwt-bearer."
-      );
-      return;
-    }
+    buildTokenHandlerClient(
+      redirect_uri,
+      issuer,
+      logger,
+      dynamoClient,
+      config,
+      req,
+      res,
+      next,
+      validateToken,
+      staticTokens,
+      app_category
+    )
+      .then(() => fail("Invalid assertion type error should have been thrown."))
+      .catch((err) => {
+        expect(err.status).toBe(400);
+        expect(err.error).toBe("invalid_request");
+        expect(err.error_description).toBe(
+          "Client assertion type must be jwt-bearer."
+        );
+        return;
+      });
   });
 });

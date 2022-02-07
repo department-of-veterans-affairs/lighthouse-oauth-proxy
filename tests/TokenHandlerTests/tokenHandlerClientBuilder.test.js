@@ -50,7 +50,7 @@ const {
 } = require("../../src/metrics");
 
 require("jest");
-jest.f;
+
 describe("buildTokenHandlerClient Tests", () => {
   let redirect_uri = "https://redirect.com";
   let issuer = new FakeIssuer();

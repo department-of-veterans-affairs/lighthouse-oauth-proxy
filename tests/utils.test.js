@@ -9,6 +9,7 @@ const {
   hashString,
   minimalError,
   handleOpenIdClientError,
+  screenForV2ClientId,
 } = require("../src/utils");
 
 describe("statusCodeFromError", () => {
@@ -303,5 +304,30 @@ describe("handleOpenIdClientError tests", () => {
     } catch (err) {
       expect(err).toEqual(error);
     }
+  });
+});
+
+describe("screenForV2ClientId tests", () => {
+  const dynamoClient = {};
+  dynamoClient.getPayloadFromDynamo = jest.fn();
+  it("screenForV2ClientId happy v2", async () => {
+    const v2val = { Item: { v2_client_id: "clientIdv2" } };
+    dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
+    const client_id = await screenForV2ClientId(
+      "clientId",
+      dynamoClient,
+      "client_table"
+    );
+    expect(client_id).toBe("clientIdv2");
+  });
+  it("screenForV2ClientId happy v1", async () => {
+    const v2val = {};
+    dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
+    const client_id = await screenForV2ClientId(
+      "clientId",
+      dynamoClient,
+      "client_table"
+    );
+    expect(client_id).toBe("clientId");
   });
 });

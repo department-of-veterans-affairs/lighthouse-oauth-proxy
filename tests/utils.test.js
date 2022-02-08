@@ -10,6 +10,7 @@ const {
   minimalError,
   handleOpenIdClientError,
   screenForV2ClientId,
+  apiCategoryFromPath,
 } = require("../src/utils");
 
 describe("statusCodeFromError", () => {
@@ -329,5 +330,45 @@ describe("screenForV2ClientId tests", () => {
       "client_table"
     );
     expect(client_id).toBe("clientId");
+  });
+});
+
+describe("apiCategoryFromPath tests", () => {
+  const categories = [
+    {
+      api_category: "",
+      audience: "api://default",
+      enable_consent_endpoint: true,
+    },
+    {
+      api_category: "/claims/v1",
+      audience: "api://default",
+      enable_consent_endpoint: true,
+    },
+    {
+      api_category: "/community-care/v1",
+      audience: "api://default",
+      enable_client_id_transition: true,
+    },
+    {
+      api_category: "/health/v1",
+      audience: "api://default",
+      enable_consent_endpoint: true,
+    },
+  ];
+
+  it("apiCategoryFromPath /health/v1", async () => {
+    const result = apiCategoryFromPath("/health/v1/token", categories);
+    expect(result.api_category).toBe("/health/v1");
+  });
+
+  it("apiCategoryFromPath default", async () => {
+    const result = apiCategoryFromPath("/token", categories);
+    expect(result.api_category).toBe("");
+  });
+
+  it("apiCategoryFromPath not found", async () => {
+    const result = apiCategoryFromPath("/nothere/v0/token", categories);
+    expect(result).toBe(undefined);
   });
 });

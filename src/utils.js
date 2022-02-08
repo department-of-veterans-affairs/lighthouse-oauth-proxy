@@ -150,6 +150,13 @@ const handleOpenIdClientError = (error) => {
   };
 };
 
+const apiCategoryFromPath = (path, categories) => {
+  const category = path.substring(0, path.indexOf("/token"));
+  return categories.find(
+    (apiCatetory) => apiCatetory.api_category === category
+  );
+};
+
 const screenForV2ClientId = async (
   client_id,
   dynamoClient,
@@ -186,4 +193,5 @@ module.exports = {
   minimalError,
   handleOpenIdClientError,
   screenForV2ClientId,
+  apiCategoryFromPath,
 };

@@ -158,8 +158,12 @@ const handleOpenIdClientError = (error) => {
  */
 const apiCategoryFromPath = (path, categories) => {
   let app_category;
-  if (path && categories && path.endsWith("/token")) {
-    const category = path.substring(0, path.indexOf("/token"));
+  if (
+    path &&
+    categories &&
+    (path.endsWith("/token") || path.endsWith("/authorization"))
+  ) {
+    const category = path.substring(0, path.lastIndexOf("/"));
     app_category = categories.find(
       (apiCatetory) => apiCatetory.api_category === category
     );

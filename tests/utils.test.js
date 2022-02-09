@@ -391,7 +391,9 @@ describe("apiCategoryFromPath tests", () => {
   ];
 
   it("apiCategoryFromPath /health/v1", async () => {
-    const result = apiCategoryFromPath("/health/v1/token", categories);
+    let result = apiCategoryFromPath("/health/v1/token", categories);
+    expect(result.api_category).toBe("/health/v1");
+    result = apiCategoryFromPath("/health/v1/authorization", categories);
     expect(result.api_category).toBe("/health/v1");
   });
 
@@ -405,7 +407,7 @@ describe("apiCategoryFromPath tests", () => {
     expect(result).toBe(undefined);
   });
   it("apiCategoryFromPath invalid path", async () => {
-    const result = apiCategoryFromPath("/nothere/v0/authorize", categories);
+    const result = apiCategoryFromPath("/health/v1/badpath", categories);
     expect(result).toBe(undefined);
   });
 });

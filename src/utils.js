@@ -152,15 +152,19 @@ const handleOpenIdClientError = (error) => {
 
 /**
  * Determine the api_catory based on the path
- * @param {} path
- * @param {*} categories
+ * @param {} path The path for the token request
+ * @param {*} categories  Array of the app config route categories
  * @returns The api_catory object from the app config
  */
 const apiCategoryFromPath = (path, categories) => {
-  const category = path.substring(0, path.indexOf("/token"));
-  return categories.find(
-    (apiCatetory) => apiCatetory.api_category === category
-  );
+  let app_category;
+  if (path && categories && path.endsWith("/token")) {
+    const category = path.substring(0, path.indexOf("/token"));
+    app_category = categories.find(
+      (apiCatetory) => apiCatetory.api_category === category
+    );
+  }
+  return app_category;
 };
 
 /**
@@ -173,7 +177,10 @@ const apiCategoryFromPath = (path, categories) => {
  */
 const screenForV2ClientId = async (client_id, dynamoClient, config, path) => {
   let clientId = client_id;
-  const apiCategory = apiCategoryFromPath(path, config.routes.categories);
+  const apiCategory =
+    config && config.routes
+      ? apiCategoryFromPath(path, config.routes.categories)
+      : null;
   if (apiCategory && apiCategory.enable_client_id_transition) {
     try {
       const dynamo_clients_table = config.dynamo_clients_table;

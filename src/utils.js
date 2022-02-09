@@ -165,7 +165,7 @@ const apiCategoryFromPath = (path, categories) => {
   ) {
     const category = path.substring(0, path.lastIndexOf("/"));
     app_category = categories.find(
-      (apiCatetory) => apiCatetory.api_category === category
+      (appCategory) => appCategory.api_category === category
     );
   }
   return app_category;

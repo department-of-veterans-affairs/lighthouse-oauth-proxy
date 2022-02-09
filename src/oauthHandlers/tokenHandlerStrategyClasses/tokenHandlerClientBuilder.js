@@ -265,7 +265,8 @@ async function createClientMetadata(redirect_uri, req, config, dynamoClient) {
   clientMetadata.client_id = await screenForV2ClientId(
     clientMetadata.client_id,
     dynamoClient,
-    config.dynamo_clients_table
+    config,
+    req.path
   );
 
   return clientMetadata;

@@ -10,6 +10,7 @@ const {
   minimalError,
   handleOpenIdClientError,
   screenForV2ClientId,
+  apiCategoryFromPath,
 } = require("../src/utils");
 
 describe("statusCodeFromError", () => {
@@ -308,6 +309,26 @@ describe("handleOpenIdClientError tests", () => {
 });
 
 describe("screenForV2ClientId tests", () => {
+  const categories = [
+    {
+      api_category: "",
+      audience: "api://default",
+    },
+    {
+      api_category: "/claims/v1",
+      audience: "api://default",
+    },
+    {
+      api_category: "/community-care/v1",
+      audience: "api://default",
+      enable_client_id_transition: true,
+    },
+    {
+      api_category: "/health/v1",
+      audience: "api://default",
+    },
+  ];
+  const config = { routes: { categories: categories } };
   const dynamoClient = {};
   dynamoClient.getPayloadFromDynamo = jest.fn();
   it("screenForV2ClientId happy v2", async () => {
@@ -316,7 +337,8 @@ describe("screenForV2ClientId tests", () => {
     const client_id = await screenForV2ClientId(
       "clientId",
       dynamoClient,
-      "client_table"
+      config,
+      "/community-care/v1/token"
     );
     expect(client_id).toBe("clientIdv2");
   });
@@ -326,8 +348,64 @@ describe("screenForV2ClientId tests", () => {
     const client_id = await screenForV2ClientId(
       "clientId",
       dynamoClient,
-      "client_table"
+      config,
+      "/community-care/v1/token"
     );
     expect(client_id).toBe("clientId");
+  });
+  it("screenForV2ClientId mapping not applicable", async () => {
+    const v2val = { Item: { v2_client_id: "clientIdv2" } };
+    dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
+    const client_id = await screenForV2ClientId(
+      "clientId",
+      dynamoClient,
+      config,
+      "/health/v1/token"
+    );
+    expect(client_id).toBe("clientId");
+  });
+});
+
+describe("apiCategoryFromPath tests", () => {
+  const categories = [
+    {
+      api_category: "",
+      audience: "api://default",
+      enable_consent_endpoint: true,
+    },
+    {
+      api_category: "/claims/v1",
+      audience: "api://default",
+      enable_consent_endpoint: true,
+    },
+    {
+      api_category: "/community-care/v1",
+      audience: "api://default",
+      enable_client_id_transition: true,
+    },
+    {
+      api_category: "/health/v1",
+      audience: "api://default",
+      enable_consent_endpoint: true,
+    },
+  ];
+
+  it("apiCategoryFromPath /health/v1", async () => {
+    const result = apiCategoryFromPath("/health/v1/token", categories);
+    expect(result.api_category).toBe("/health/v1");
+  });
+
+  it("apiCategoryFromPath default", async () => {
+    const result = apiCategoryFromPath("/token", categories);
+    expect(result.api_category).toBe("");
+  });
+
+  it("apiCategoryFromPath not found", async () => {
+    const result = apiCategoryFromPath("/nothere/v0/token", categories);
+    expect(result).toBe(undefined);
+  });
+  it("apiCategoryFromPath invalid path", async () => {
+    const result = apiCategoryFromPath("/nothere/v0/authorize", categories);
+    expect(result).toBe(undefined);
   });
 });

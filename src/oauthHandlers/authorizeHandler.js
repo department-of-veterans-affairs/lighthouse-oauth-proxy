@@ -37,7 +37,8 @@ const authorizeHandler = async (
   let screenedClientId = await screenForV2ClientId(
     client_id,
     dynamoClient,
-    config.dynamo_clients_table
+    config,
+    req.path
   );
 
   let clientValidation = await validateClient(

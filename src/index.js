@@ -303,6 +303,28 @@ function buildApp(
       }
     );
 
+    // Enables local testing using a fhir-client app
+    if (app_category.enable_smart_configuration_metadata) {
+      router.get(
+        api_category + "/.well-known/smart-configuration",
+        corsHandler,
+        (req, res) => {
+          const baseServiceMetadata = {
+            ...service_issuer.metadata,
+            ...servicesMetadataRewrite,
+          };
+          const filteredServiceMetadata = openidMetadataWhitelist.reduce(
+            (meta, key) => {
+              meta[key] = baseServiceMetadata[key];
+              return meta;
+            },
+            {}
+          );
+
+          res.json(filteredServiceMetadata);
+        }
+      );
+    }
     router.get(api_category + app_routes.authorize, async (req, res, next) => {
       await oauthHandlers
         .authorizeHandler(

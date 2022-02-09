@@ -150,6 +150,12 @@ const handleOpenIdClientError = (error) => {
   };
 };
 
+/**
+ * Determine the api_catory based on the path
+ * @param {} path
+ * @param {*} categories
+ * @returns The api_catory object from the app config
+ */
 const apiCategoryFromPath = (path, categories) => {
   const category = path.substring(0, path.indexOf("/token"));
   return categories.find(
@@ -157,26 +163,34 @@ const apiCategoryFromPath = (path, categories) => {
   );
 };
 
-const screenForV2ClientId = async (
-  client_id,
-  dynamoClient,
-  dynamo_clients_table
-) => {
+/**
+ * Screens client_id and replaces with v2 equivant if applicable for the route
+ * @param {*} client_id The incocming client_id
+ * @param {*} dynamoClient The dynamo client
+ * @param {*} config The app config
+ * @param {*} path  The path in the request
+ * @returns Either the original client ID or the v2 variant of it
+ */
+const screenForV2ClientId = async (client_id, dynamoClient, config, path) => {
   let clientId = client_id;
-  try {
-    let clientInfo = await dynamoClient.getPayloadFromDynamo(
-      {
-        client_id: client_id,
-      },
-      dynamo_clients_table
-    );
-    if (clientInfo.Item) {
-      clientId = clientInfo.Item.v2_client_id
-        ? clientInfo.Item.v2_client_id
-        : client_id;
+  const apiCategory = apiCategoryFromPath(path, config.routes.categories);
+  if (apiCategory && apiCategory.enable_client_id_transition) {
+    try {
+      const dynamo_clients_table = config.dynamo_clients_table;
+      let clientInfo = await dynamoClient.getPayloadFromDynamo(
+        {
+          client_id: client_id,
+        },
+        dynamo_clients_table
+      );
+      if (clientInfo.Item) {
+        clientId = clientInfo.Item.v2_client_id
+          ? clientInfo.Item.v2_client_id
+          : client_id;
+      }
+    } catch (err) {
+      // No client entry
     }
-  } catch (err) {
-    // No client entry
   }
   return clientId;
 };

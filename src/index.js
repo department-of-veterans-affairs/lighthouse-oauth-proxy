@@ -19,6 +19,7 @@ const { configureTokenValidator } = require("./tokenValidation");
 const rTracer = require("cls-rtracer");
 const { SlugHelper } = require("./slug_helper");
 const { buildIssuer } = require("./issuer_helper");
+const { basicAuthRewrite } = require("./utils");
 
 const openidMetadataWhitelist = [
   "issuer",
@@ -110,7 +111,15 @@ function buildApp(
    * @param requestMethod The HTTP method.
    * @param bodyencoder The optional body encoder.
    */
-  const proxyRequest = (req, res, redirectUrl, requestMethod, bodyencoder) => {
+  const proxyRequest = (
+    req,
+    res,
+    redirectUrl,
+    requestMethod,
+    config,
+    dynamoClient,
+    bodyencoder
+  ) => {
     delete req.headers.host;
 
     let proxyRequest = {
@@ -138,14 +147,29 @@ function buildApp(
       proxyRequest.data = payload;
     }
 
-    // Proxy request
+    basicAuthRewrite(req, dynamoClient, config, req.path)
+      .then((authRewrite) => {
+        // Proxy request
+        if (authRewrite) {
+          proxyRequest.headers.authorization = authRewrite;
+        }
 
-    axios(proxyRequest)
-      .then((response) => {
-        setProxyResponse(response, res);
+        axios(proxyRequest)
+          .then((response) => {
+            setProxyResponse(response, res);
+          })
+          .catch((err) => {
+            setProxyResponse(err.response, res);
+          });
       })
-      .catch((err) => {
-        setProxyResponse(err.response, res);
+      .catch(() => {
+        axios(proxyRequest)
+          .then((response) => {
+            setProxyResponse(response, res);
+          })
+          .catch((err) => {
+            setProxyResponse(err.response, res);
+          });
       });
   };
 
@@ -375,10 +399,24 @@ function buildApp(
     }
 
     router.get(api_category + app_routes.jwks, (req, res) =>
-      proxyRequest(req, res, service_issuer.metadata.jwks_uri, "GET")
+      proxyRequest(
+        req,
+        res,
+        service_issuer.metadata.jwks_uri,
+        "GET",
+        config,
+        dynamoClient
+      )
     );
     router.get(api_category + app_routes.userinfo, (req, res) =>
-      proxyRequest(req, res, service_issuer.metadata.userinfo_endpoint, "GET")
+      proxyRequest(
+        req,
+        res,
+        service_issuer.metadata.userinfo_endpoint,
+        "GET",
+        config,
+        dynamoClient
+      )
     );
     router.post(api_category + app_routes.introspection, (req, res) =>
       proxyRequest(
@@ -386,6 +424,8 @@ function buildApp(
         res,
         service_issuer.metadata.introspection_endpoint,
         "POST",
+        config,
+        dynamoClient,
         querystring
       )
     );
@@ -396,6 +436,8 @@ function buildApp(
         res,
         service_issuer.metadata.revocation_endpoint,
         "POST",
+        config,
+        dynamoClient,
         querystring
       );
     });

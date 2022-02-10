@@ -156,15 +156,20 @@ const handleOpenIdClientError = (error) => {
  * @param {*} categories  Array of the app config route categories
  * @returns The api_catory object from the app config
  */
-const apiCategoryFromPath = (path, categories) => {
+const apiCategoryFromPath = (path, routes) => {
   let app_category;
   if (
     path &&
-    categories &&
-    (path.endsWith("/token") || path.endsWith("/authorization"))
+    routes &&
+    routes.categories &&
+    routes.app_routes &&
+    (path.endsWith(routes.app_routes.token) ||
+      path.endsWith(routes.app_routes.authorize) ||
+      path.endsWith(routes.app_routes.introspection) ||
+      path.endsWith(routes.app_routes.revoke))
   ) {
     const category = path.substring(0, path.lastIndexOf("/"));
-    app_category = categories.find(
+    app_category = routes.categories.find(
       (appCategory) => appCategory.api_category === category
     );
   }
@@ -182,9 +187,7 @@ const apiCategoryFromPath = (path, categories) => {
 const screenForV2ClientId = async (client_id, dynamoClient, config, path) => {
   let clientId = client_id;
   const apiCategory =
-    config && config.routes
-      ? apiCategoryFromPath(path, config.routes.categories)
-      : null;
+    config && config.routes ? apiCategoryFromPath(path, config.routes) : null;
   if (apiCategory && apiCategory.old && apiCategory.old.upstream_issuer) {
     try {
       const dynamo_clients_table = config.dynamo_clients_table;
@@ -206,6 +209,27 @@ const screenForV2ClientId = async (client_id, dynamoClient, config, path) => {
   return clientId;
 };
 
+/**
+ * Rewrites the basic auth in the header if applicable
+ * @param {*} req The request
+ * @param {*} dynamoClient The dynamo client
+ * @param {*} config The app configuration
+ * @returns The rewritten basic auth
+ */
+const basicAuthRewrite = async (req, dynamoClient, config) => {
+  let creds = parseBasicAuth(req);
+  if (!creds) {
+    return undefined;
+  }
+  let client_id = await screenForV2ClientId(
+    creds.username,
+    dynamoClient,
+    config,
+    req.path
+  );
+  return encodeBasicAuthHeader(client_id, creds.password);
+};
+
 module.exports = {
   isRuntimeError,
   rethrowIfRuntimeError,
@@ -219,4 +243,5 @@ module.exports = {
   handleOpenIdClientError,
   screenForV2ClientId,
   apiCategoryFromPath,
+  basicAuthRewrite,
 };

@@ -11,6 +11,7 @@ const {
   handleOpenIdClientError,
   screenForV2ClientId,
   apiCategoryFromPath,
+  basicAuthRewrite,
 } = require("../src/utils");
 
 describe("statusCodeFromError", () => {
@@ -307,28 +308,43 @@ describe("handleOpenIdClientError tests", () => {
     }
   });
 });
+const categories = [
+  {
+    api_category: "",
+    audience: "api://default",
+  },
+  {
+    api_category: "/claims/v1",
+    audience: "api://default",
+  },
+  {
+    api_category: "/community-care/v1",
+    audience: "api://default",
+    old: { upstream_issuer: "http://whatever" },
+  },
+  {
+    api_category: "/health/v1",
+    audience: "api://default",
+  },
+];
+const app_routes = {
+  authorize: "/authorization",
+  token: "/token",
+  userinfo: "/userinfo",
+  introspection: "/introspect",
+  manage: "/manage",
+  revoke: "/revoke",
+  jwks: "/keys",
+  issued: "/issued",
+  grants: "/grants",
+  smart_launch: "/smart/launch",
+  redirect: "/redirect",
+  claims: "/claims",
+};
+
+const config = { routes: { categories: categories, app_routes: app_routes } };
 
 describe("screenForV2ClientId tests", () => {
-  const categories = [
-    {
-      api_category: "",
-      audience: "api://default",
-    },
-    {
-      api_category: "/claims/v1",
-      audience: "api://default",
-    },
-    {
-      api_category: "/community-care/v1",
-      audience: "api://default",
-      old: { upstream_issuer: "http://whatever" },
-    },
-    {
-      api_category: "/health/v1",
-      audience: "api://default",
-    },
-  ];
-  const config = { routes: { categories: categories } };
   const dynamoClient = {};
   dynamoClient.getPayloadFromDynamo = jest.fn();
   it("screenForV2ClientId happy v2", async () => {
@@ -342,10 +358,19 @@ describe("screenForV2ClientId tests", () => {
     );
     expect(client_id).toBe("clientIdv2");
   });
-  it("screenForV2ClientId happy v1", async () => {
-    const v2val = {};
+  it("screenForV2ClientId happy v1 2", async () => {
+    let v2val = {};
     dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
-    const client_id = await screenForV2ClientId(
+    let client_id = await screenForV2ClientId(
+      "clientId",
+      dynamoClient,
+      config,
+      "/community-care/v1/token"
+    );
+    expect(client_id).toBe("clientId");
+    v2val = { Item: { something: "xxxx" } };
+    dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
+    client_id = await screenForV2ClientId(
       "clientId",
       dynamoClient,
       config,
@@ -367,47 +392,41 @@ describe("screenForV2ClientId tests", () => {
 });
 
 describe("apiCategoryFromPath tests", () => {
-  const categories = [
-    {
-      api_category: "",
-      audience: "api://default",
-      enable_consent_endpoint: true,
-    },
-    {
-      api_category: "/claims/v1",
-      audience: "api://default",
-      enable_consent_endpoint: true,
-    },
-    {
-      api_category: "/community-care/v1",
-      audience: "api://default",
-      enable_client_id_transition: true,
-    },
-    {
-      api_category: "/health/v1",
-      audience: "api://default",
-      enable_consent_endpoint: true,
-    },
-  ];
-
   it("apiCategoryFromPath /health/v1", async () => {
-    let result = apiCategoryFromPath("/health/v1/token", categories);
+    let result = apiCategoryFromPath("/health/v1/token", config.routes);
     expect(result.api_category).toBe("/health/v1");
-    result = apiCategoryFromPath("/health/v1/authorization", categories);
+    result = apiCategoryFromPath("/health/v1/authorization", config.routes);
     expect(result.api_category).toBe("/health/v1");
   });
 
   it("apiCategoryFromPath default", async () => {
-    const result = apiCategoryFromPath("/token", categories);
+    const result = apiCategoryFromPath("/token", config.routes);
     expect(result.api_category).toBe("");
   });
 
   it("apiCategoryFromPath not found", async () => {
-    const result = apiCategoryFromPath("/nothere/v0/token", categories);
+    const result = apiCategoryFromPath("/nothere/v0/token", config.routes);
     expect(result).toBe(undefined);
   });
   it("apiCategoryFromPath invalid path", async () => {
-    const result = apiCategoryFromPath("/health/v1/badpath", categories);
+    const result = apiCategoryFromPath("/health/v1/badpath", config.routes);
     expect(result).toBe(undefined);
+  });
+});
+
+describe("basicAuthRewrite tests", () => {
+  const dynamoClient = {};
+  dynamoClient.getPayloadFromDynamo = jest.fn();
+  it("basicAuthRewrite possitive rewrite", async () => {
+    const v2val = { Item: { v2_client_id: "clientIdv2" } };
+    dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
+    const req = {
+      headers: {
+        authorization: "Basic dGVzdGNsaWVudDI6bXlzZWNyZXQ=",
+      },
+      path: "/community-care/v1/introspect",
+    };
+    const result = await basicAuthRewrite(req, dynamoClient, config);
+    expect(result).toBe("Basic Y2xpZW50SWR2MjpteXNlY3JldA==");
   });
 });

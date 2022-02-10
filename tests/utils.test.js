@@ -424,13 +424,9 @@ describe("basicAuthRewrite tests", () => {
       headers: {
         authorization: "Basic dGVzdGNsaWVudDI6bXlzZWNyZXQ=",
       },
+      path: "/community-care/v1/introspect",
     };
-    const result = await basicAuthRewrite(
-      req,
-      dynamoClient,
-      config,
-      "/community-care/v1/introspect"
-    );
+    const result = await basicAuthRewrite(req, dynamoClient, config);
     expect(result).toBe("Basic Y2xpZW50SWR2MjpteXNlY3JldA==");
   });
 });

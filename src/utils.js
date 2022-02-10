@@ -209,7 +209,14 @@ const screenForV2ClientId = async (client_id, dynamoClient, config, path) => {
   return clientId;
 };
 
-const basicAuthRewrite = async (req, dynamoClient, config, path) => {
+/**
+ * Rewrites the basic auth in the header if applicable
+ * @param {*} req The request
+ * @param {*} dynamoClient The dynamo client
+ * @param {*} config The app configuration
+ * @returns The rewritten basic auth
+ */
+const basicAuthRewrite = async (req, dynamoClient, config) => {
   let creds = parseBasicAuth(req);
   if (!creds) {
     return undefined;
@@ -218,7 +225,7 @@ const basicAuthRewrite = async (req, dynamoClient, config, path) => {
     creds.username,
     dynamoClient,
     config,
-    path
+    req.path
   );
   return encodeBasicAuthHeader(client_id, creds.password);
 };

@@ -358,10 +358,19 @@ describe("screenForV2ClientId tests", () => {
     );
     expect(client_id).toBe("clientIdv2");
   });
-  it("screenForV2ClientId happy v1", async () => {
-    const v2val = {};
+  it("screenForV2ClientId happy v1 2", async () => {
+    let v2val = {};
     dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
-    const client_id = await screenForV2ClientId(
+    let client_id = await screenForV2ClientId(
+      "clientId",
+      dynamoClient,
+      config,
+      "/community-care/v1/token"
+    );
+    expect(client_id).toBe("clientId");
+    v2val = { Item: { something: "xxxx" } };
+    dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
+    client_id = await screenForV2ClientId(
       "clientId",
       dynamoClient,
       config,

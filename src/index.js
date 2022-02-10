@@ -147,8 +147,8 @@ function buildApp(
       proxyRequest.data = payload;
     }
 
-    basicAuthRewrite(req, dynamoClient, config, req.path)
-      .then((authRewrite) => {
+    basicAuthRewrite(req, dynamoClient, config, req.path).then(
+      (authRewrite) => {
         // Proxy request
         if (authRewrite) {
           proxyRequest.headers.authorization = authRewrite;
@@ -161,16 +161,8 @@ function buildApp(
           .catch((err) => {
             setProxyResponse(err.response, res);
           });
-      })
-      .catch(() => {
-        axios(proxyRequest)
-          .then((response) => {
-            setProxyResponse(response, res);
-          })
-          .catch((err) => {
-            setProxyResponse(err.response, res);
-          });
-      });
+      }
+    );
   };
 
   const { well_known_base_path } = config;

@@ -185,7 +185,7 @@ const screenForV2ClientId = async (client_id, dynamoClient, config, path) => {
     config && config.routes
       ? apiCategoryFromPath(path, config.routes.categories)
       : null;
-  if (apiCategory && apiCategory.enable_client_id_transition) {
+  if (apiCategory && apiCategory.old && apiCategory.old.upstream_issuer) {
     try {
       const dynamo_clients_table = config.dynamo_clients_table;
       let clientInfo = await dynamoClient.getPayloadFromDynamo(

@@ -321,7 +321,7 @@ describe("screenForV2ClientId tests", () => {
     {
       api_category: "/community-care/v1",
       audience: "api://default",
-      enable_client_id_transition: true,
+      old: { upstream_issuer: "http://whatever" },
     },
     {
       api_category: "/health/v1",

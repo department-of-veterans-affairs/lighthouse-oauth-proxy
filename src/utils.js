@@ -151,10 +151,10 @@ const handleOpenIdClientError = (error) => {
 };
 
 /**
- * Determine the api_catory based on the path
+ * Determine the app category based on the path
  * @param {} path The path for the token request
  * @param {*} categories  Array of the app config route categories
- * @returns The api_catory object from the app config
+ * @returns The the appropriate app category object from the app config
  */
 const apiCategoryFromPath = (path, routes) => {
   let app_category;

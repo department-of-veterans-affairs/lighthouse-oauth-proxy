@@ -19,7 +19,7 @@ const { configureTokenValidator } = require("./tokenValidation");
 const rTracer = require("cls-rtracer");
 const { SlugHelper } = require("./slug_helper");
 const { buildIssuer } = require("./issuer_helper");
-const { basicAuthRewrite } = require("./utils");
+const { reqClientRewrite } = require("./utils");
 
 const openidMetadataWhitelist = [
   "issuer",
@@ -147,14 +147,10 @@ function buildApp(
       proxyRequest.data = payload;
     }
 
-    basicAuthRewrite(req, dynamoClient, config, req.path).then(
-      (authRewrite) => {
+    reqClientRewrite(req, dynamoClient, config, req.path).then(
+      (clientScreenedProxRequest) => {
         // Proxy request
-        if (authRewrite) {
-          proxyRequest.headers.authorization = authRewrite;
-        }
-
-        axios(proxyRequest)
+        axios(clientScreenedProxRequest)
           .then((response) => {
             setProxyResponse(response, res);
           })

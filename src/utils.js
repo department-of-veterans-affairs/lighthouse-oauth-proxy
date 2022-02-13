@@ -210,24 +210,36 @@ const screenForV2ClientId = async (client_id, dynamoClient, config, path) => {
 };
 
 /**
- * Rewrites the basic auth in the header if applicable
+ * Rewrites the client in the request
  * @param {*} req The request
  * @param {*} dynamoClient The dynamo client
  * @param {*} config The app configuration
- * @returns The rewritten basic auth
+ * @returns The the request, modified or unchanged
  */
-const basicAuthRewrite = async (req, dynamoClient, config) => {
+const reqClientRewrite = async (req, dynamoClient, config) => {
   let creds = parseBasicAuth(req);
-  if (!creds) {
-    return undefined;
+  let client_id;
+  if (creds) {
+    client_id = await screenForV2ClientId(
+      creds.username,
+      dynamoClient,
+      config,
+      req.path
+    );
+    req.headers.authorization = encodeBasicAuthHeader(
+      client_id,
+      creds.password
+    );
+  } else if (req.body && req.body.client_id) {
+    client_id = await screenForV2ClientId(
+      req.body.client_id,
+      dynamoClient,
+      config,
+      req.path
+    );
+    req.body.client_id = client_id;
   }
-  let client_id = await screenForV2ClientId(
-    creds.username,
-    dynamoClient,
-    config,
-    req.path
-  );
-  return encodeBasicAuthHeader(client_id, creds.password);
+  return req;
 };
 
 module.exports = {
@@ -243,5 +255,5 @@ module.exports = {
   handleOpenIdClientError,
   screenForV2ClientId,
   apiCategoryFromPath,
-  basicAuthRewrite,
+  reqClientRewrite,
 };

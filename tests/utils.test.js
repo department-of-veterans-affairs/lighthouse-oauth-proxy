@@ -11,7 +11,7 @@ const {
   handleOpenIdClientError,
   screenForV2ClientId,
   apiCategoryFromPath,
-  basicAuthRewrite,
+  reqClientRewrite,
 } = require("../src/utils");
 
 describe("statusCodeFromError", () => {
@@ -414,10 +414,10 @@ describe("apiCategoryFromPath tests", () => {
   });
 });
 
-describe("basicAuthRewrite tests", () => {
+describe("reqClientRewrite tests", () => {
   const dynamoClient = {};
   dynamoClient.getPayloadFromDynamo = jest.fn();
-  it("basicAuthRewrite possitive rewrite", async () => {
+  it("reqClientRewrite possitive rewrite auth basic", async () => {
     const v2val = { Item: { v2_client_id: "clientIdv2" } };
     dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
     const req = {
@@ -426,7 +426,17 @@ describe("basicAuthRewrite tests", () => {
       },
       path: "/community-care/v1/introspect",
     };
-    const result = await basicAuthRewrite(req, dynamoClient, config);
-    expect(result).toBe("Basic Y2xpZW50SWR2MjpteXNlY3JldA==");
+    const result = await reqClientRewrite(req, dynamoClient, config);
+    expect(result.headers.authorization).toBe("Basic Y2xpZW50SWR2MjpteXNlY3JldA==");
+  });
+  it("reqClientRewrite possitive rewrite client body", async () => {
+    const v2val = { Item: { v2_client_id: "clientIdv2" } };
+    dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
+    const req = {
+      body: { client_id: "clientidv1" },
+      path: "/community-care/v1/introspect",
+    };
+    const result = await reqClientRewrite(req, dynamoClient, config);
+    expect(result.body.client_id).toBe("clientIdv2");
   });
 });

@@ -452,6 +452,13 @@ function startApp(config, isolatedIssuers) {
         token: config.okta_token,
         requestExecutor: new okta.DefaultRequestExecutor(),
       });
+      if (app_category.old && app_category.old.upstream_issuer) {
+        app_category.old.okta_client = new okta.Client({
+          orgUrl: config.okta_url,
+          token: config.okta_token,
+          requestExecutor: new okta.DefaultRequestExecutor(),
+        });
+      }
     });
   }
 
@@ -509,10 +516,15 @@ if (require.main === module) {
 
       const isolatedIssuers = {};
       if (config.routes && config.routes.categories) {
-        for (const service_config of config.routes.categories) {
-          isolatedIssuers[service_config.api_category] = await createIssuer(
-            service_config
+        for (const app_category of config.routes.categories) {
+          isolatedIssuers[app_category.api_category] = await createIssuer(
+            app_category
           );
+          if (app_category.old && app_category.old.upstream_issuer) {
+            app_category.old.issuer = await createIssuer(
+              app_category.old.upstream_issuer
+            );
+          }
         }
       }
       startApp(config, isolatedIssuers);

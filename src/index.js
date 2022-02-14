@@ -120,37 +120,35 @@ function buildApp(
     dynamoClient,
     bodyencoder
   ) => {
-    delete req.headers.host;
-
-    let proxyRequest = {
-      method: requestMethod,
-      url: redirectUrl,
-      headers: req.headers,
-      responseType: "stream",
-    };
-
-    /*
-     * Build the proxied request body.
-     *
-     * Use the original request body and optionally encode it.
-     *
-     * If resulting body is empty, omit it from the proxied request.
-     */
-
-    let payload = req.body;
-
-    if (bodyencoder !== undefined) {
-      payload = bodyencoder.stringify(req.body);
-    }
-
-    if (payload && Object.keys(payload).length) {
-      proxyRequest.data = payload;
-    }
-
-    reqClientRewrite(req, dynamoClient, config, req.path).then(
+    reqClientRewrite(req, dynamoClient, config).then(
       (clientScreenedProxRequest) => {
+        delete clientScreenedProxRequest.headers.host;
+
+        let proxyRequest = {
+          method: requestMethod,
+          url: redirectUrl,
+          headers: clientScreenedProxRequest.headers,
+          responseType: "stream",
+        };
+        /*
+         * Build the proxied request body.
+         *
+         * Use the original request body and optionally encode it.
+         *
+         * If resulting body is empty, omit it from the proxied request.
+         */
+
+        let payload = clientScreenedProxRequest.body;
+
+        if (bodyencoder !== undefined) {
+          payload = bodyencoder.stringify(clientScreenedProxRequest.body);
+        }
+
+        if (payload && Object.keys(payload).length) {
+          proxyRequest.data = payload;
+        }
         // Proxy request
-        axios(clientScreenedProxRequest)
+        axios(proxyRequest)
           .then((response) => {
             setProxyResponse(response, res);
           })

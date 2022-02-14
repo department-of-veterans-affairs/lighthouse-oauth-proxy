@@ -45,8 +45,8 @@ const openidMetadataWhitelist = [
   "request_object_signing_alg_values_supported",
 ];
 
-async function createIssuer(issuer_category) {
-  return await buildIssuer(issuer_category);
+async function createIssuer(upstream_issuer, custom_metadata) {
+  return await buildIssuer(upstream_issuer, custom_metadata);
 }
 
 function buildMetadataRewriteTable(config, api_category) {
@@ -518,11 +518,13 @@ if (require.main === module) {
       if (config.routes && config.routes.categories) {
         for (const app_category of config.routes.categories) {
           isolatedIssuers[app_category.api_category] = await createIssuer(
-            app_category
+            app_category.upstream_issuer,
+            app_category.custom_metadata
           );
           if (app_category.old && app_category.old.upstream_issuer) {
             app_category.old.issuer = await createIssuer(
-              app_category.old.upstream_issuer
+              app_category.old.upstream_issuer,
+              app_category.old.custom_metadata
             );
           }
         }

@@ -114,7 +114,8 @@ function buildApp(
   const proxyRequest = (
     req,
     res,
-    redirectUrl,
+    issuer_metadata,
+    metadata_type,
     requestMethod,
     config,
     dynamoClient,
@@ -123,7 +124,9 @@ function buildApp(
     reqClientRewrite(req, dynamoClient, config).then(
       (clientScreenedProxRequest) => {
         delete clientScreenedProxRequest.headers.host;
-
+        let redirectUrl = clientScreenedProxRequest.old
+          ? clientScreenedProxRequest.old.issuer.metadata[metadata_type]
+          : issuer_metadata[metadata_type];
         let proxyRequest = {
           method: requestMethod,
           url: redirectUrl,
@@ -388,7 +391,8 @@ function buildApp(
       proxyRequest(
         req,
         res,
-        service_issuer.metadata.jwks_uri,
+        service_issuer.metadata,
+        "jwks_uri",
         "GET",
         config,
         dynamoClient
@@ -398,29 +402,32 @@ function buildApp(
       proxyRequest(
         req,
         res,
-        service_issuer.metadata.userinfo_endpoint,
+        service_issuer.metadata,
+        "userinfo_endpoint",
         "GET",
         config,
         dynamoClient
       )
     );
-    router.post(api_category + app_routes.introspection, (req, res) =>
+    router.post(api_category + app_routes.introspection, (req, res) => {
       proxyRequest(
         req,
         res,
-        service_issuer.metadata.introspection_endpoint,
+        service_issuer.metadata,
+        "introspection_endpoint",
         "POST",
         config,
         dynamoClient,
         querystring
-      )
-    );
+      );
+    });
 
     router.post(api_category + app_routes.revoke, (req, res) => {
       proxyRequest(
         req,
         res,
-        service_issuer.metadata.revocation_endpoint,
+        service_issuer.metadata,
+        "revocation_endpoint",
         "POST",
         config,
         dynamoClient,
@@ -521,6 +528,7 @@ if (require.main === module) {
             app_category.upstream_issuer,
             app_category.custom_metadata
           );
+          app_category.issuer = isolatedIssuers[app_category.api_category];
           if (app_category.old && app_category.old.upstream_issuer) {
             app_category.old.issuer = await createIssuer(
               app_category.old.upstream_issuer,

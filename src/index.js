@@ -93,88 +93,6 @@ function buildApp(
     });
   }
   const slugHelper = new SlugHelper(config);
-
-  const setProxyResponse = (response, targetResponse) => {
-    if (response.headers !== undefined) {
-      targetResponse.set(response.headers);
-    }
-    targetResponse.status(response.status);
-    response.data.pipe(targetResponse);
-  };
-
-  /**
-   * Proxy a request to another location.
-   *
-   * @param req The request.
-   * @param res The response.
-   * @param redirectUrl The proxied location.
-   * @param requestMethod The HTTP method.
-   * @param bodyencoder The optional body encoder.
-   */
-  const proxyRequest = (
-    req,
-    res,
-    issuer_metadata,
-    metadata_type,
-    requestMethod,
-    config,
-    dynamoClient,
-    bodyencoder
-  ) => {
-    v2TransitionReqRewrite(req, dynamoClient, config).then(
-      (clientScreenedProxRequest) => {
-        delete clientScreenedProxRequest.headers.host;
-        let redirectUrl = clientScreenedProxRequest.old
-          ? clientScreenedProxRequest.old.issuer.metadata[metadata_type]
-          : issuer_metadata[metadata_type];
-        let proxy_request = {
-          method: requestMethod,
-          url: redirectUrl,
-          headers: clientScreenedProxRequest.headers,
-          responseType: "stream",
-        };
-        /*
-         * Build the proxied request body.
-         *
-         * Use the original request body and optionally encode it.
-         *
-         * If resulting body is empty, omit it from the proxied request.
-         */
-
-        let payload = clientScreenedProxRequest.body;
-
-        if (bodyencoder !== undefined) {
-          payload = bodyencoder.stringify(clientScreenedProxRequest.body);
-        }
-
-        if (payload && Object.keys(payload).length) {
-          proxy_request.data = payload;
-        }
-        // Proxy request
-        axios(proxy_request)
-          .then((response) => {
-            setProxyResponse(response, res);
-          })
-          .catch((err) => {
-            const api_category = apiCategoryFromPath(req.path, config.routes);
-            if (api_category && api_category.old) {
-              proxy_request.url =
-                api_category.old.issuer.metadata[metadata_type];
-              axios(proxy_request)
-                .then((response) => {
-                  setProxyResponse(response, res);
-                })
-                .catch((err) => {
-                  setProxyResponse(err.response, res);
-                });
-            } else {
-              setProxyResponse(err.response, res);
-            }
-          });
-      }
-    );
-  };
-
   const { well_known_base_path } = config;
   const redirect_uri = `${config.host}${well_known_base_path}${config.routes.app_routes.redirect}`;
 
@@ -532,8 +450,89 @@ if (require.main === module) {
   })();
 }
 
+const setProxyResponse = (response, targetResponse) => {
+  if (response.headers !== undefined) {
+    targetResponse.set(response.headers);
+  }
+  targetResponse.status(response.status);
+  response.data.pipe(targetResponse);
+};
+
+/**
+ * Proxy a request to another location.
+ *
+ * @param req The request.
+ * @param res The response.
+ * @param redirectUrl The proxied location.
+ * @param requestMethod The HTTP method.
+ * @param bodyencoder The optional body encoder.
+ */
+const proxyRequest = (
+  req,
+  res,
+  issuer_metadata,
+  metadata_type,
+  requestMethod,
+  config,
+  dynamoClient,
+  bodyencoder
+) => {
+  v2TransitionReqRewrite(req, dynamoClient, config).then(
+    (clientScreenedProxRequest) => {
+      delete clientScreenedProxRequest.headers.host;
+      let redirectUrl = clientScreenedProxRequest.old
+        ? clientScreenedProxRequest.old.issuer.metadata[metadata_type]
+        : issuer_metadata[metadata_type];
+      let proxy_request = {
+        method: requestMethod,
+        url: redirectUrl,
+        headers: clientScreenedProxRequest.headers,
+        responseType: "stream",
+      };
+      /*
+       * Build the proxied request body.
+       *
+       * Use the original request body and optionally encode it.
+       *
+       * If resulting body is empty, omit it from the proxied request.
+       */
+
+      let payload = clientScreenedProxRequest.body;
+
+      if (bodyencoder !== undefined) {
+        payload = bodyencoder.stringify(clientScreenedProxRequest.body);
+      }
+
+      if (payload && Object.keys(payload).length) {
+        proxy_request.data = payload;
+      }
+      // Proxy request
+      axios(proxy_request)
+        .then((response) => {
+          setProxyResponse(response, res);
+        })
+        .catch((err) => {
+          const api_category = apiCategoryFromPath(req.path, config.routes);
+          if (api_category && api_category.old) {
+            proxy_request.url = api_category.old.issuer.metadata[metadata_type];
+            axios(proxy_request)
+              .then((response) => {
+                setProxyResponse(response, res);
+              })
+              .catch((err) => {
+                setProxyResponse(err.response, res);
+              });
+          } else {
+            setProxyResponse(err.response, res);
+          }
+        });
+    }
+  );
+};
+
 module.exports = {
   buildApp,
   createIssuer,
   startApp,
+  proxyRequest,
 };

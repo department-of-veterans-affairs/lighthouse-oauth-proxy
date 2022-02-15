@@ -33,14 +33,14 @@ describe("proxymockin_request tests", () => {
 
     const res = {
       _status: "500",
-      set: (in_headers) => {
-        this._headers = in_headers;
-      },
-      status: (in_status) => {
-        this._status = in_status;
-      },
-      checkvals: () => {},
     };
+    res.set = (in_headers) => {
+      res._headers = in_headers;
+    };
+    res.status = (in_status) => {
+      res._status = in_status;
+    };
+
     const axiosPostPayload = {
       body: mock_result,
       headers: { "Content-type": "application/json" },
@@ -48,8 +48,21 @@ describe("proxymockin_request tests", () => {
       data: {},
     };
 
+    const promise2check = (res) => {
+      return new Promise(
+        (resolve) => {
+          expect(res._status).toBe("200");
+          expect(res.body).toBe(mock_result);
+          resolve(true);
+        },
+        (reject) => {
+          reject("Should not be here");
+        }
+      );
+    };
     axiosPostPayload.data.pipe = (targetResp) => {
       targetResp.body = axiosPostPayload.body;
+      promise2check(res);
     };
     axios.mockResolvedValueOnce(axiosPostPayload);
     let config = createFakeConfig();

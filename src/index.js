@@ -19,7 +19,7 @@ const { configureTokenValidator } = require("./tokenValidation");
 const rTracer = require("cls-rtracer");
 const { SlugHelper } = require("./slug_helper");
 const { buildIssuer } = require("./issuer_helper");
-const { reqClientRewrite } = require("./utils");
+const { reqClientRewrite, apiCategoryFromPath } = require("./utils");
 
 const openidMetadataWhitelist = [
   "issuer",
@@ -127,7 +127,7 @@ function buildApp(
         let redirectUrl = clientScreenedProxRequest.old
           ? clientScreenedProxRequest.old.issuer.metadata[metadata_type]
           : issuer_metadata[metadata_type];
-        let proxyRequest = {
+        let proxy_request = {
           method: requestMethod,
           url: redirectUrl,
           headers: clientScreenedProxRequest.headers,
@@ -148,15 +148,29 @@ function buildApp(
         }
 
         if (payload && Object.keys(payload).length) {
-          proxyRequest.data = payload;
+          proxy_request.data = payload;
         }
         // Proxy request
-        axios(proxyRequest)
+        axios(proxy_request)
           .then((response) => {
             setProxyResponse(response, res);
           })
           .catch((err) => {
-            setProxyResponse(err.response, res);
+            const api_category = apiCategoryFromPath(req.path, config.routes);
+            if (api_category.old) {
+              proxyRequest(
+                clientScreenedProxRequest,
+                res,
+                api_category.old.issuer.metadata,
+                metadata_type,
+                requestMethod,
+                config,
+                dynamoClient,
+                bodyencoder
+              );
+            } else {
+              setProxyResponse(err.response, res);
+            }
           });
       }
     );

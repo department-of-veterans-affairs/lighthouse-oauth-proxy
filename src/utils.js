@@ -161,16 +161,7 @@ const apiCategoryFromPath = (path_orig, routes) => {
   const path = path_orig.endsWith("/")
     ? path_orig.slice(0, path_orig.lastIndexOf("/"))
     : path_orig;
-  if (
-    path &&
-    routes &&
-    routes.categories &&
-    routes.app_routes &&
-    (path.endsWith(routes.app_routes.token) ||
-      path.endsWith(routes.app_routes.authorize) ||
-      path.endsWith(routes.app_routes.introspection) ||
-      path.endsWith(routes.app_routes.revoke))
-  ) {
+  if (path && routes && routes.categories && routes.app_routes) {
     const category = path.substring(0, path.lastIndexOf("/"));
     app_category = routes.categories.find(
       (appCategory) => appCategory.api_category === category

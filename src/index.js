@@ -157,17 +157,16 @@ function buildApp(
           })
           .catch((err) => {
             const api_category = apiCategoryFromPath(req.path, config.routes);
-            if (api_category.old) {
-              proxyRequest(
-                clientScreenedProxRequest,
-                res,
-                api_category.old.issuer.metadata,
-                metadata_type,
-                requestMethod,
-                config,
-                dynamoClient,
-                bodyencoder
-              );
+            if (api_category?.old) {
+              proxy_request.url =
+                api_category.old.issuer.metadata[metadata_type];
+              axios(proxy_request)
+                .then((response) => {
+                  setProxyResponse(response, res);
+                })
+                .catch((err) => {
+                  setProxyResponse(err.response, res);
+                });
             } else {
               setProxyResponse(err.response, res);
             }

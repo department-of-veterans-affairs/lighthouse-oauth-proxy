@@ -538,15 +538,11 @@ if (require.main === module) {
       if (config.routes && config.routes.categories) {
         for (const app_category of config.routes.categories) {
           isolatedIssuers[app_category.api_category] = await createIssuer(
-            app_category.upstream_issuer,
-            app_category.custom_metadata
+            app_category
           );
           app_category.issuer = isolatedIssuers[app_category.api_category];
           if (app_category.old && app_category.old.upstream_issuer) {
-            app_category.old.issuer = await createIssuer(
-              app_category.old.upstream_issuer,
-              app_category.old.custom_metadata
-            );
+            app_category.old.issuer = await createIssuer(app_category.old);
           }
         }
       }

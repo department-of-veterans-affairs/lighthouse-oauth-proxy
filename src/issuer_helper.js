@@ -4,20 +4,16 @@ const { Issuer } = require("openid-client");
 /**
  * Overrides default metadata endpoints for issuer if necessary.
  *
- * @param {*} upstream_issuer Object of metadata endpoints.
+ * @param {*} serviceConfig Object of metadata endpoints.
  */
-
-/**
- * Overrides default metadata endpoints for issuer if necessary.
- * @param {*} upstream_issuer The upstream issuer for a given app_category
- * @param {*} custom_metadata The custom metadata for a given app_category
- * @returns an Issuer object
- */
-const buildIssuer = async (upstream_issuer, custom_metadata) => {
-  let discovered_issuer = await Issuer.discover(upstream_issuer);
-  if (custom_metadata) {
+const buildIssuer = async (serviceConfig) => {
+  let discovered_issuer = await Issuer.discover(serviceConfig.upstream_issuer);
+  if (serviceConfig.custom_metadata) {
     return new Issuer(
-      overrideMetadata(custom_metadata, discovered_issuer.metadata)
+      overrideMetadata(
+        serviceConfig.custom_metadata,
+        discovered_issuer.metadata
+      )
     );
   }
   return discovered_issuer;

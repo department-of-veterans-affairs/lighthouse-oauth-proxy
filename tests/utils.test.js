@@ -350,44 +350,44 @@ describe("screenForV2ClientId tests", () => {
   it("screenForV2ClientId happy v2", async () => {
     const v2val = { Item: { v2_client_id: "clientIdv2" } };
     dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
-    const client_id = await screenForV2ClientId(
+    const result = await screenForV2ClientId(
       "clientId",
       dynamoClient,
       config,
       "/community-care/v1/token"
     );
-    expect(client_id).toBe("clientIdv2");
+    expect(result.client_id).toBe("clientIdv2");
   });
   it("screenForV2ClientId happy v1 2", async () => {
     let v2val = {};
     dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
-    let client_id = await screenForV2ClientId(
+    let result = await screenForV2ClientId(
       "clientId",
       dynamoClient,
       config,
       "/community-care/v1/token"
     );
-    expect(client_id).toBe("clientId");
+    expect(result.client_id).toBe("clientId");
     v2val = { Item: { something: "xxxx" } };
     dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
-    client_id = await screenForV2ClientId(
+    result = await screenForV2ClientId(
       "clientId",
       dynamoClient,
       config,
       "/community-care/v1/token"
     );
-    expect(client_id).toBe("clientId");
+    expect(result.client_id).toBe("clientId");
   });
   it("screenForV2ClientId mapping not applicable", async () => {
     const v2val = { Item: { v2_client_id: "clientIdv2" } };
     dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
-    const client_id = await screenForV2ClientId(
+    const result = await screenForV2ClientId(
       "clientId",
       dynamoClient,
       config,
       "/health/v1/token"
     );
-    expect(client_id).toBe("clientId");
+    expect(result.client_id).toBe("clientId");
   });
 });
 

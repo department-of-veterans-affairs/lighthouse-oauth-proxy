@@ -156,18 +156,12 @@ const handleOpenIdClientError = (error) => {
  * @param {*} categories  Array of the app config route categories
  * @returns The the appropriate app category object from the app config
  */
-const apiCategoryFromPath = (path, routes) => {
+const apiCategoryFromPath = (path_orig, routes) => {
   let app_category;
-  if (
-    path &&
-    routes &&
-    routes.categories &&
-    routes.app_routes &&
-    (path.endsWith(routes.app_routes.token) ||
-      path.endsWith(routes.app_routes.authorize) ||
-      path.endsWith(routes.app_routes.introspection) ||
-      path.endsWith(routes.app_routes.revoke))
-  ) {
+  const path = path_orig?.endsWith("/")
+    ? path_orig.slice(0, path_orig.lastIndexOf("/"))
+    : path_orig;
+  if (path && routes && routes.categories && routes.app_routes) {
     const category = path.substring(0, path.lastIndexOf("/"));
     app_category = routes.categories.find(
       (appCategory) => appCategory.api_category === category
@@ -182,10 +176,10 @@ const apiCategoryFromPath = (path, routes) => {
  * @param {*} dynamoClient The dynamo client
  * @param {*} config The app config
  * @param {*} path  The path in the request
- * @returns Either the original client ID or the v2 variant of it
+ * @returns An object with either the original client ID or the v2 variant of it, as well as possibly, old issuer isssuer
  */
 const screenForV2ClientId = async (client_id, dynamoClient, config, path) => {
-  let clientId = client_id;
+  let v2transitiondata = { client_id: client_id };
   const apiCategory =
     config && config.routes ? apiCategoryFromPath(path, config.routes) : null;
   if (apiCategory && apiCategory.old && apiCategory.old.upstream_issuer) {
@@ -193,12 +187,12 @@ const screenForV2ClientId = async (client_id, dynamoClient, config, path) => {
       const dynamo_clients_table = config.dynamo_clients_table;
       let clientInfo = await dynamoClient.getPayloadFromDynamo(
         {
-          client_id: client_id,
+          client_id: v2transitiondata.client_id,
         },
         dynamo_clients_table
       );
       if (clientInfo.Item) {
-        clientId = clientInfo.Item.v2_client_id
+        v2transitiondata.client_id = clientInfo.Item.v2_client_id
           ? clientInfo.Item.v2_client_id
           : client_id;
       }
@@ -206,7 +200,10 @@ const screenForV2ClientId = async (client_id, dynamoClient, config, path) => {
       // No client entry
     }
   }
-  return clientId;
+  if (v2transitiondata.client_id === client_id && apiCategory?.old) {
+    v2transitiondata.old = apiCategory.old;
+  }
+  return v2transitiondata;
 };
 
 /**
@@ -216,29 +213,30 @@ const screenForV2ClientId = async (client_id, dynamoClient, config, path) => {
  * @param {*} config The app configuration
  * @returns The the request, modified or unchanged
  */
-const reqClientRewrite = async (req, dynamoClient, config) => {
+const v2TransitionReqRewrite = async (req, dynamoClient, config) => {
   let creds = parseBasicAuth(req);
-  let client_id;
+  let v2transitiondata = {};
   if (creds) {
-    client_id = await screenForV2ClientId(
+    v2transitiondata = await screenForV2ClientId(
       creds.username,
       dynamoClient,
       config,
       req.path
     );
     req.headers.authorization = encodeBasicAuthHeader(
-      client_id,
+      v2transitiondata.client_id,
       creds.password
     );
   } else if (req.body && req.body.client_id) {
-    client_id = await screenForV2ClientId(
+    v2transitiondata = await screenForV2ClientId(
       req.body.client_id,
       dynamoClient,
       config,
       req.path
     );
-    req.body.client_id = client_id;
+    req.body.client_id = v2transitiondata.client_id;
   }
+  req.old = v2transitiondata.old;
   return req;
 };
 
@@ -255,5 +253,5 @@ module.exports = {
   handleOpenIdClientError,
   screenForV2ClientId,
   apiCategoryFromPath,
-  reqClientRewrite,
+  v2TransitionReqRewrite,
 };

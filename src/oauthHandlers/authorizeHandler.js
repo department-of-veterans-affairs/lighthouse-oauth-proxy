@@ -21,9 +21,9 @@ const { screenForV2ClientId } = require("../utils");
 const authorizeHandler = async (
   redirect_uri,
   logger,
-  issuer,
+  issuer_orig,
   dynamoClient,
-  oktaClient,
+  okta_client_orig,
   slugHelper,
   app_category,
   config,
@@ -33,13 +33,19 @@ const authorizeHandler = async (
 ) => {
   loginBegin.inc();
   const { state, client_id, redirect_uri: client_redirect } = req.query;
-
-  let screenedClientId = await screenForV2ClientId(
+  let v2transitiondata = await screenForV2ClientId(
     client_id,
     dynamoClient,
     config,
     req.path
   );
+  let oktaClient = okta_client_orig;
+  const screenedClientId = v2transitiondata.client_id;
+  let issuer = issuer_orig;
+  if (v2transitiondata.old) {
+    issuer = v2transitiondata.old.issuer;
+    oktaClient = app_category.old.okta_client;
+  }
 
   let clientValidation = await validateClient(
     logger,

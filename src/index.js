@@ -19,7 +19,7 @@ const { configureTokenValidator } = require("./tokenValidation");
 const rTracer = require("cls-rtracer");
 const { SlugHelper } = require("./slug_helper");
 const { buildIssuer } = require("./issuer_helper");
-const { reqClientRewrite } = require("./utils");
+const { v2TransitionReqRewrite, apiCategoryFromPath } = require("./utils");
 
 const openidMetadataWhitelist = [
   "issuer",
@@ -45,8 +45,8 @@ const openidMetadataWhitelist = [
   "request_object_signing_alg_values_supported",
 ];
 
-async function createIssuer(issuer_category) {
-  return await buildIssuer(issuer_category);
+async function createIssuer(upstream_issuer, custom_metadata) {
+  return await buildIssuer(upstream_issuer, custom_metadata);
 }
 
 function buildMetadataRewriteTable(config, api_category) {
@@ -114,17 +114,20 @@ function buildApp(
   const proxyRequest = (
     req,
     res,
-    redirectUrl,
+    issuer_metadata,
+    metadata_type,
     requestMethod,
     config,
     dynamoClient,
     bodyencoder
   ) => {
-    reqClientRewrite(req, dynamoClient, config).then(
+    v2TransitionReqRewrite(req, dynamoClient, config).then(
       (clientScreenedProxRequest) => {
         delete clientScreenedProxRequest.headers.host;
-
-        let proxyRequest = {
+        let redirectUrl = clientScreenedProxRequest.old
+          ? clientScreenedProxRequest.old.issuer.metadata[metadata_type]
+          : issuer_metadata[metadata_type];
+        let proxy_request = {
           method: requestMethod,
           url: redirectUrl,
           headers: clientScreenedProxRequest.headers,
@@ -145,15 +148,28 @@ function buildApp(
         }
 
         if (payload && Object.keys(payload).length) {
-          proxyRequest.data = payload;
+          proxy_request.data = payload;
         }
         // Proxy request
-        axios(proxyRequest)
+        axios(proxy_request)
           .then((response) => {
             setProxyResponse(response, res);
           })
           .catch((err) => {
-            setProxyResponse(err.response, res);
+            const api_category = apiCategoryFromPath(req.path, config.routes);
+            if (api_category?.old) {
+              proxy_request.url =
+                api_category.old.issuer.metadata[metadata_type];
+              axios(proxy_request)
+                .then((response) => {
+                  setProxyResponse(response, res);
+                })
+                .catch((err) => {
+                  setProxyResponse(err.response, res);
+                });
+            } else {
+              setProxyResponse(err.response, res);
+            }
           });
       }
     );
@@ -388,7 +404,8 @@ function buildApp(
       proxyRequest(
         req,
         res,
-        service_issuer.metadata.jwks_uri,
+        service_issuer.metadata,
+        "jwks_uri",
         "GET",
         config,
         dynamoClient
@@ -398,29 +415,32 @@ function buildApp(
       proxyRequest(
         req,
         res,
-        service_issuer.metadata.userinfo_endpoint,
+        service_issuer.metadata,
+        "userinfo_endpoint",
         "GET",
         config,
         dynamoClient
       )
     );
-    router.post(api_category + app_routes.introspection, (req, res) =>
+    router.post(api_category + app_routes.introspection, (req, res) => {
       proxyRequest(
         req,
         res,
-        service_issuer.metadata.introspection_endpoint,
+        service_issuer.metadata,
+        "introspection_endpoint",
         "POST",
         config,
         dynamoClient,
         querystring
-      )
-    );
+      );
+    });
 
     router.post(api_category + app_routes.revoke, (req, res) => {
       proxyRequest(
         req,
         res,
-        service_issuer.metadata.revocation_endpoint,
+        service_issuer.metadata,
+        "revocation_endpoint",
         "POST",
         config,
         dynamoClient,
@@ -452,6 +472,13 @@ function startApp(config, isolatedIssuers) {
         token: config.okta_token,
         requestExecutor: new okta.DefaultRequestExecutor(),
       });
+      if (app_category.old && app_category.old.upstream_issuer) {
+        app_category.old.okta_client = new okta.Client({
+          orgUrl: config.okta_url,
+          token: config.okta_token,
+          requestExecutor: new okta.DefaultRequestExecutor(),
+        });
+      }
     });
   }
 
@@ -509,10 +536,18 @@ if (require.main === module) {
 
       const isolatedIssuers = {};
       if (config.routes && config.routes.categories) {
-        for (const service_config of config.routes.categories) {
-          isolatedIssuers[service_config.api_category] = await createIssuer(
-            service_config
+        for (const app_category of config.routes.categories) {
+          isolatedIssuers[app_category.api_category] = await createIssuer(
+            app_category.upstream_issuer,
+            app_category.custom_metadata
           );
+          app_category.issuer = isolatedIssuers[app_category.api_category];
+          if (app_category.old && app_category.old.upstream_issuer) {
+            app_category.old.issuer = await createIssuer(
+              app_category.old.upstream_issuer,
+              app_category.old.custom_metadata
+            );
+          }
         }
       }
       startApp(config, isolatedIssuers);

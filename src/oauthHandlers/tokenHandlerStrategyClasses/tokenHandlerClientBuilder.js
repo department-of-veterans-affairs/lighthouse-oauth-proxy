@@ -115,7 +115,7 @@ const buildTokenHandlerClient = async (
  */
 const getStrategies = async (
   redirect_uri,
-  issuer,
+  issuer_orig,
   logger,
   dynamoClient,
   config,
@@ -130,8 +130,10 @@ const getStrategies = async (
       redirect_uri,
       req,
       config,
-      dynamoClient
+      dynamoClient,
+      issuer_orig
     );
+    let issuer = clientMetadata.issuer;
     strategies = {
       getTokenStrategy: new RefreshTokenStrategy(
         req,
@@ -165,8 +167,10 @@ const getStrategies = async (
       redirect_uri,
       req,
       config,
-      dynamoClient
+      dynamoClient,
+      issuer_orig
     );
+    const issuer = clientMetadata.issuer;
     let issuerClient = new issuer.Client(clientMetadata);
     strategies = {
       getTokenStrategy: new AuthorizationCodeStrategy(
@@ -212,7 +216,7 @@ const getStrategies = async (
       getTokenStrategy: new ClientCredentialsStrategy(
         req,
         logger,
-        issuer.token_endpoint
+        issuer_orig.token_endpoint
       ),
       getDocumentFromDynamoStrategy: new GetDocumentByLaunchStrategy(req),
       saveDocumentToDynamoStrategy: new SaveDocumentLaunchStrategy(
@@ -237,7 +241,13 @@ const getStrategies = async (
   return strategies;
 };
 
-async function createClientMetadata(redirect_uri, req, config, dynamoClient) {
+async function createClientMetadata(
+  redirect_uri,
+  req,
+  config,
+  dynamoClient,
+  issuer
+) {
   let clientMetadata = {
     redirect_uris: [redirect_uri],
   };
@@ -262,12 +272,18 @@ async function createClientMetadata(redirect_uri, req, config, dynamoClient) {
       error_description: "Client authentication failed",
     };
   }
-  clientMetadata.client_id = await screenForV2ClientId(
+  const v2transitiondata = await screenForV2ClientId(
     clientMetadata.client_id,
     dynamoClient,
     config,
     req.path
   );
+  clientMetadata.issuer =
+    v2transitiondata.client_id === clientMetadata.client_id &&
+    v2transitiondata.old
+      ? v2transitiondata.old.issuer
+      : issuer;
+  clientMetadata.client_id = v2transitiondata.client_id;
 
   return clientMetadata;
 }

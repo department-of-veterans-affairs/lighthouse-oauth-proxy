@@ -11,7 +11,7 @@ const {
   handleOpenIdClientError,
   screenForV2ClientId,
   apiCategoryFromPath,
-  reqClientRewrite,
+  v2TransitionReqRewrite,
 } = require("../src/utils");
 
 describe("statusCodeFromError", () => {
@@ -350,44 +350,44 @@ describe("screenForV2ClientId tests", () => {
   it("screenForV2ClientId happy v2", async () => {
     const v2val = { Item: { v2_client_id: "clientIdv2" } };
     dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
-    const client_id = await screenForV2ClientId(
+    const result = await screenForV2ClientId(
       "clientId",
       dynamoClient,
       config,
       "/community-care/v1/token"
     );
-    expect(client_id).toBe("clientIdv2");
+    expect(result.client_id).toBe("clientIdv2");
   });
   it("screenForV2ClientId happy v1 2", async () => {
     let v2val = {};
     dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
-    let client_id = await screenForV2ClientId(
+    let result = await screenForV2ClientId(
       "clientId",
       dynamoClient,
       config,
       "/community-care/v1/token"
     );
-    expect(client_id).toBe("clientId");
+    expect(result.client_id).toBe("clientId");
     v2val = { Item: { something: "xxxx" } };
     dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
-    client_id = await screenForV2ClientId(
+    result = await screenForV2ClientId(
       "clientId",
       dynamoClient,
       config,
       "/community-care/v1/token"
     );
-    expect(client_id).toBe("clientId");
+    expect(result.client_id).toBe("clientId");
   });
   it("screenForV2ClientId mapping not applicable", async () => {
     const v2val = { Item: { v2_client_id: "clientIdv2" } };
     dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
-    const client_id = await screenForV2ClientId(
+    const result = await screenForV2ClientId(
       "clientId",
       dynamoClient,
       config,
       "/health/v1/token"
     );
-    expect(client_id).toBe("clientId");
+    expect(result.client_id).toBe("clientId");
   });
 });
 
@@ -396,6 +396,8 @@ describe("apiCategoryFromPath tests", () => {
     let result = apiCategoryFromPath("/health/v1/token", config.routes);
     expect(result.api_category).toBe("/health/v1");
     result = apiCategoryFromPath("/health/v1/authorization", config.routes);
+    expect(result.api_category).toBe("/health/v1");
+    result = apiCategoryFromPath("/health/v1/authorization/", config.routes);
     expect(result.api_category).toBe("/health/v1");
   });
 
@@ -408,16 +410,12 @@ describe("apiCategoryFromPath tests", () => {
     const result = apiCategoryFromPath("/nothere/v0/token", config.routes);
     expect(result).toBe(undefined);
   });
-  it("apiCategoryFromPath invalid path", async () => {
-    const result = apiCategoryFromPath("/health/v1/badpath", config.routes);
-    expect(result).toBe(undefined);
-  });
 });
 
-describe("reqClientRewrite tests", () => {
+describe("v2TransitionReqRewrite tests", () => {
   const dynamoClient = {};
   dynamoClient.getPayloadFromDynamo = jest.fn();
-  it("reqClientRewrite possitive rewrite auth basic", async () => {
+  it("v2TransitionReqRewrite possitive rewrite auth basic", async () => {
     const v2val = { Item: { v2_client_id: "clientIdv2" } };
     dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
     const req = {
@@ -426,17 +424,19 @@ describe("reqClientRewrite tests", () => {
       },
       path: "/community-care/v1/introspect",
     };
-    const result = await reqClientRewrite(req, dynamoClient, config);
-    expect(result.headers.authorization).toBe("Basic Y2xpZW50SWR2MjpteXNlY3JldA==");
+    const result = await v2TransitionReqRewrite(req, dynamoClient, config);
+    expect(result.headers.authorization).toBe(
+      "Basic Y2xpZW50SWR2MjpteXNlY3JldA=="
+    );
   });
-  it("reqClientRewrite possitive rewrite client body", async () => {
+  it("v2TransitionReqRewrite possitive rewrite client body", async () => {
     const v2val = { Item: { v2_client_id: "clientIdv2" } };
     dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
     const req = {
       body: { client_id: "clientidv1" },
       path: "/community-care/v1/introspect",
     };
-    const result = await reqClientRewrite(req, dynamoClient, config);
+    const result = await v2TransitionReqRewrite(req, dynamoClient, config);
     expect(result.body.client_id).toBe("clientIdv2");
   });
 });

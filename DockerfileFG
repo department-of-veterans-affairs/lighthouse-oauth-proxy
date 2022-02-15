@@ -1,4 +1,4 @@
-from vasdvp/lighthouse-node-application-base:node12
+from vasdvp/lighthouse-node-application-base:node16
 
 USER node
 WORKDIR /home/ca-certificates

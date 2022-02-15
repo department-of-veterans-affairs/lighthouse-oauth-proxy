@@ -19,7 +19,7 @@ const { configureTokenValidator } = require("./tokenValidation");
 const rTracer = require("cls-rtracer");
 const { SlugHelper } = require("./slug_helper");
 const { buildIssuer } = require("./issuer_helper");
-const { reqClientRewrite, apiCategoryFromPath } = require("./utils");
+const { v2TransitionReqRewrite, apiCategoryFromPath } = require("./utils");
 
 const openidMetadataWhitelist = [
   "issuer",
@@ -121,7 +121,7 @@ function buildApp(
     dynamoClient,
     bodyencoder
   ) => {
-    reqClientRewrite(req, dynamoClient, config).then(
+    v2TransitionReqRewrite(req, dynamoClient, config).then(
       (clientScreenedProxRequest) => {
         delete clientScreenedProxRequest.headers.host;
         let redirectUrl = clientScreenedProxRequest.old

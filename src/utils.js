@@ -213,7 +213,7 @@ const screenForV2ClientId = async (client_id, dynamoClient, config, path) => {
  * @param {*} config The app configuration
  * @returns The the request, modified or unchanged
  */
-const reqClientRewrite = async (req, dynamoClient, config) => {
+const v2TransitionReqRewrite = async (req, dynamoClient, config) => {
   let creds = parseBasicAuth(req);
   let v2transitiondata = {};
   if (creds) {
@@ -253,5 +253,5 @@ module.exports = {
   handleOpenIdClientError,
   screenForV2ClientId,
   apiCategoryFromPath,
-  reqClientRewrite,
+  v2TransitionReqRewrite,
 };

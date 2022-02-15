@@ -157,7 +157,7 @@ function buildApp(
           })
           .catch((err) => {
             const api_category = apiCategoryFromPath(req.path, config.routes);
-            if (api_category?.old) {
+            if (api_category && api_category.old) {
               proxy_request.url =
                 api_category.old.issuer.metadata[metadata_type];
               axios(proxy_request)

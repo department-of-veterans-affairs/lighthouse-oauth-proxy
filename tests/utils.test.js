@@ -408,10 +408,6 @@ describe("apiCategoryFromPath tests", () => {
     const result = apiCategoryFromPath("/nothere/v0/token", config.routes);
     expect(result).toBe(undefined);
   });
-  it("apiCategoryFromPath invalid path", async () => {
-    const result = apiCategoryFromPath("/health/v1/badpath", config.routes);
-    expect(result).toBe(undefined);
-  });
 });
 
 describe("v2TransitionReqRewrite tests", () => {

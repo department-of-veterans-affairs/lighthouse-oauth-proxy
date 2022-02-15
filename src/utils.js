@@ -158,7 +158,7 @@ const handleOpenIdClientError = (error) => {
  */
 const apiCategoryFromPath = (path_orig, routes) => {
   let app_category;
-  const path = path_orig.endsWith("/")
+  const path = path_orig?.endsWith("/")
     ? path_orig.slice(0, path_orig.lastIndexOf("/"))
     : path_orig;
   if (path && routes && routes.categories && routes.app_routes) {
@@ -200,7 +200,7 @@ const screenForV2ClientId = async (client_id, dynamoClient, config, path) => {
       // No client entry
     }
   }
-  if (v2transitiondata.client_id === client_id) {
+  if (v2transitiondata.client_id === client_id && apiCategory?.old) {
     v2transitiondata.old = apiCategory.old;
   }
   return v2transitiondata;

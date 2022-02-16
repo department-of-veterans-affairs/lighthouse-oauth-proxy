@@ -5,17 +5,24 @@ const { proxyRequest } = require("../src");
 const { createFakeConfig, ISSUER_METADATA } = require("./testUtils");
 const dynnamoClient = {};
 jest.mock("axios");
-
+const mock_config = createFakeConfig();
+const mock_app_category = mock_config.routes.categories[0];
 describe("proxymockin_request tests", () => {
-  const in_req = {
+  const mock_in_req = {
     body: { client_id: "client1", token: "token1" },
     headers: { host: "host1" },
+    path: "/health/v1/introspect",
   };
-  // Don't alter req
-  jest.mock("../src/utils", () => {
-    jest.fn(() => Promise.resolve(in_req));
-  });
+  jest.mock("../src/utils", () => ({
+    v2TransitionReqRewrite: () => Promise.resolve(mock_in_req),
+    apiCategoryFromPath: () => Promise.resolve(mock_app_category),
+  }));
+  // Don't alter req config.routes.categories[0];
   it("proxymockin_request introspect", async () => {
+    jest.mock("../src/utils", () => ({
+      v2TransitionReqRewrite: () => Promise.resolve(mock_in_req),
+      apiCategoryFromPath: () => Promise.resolve(mock_app_category),
+    }));
     const mock_result = {
       active: true,
       scope: "offline_access openid",
@@ -65,19 +72,22 @@ describe("proxymockin_request tests", () => {
       promise2check(res);
     };
     axios.mockResolvedValueOnce(axiosPostPayload);
-    let config = createFakeConfig();
     proxyRequest(
-      in_req,
+      mock_in_req,
       res,
       ISSUER_METADATA,
       "introspection_endpoint",
       "POST",
-      config,
+      mock_config,
       dynnamoClient
     );
   });
   it("proxymockin_request bad", async () => {
-    const promise2check = (res) => {
+    jest.mock("../src/utils", () => ({
+      v2TransitionReqRewrite: () => Promise.resolve(mock_in_req),
+      apiCategoryFromPath: () => mock_app_category,
+    }));
+    const promise2check404 = (res) => {
       return new Promise(
         (resolve) => {
           expect(res._status).toBe("404");
@@ -106,18 +116,28 @@ describe("proxymockin_request tests", () => {
     };
     axiosErrorPayload.data.pipe = (targetResp) => {
       targetResp.body = axiosErrorPayload.body;
-      promise2check(res);
+      promise2check404(res);
     };
 
-    axios.mockRejectedValueOnce({ response: axiosErrorPayload });
-    let config = createFakeConfig();
+    axios.mockRejectedValue({ response: axiosErrorPayload });
+    const mock_config = createFakeConfig();
+
+    mock_config.routes.categories[0].old = {
+      issuer: {
+        upstream_issuer:
+          "https://deptva-eval.okta.com/oauth2/aus7y0ho1w0bSNLDV2p7",
+        manage_endpoint: "https://staging.va.gov/account",
+        audience: "https://sandbox-api.va.gov/services/fhir",
+        metadata: ISSUER_METADATA,
+      },
+    };
     proxyRequest(
-      in_req,
+      mock_in_req,
       res,
       ISSUER_METADATA,
       "introspection_endpoint",
       "POST",
-      config,
+      mock_config,
       dynnamoClient
     );
   });

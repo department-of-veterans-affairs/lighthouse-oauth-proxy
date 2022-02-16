@@ -21,9 +21,9 @@ const { screenForV2ClientId } = require("../utils");
 const authorizeHandler = async (
   redirect_uri,
   logger,
-  issuer_orig,
+  issuer,
   dynamoClient,
-  okta_client_orig,
+  oktaClient,
   slugHelper,
   app_category,
   config,
@@ -39,12 +39,12 @@ const authorizeHandler = async (
     config,
     req.path
   );
-  let oktaClient = okta_client_orig;
+  let okta_client = oktaClient;
   const screenedClientId = v2transitiondata.client_id;
-  let issuer = issuer_orig;
+  let issuer_data = issuer;
   if (v2transitiondata.old) {
-    issuer = v2transitiondata.old.issuer;
-    oktaClient = app_category.old.okta_client;
+    issuer_data = v2transitiondata.old.issuer;
+    okta_client = app_category.old.okta_client;
   }
 
   let clientValidation = await validateClient(
@@ -53,7 +53,7 @@ const authorizeHandler = async (
     client_redirect,
     dynamoClient,
     config.dynamo_clients_table,
-    oktaClient,
+    okta_client,
     app_category
   );
 
@@ -129,7 +129,7 @@ const authorizeHandler = async (
   }
 
   res.redirect(
-    `${issuer.metadata.authorization_endpoint}?${params.toString()}`
+    `${issuer_data.metadata.authorization_endpoint}?${params.toString()}`
   );
 };
 

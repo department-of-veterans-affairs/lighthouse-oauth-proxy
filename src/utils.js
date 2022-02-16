@@ -171,7 +171,7 @@ const apiCategoryFromPath = (path, routes) => {
 };
 
 /**
- * Screens client_id and replaces with v2 equivant if applicable for the route
+ * Screens the client id and replaces it with its version 2 equivant if applicable.
  *
  * @param {string} client_id The incocming client_id
  * @param {DynamoClient} dynamoClient The dynamo client

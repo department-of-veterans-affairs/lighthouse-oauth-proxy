@@ -173,10 +173,10 @@ const apiCategoryFromPath = (path, routes) => {
 /**
  * Screens the client id and replaces it with its version 2 equivant if applicable.
  *
- * @param {string} client_id The incocming client_id
- * @param {DynamoClient} dynamoClient The dynamo client
- * @param {*} config application configuration
- * @param {string} path  path in the request
+ * @param {string} client_id client id to screen.
+ * @param {DynamoClient} dynamoClient interacts with dynamodb.
+ * @param {*} config application configuration.
+ * @param {string} path  path in the request.
  * @returns An object with either the original client ID or its version 2 equivalent,
  *  as well as an object with old issuer app_category data when there is no version 2 client id.
  */
@@ -218,7 +218,7 @@ const screenForV2ClientId = async (client_id, dynamoClient, config, path) => {
  * @param {express.Request} req req express request object.
  * @param {DynamoClient} dynamoClient interacts with dynamodb.
  * @param {*} config application configuration.
- * @returns The the request, modified or unchanged
+ * @returns The modified or unaltered request
  */
 const v2TransitionReqRewrite = async (req, dynamoClient, config) => {
   let v2transitiondata = {};

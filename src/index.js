@@ -478,15 +478,15 @@ const proxyRequest = (
   bodyencoder
 ) => {
   v2TransitionReqRewrite(req, dynamoClient, config).then(
-    (clientScreenedProxRequest) => {
-      delete clientScreenedProxRequest.headers.host;
-      let redirectUrl = clientScreenedProxRequest.old
-        ? clientScreenedProxRequest.old.issuer.metadata[metadata_type]
+    (clientScreenedProxyRequest) => {
+      delete clientScreenedProxyRequest.headers.host;
+      let redirectUrl = clientScreenedProxyRequest.old
+        ? clientScreenedProxyRequest.old.issuer.metadata[metadata_type]
         : issuer_metadata[metadata_type];
       let proxy_request = {
         method: requestMethod,
         url: redirectUrl,
-        headers: clientScreenedProxRequest.headers,
+        headers: clientScreenedProxyRequest.headers,
         responseType: "stream",
       };
       /*
@@ -497,10 +497,10 @@ const proxyRequest = (
        * If resulting body is empty, omit it from the proxied request.
        */
 
-      let payload = clientScreenedProxRequest.body;
+      let payload = clientScreenedProxyRequest.body;
 
       if (bodyencoder !== undefined) {
-        payload = bodyencoder.stringify(clientScreenedProxRequest.body);
+        payload = bodyencoder.stringify(clientScreenedProxyRequest.body);
       }
 
       if (payload && Object.keys(payload).length) {

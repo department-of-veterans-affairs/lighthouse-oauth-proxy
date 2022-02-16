@@ -173,7 +173,7 @@ const apiCategoryFromPath = (path, routes) => {
 /**
  * Screens the client id and replaces it with its version 2 equivant if applicable.
  *
- * @param {string} client_id client id to screen.
+ * @param {string} client_id client id to screen for version 2 equivalent
  * @param {DynamoClient} dynamoClient interacts with dynamodb.
  * @param {*} config application configuration.
  * @param {string} path  path in the request.

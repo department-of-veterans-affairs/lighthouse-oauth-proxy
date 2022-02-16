@@ -45,8 +45,8 @@ const openidMetadataWhitelist = [
   "request_object_signing_alg_values_supported",
 ];
 
-async function createIssuer(upstream_issuer, custom_metadata) {
-  return await buildIssuer(upstream_issuer, custom_metadata);
+async function createIssuer(issuer_category) {
+  return await buildIssuer(issuer_category);
 }
 
 function buildMetadataRewriteTable(config, api_category) {

@@ -415,20 +415,6 @@ describe("apiCategoryFromPath tests", () => {
 describe("v2TransitionReqRewrite tests", () => {
   const dynamoClient = {};
   dynamoClient.getPayloadFromDynamo = jest.fn();
-  it("v2TransitionReqRewrite possitive rewrite auth basic", async () => {
-    const v2val = { Item: { v2_client_id: "clientIdv2" } };
-    dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
-    const req = {
-      headers: {
-        authorization: "Basic dGVzdGNsaWVudDI6bXlzZWNyZXQ=",
-      },
-      path: "/community-care/v1/introspect",
-    };
-    const result = await v2TransitionReqRewrite(req, dynamoClient, config);
-    expect(result.headers.authorization).toBe(
-      "Basic Y2xpZW50SWR2MjpteXNlY3JldA=="
-    );
-  });
   it("v2TransitionReqRewrite possitive rewrite client body", async () => {
     const v2val = { Item: { v2_client_id: "clientIdv2" } };
     dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);

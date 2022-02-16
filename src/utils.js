@@ -223,20 +223,8 @@ const screenForV2ClientId = async (client_id, dynamoClient, config, path) => {
  * @returns The the request, modified or unchanged
  */
 const v2TransitionReqRewrite = async (req, dynamoClient, config) => {
-  let creds = parseBasicAuth(req);
   let v2transitiondata = {};
-  if (creds) {
-    v2transitiondata = await screenForV2ClientId(
-      creds.username,
-      dynamoClient,
-      config,
-      req.path
-    );
-    req.headers.authorization = encodeBasicAuthHeader(
-      v2transitiondata.client_id,
-      creds.password
-    );
-  } else if (req.body && req.body.client_id) {
+  if (req.body && req.body.client_id) {
     v2transitiondata = await screenForV2ClientId(
       req.body.client_id,
       dynamoClient,

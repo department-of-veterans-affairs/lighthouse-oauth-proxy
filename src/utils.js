@@ -179,7 +179,8 @@ const apiCategoryFromPath = (path_orig, routes) => {
  * @param {DynamoClient} dynamoClient The dynamo client
  * @param {*} config application configuration
  * @param {string} path  path in the request
- * @returns An object with either the original client ID or the v2 variant of it, as well as possibly, old issuer isssuer
+ * @returns An object with either the original client ID or its version 2 equivalent,
+ *  as well as an object with old issuer app_category data when there is no version 2 client id.
  */
 const screenForV2ClientId = async (client_id, dynamoClient, config, path) => {
   let v2transitiondata = { client_id: client_id };

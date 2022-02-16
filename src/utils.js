@@ -152,9 +152,10 @@ const handleOpenIdClientError = (error) => {
 
 /**
  * Determine the app category based on the path
- * @param {} path The path for the token request
- * @param {*} categories  Array of the app config route categories
- * @returns The the appropriate app category object from the app config
+ *
+ * @param {string} path path for the token request.
+ * @param {*} categories array of the app config route categories.
+ * @returns The the appropriate app category object from the app config.
  */
 const apiCategoryFromPath = (path_orig, routes) => {
   let app_category;
@@ -173,11 +174,13 @@ const apiCategoryFromPath = (path_orig, routes) => {
 
 /**
  * Screens client_id and replaces with v2 equivant if applicable for the route
- * @param {*} client_id The incocming client_id
- * @param {*} dynamoClient The dynamo client
- * @param {*} config The app config
- * @param {*} path  The path in the request
- * @returns An object with either the original client ID or the v2 variant of it, as well as possibly, old issuer isssuer
+ *
+ * @param {string} client_id The incocming client_id
+ * @param {DynamoClient} dynamoClient The dynamo client
+ * @param {*} config application configuration
+ * @param {string} path  path in the request
+ * @returns An object with either the original client ID or its version 2 equivalent,
+ *  as well as an object with old issuer app_category data when there is no version 2 client id.
  */
 const screenForV2ClientId = async (client_id, dynamoClient, config, path) => {
   let v2transitiondata = { client_id: client_id };
@@ -213,9 +216,10 @@ const screenForV2ClientId = async (client_id, dynamoClient, config, path) => {
 
 /**
  * Rewrites the client in the request
- * @param {*} req The request
- * @param {*} dynamoClient The dynamo client
- * @param {*} config The app configuration
+ *
+ * @param {express.Request} req req express request object.
+ * @param {DynamoClient} dynamoClient interacts with dynamodb.
+ * @param {*} config application configuration.
  * @returns The the request, modified or unchanged
  */
 const v2TransitionReqRewrite = async (req, dynamoClient, config) => {

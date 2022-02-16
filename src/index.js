@@ -467,7 +467,7 @@ const setProxyResponse = (response, targetResponse) => {
  * @param requestMethod The HTTP method.
  * @param bodyencoder The optional body encoder.
  */
-const proxyRequest = (
+const proxyRequest = async (
   req,
   res,
   issuer_metadata,
@@ -477,57 +477,59 @@ const proxyRequest = (
   dynamoClient,
   bodyencoder
 ) => {
-  v2TransitionReqRewrite(req, dynamoClient, config).then(
-    (clientScreenedProxyRequest) => {
-      delete clientScreenedProxyRequest.headers.host;
-      let redirectUrl = clientScreenedProxyRequest.old
-        ? clientScreenedProxyRequest.old.issuer.metadata[metadata_type]
-        : issuer_metadata[metadata_type];
-      let proxy_request = {
-        method: requestMethod,
-        url: redirectUrl,
-        headers: clientScreenedProxyRequest.headers,
-        responseType: "stream",
-      };
-      /*
-       * Build the proxied request body.
-       *
-       * Use the original request body and optionally encode it.
-       *
-       * If resulting body is empty, omit it from the proxied request.
-       */
-
-      let payload = clientScreenedProxyRequest.body;
-
-      if (bodyencoder !== undefined) {
-        payload = bodyencoder.stringify(clientScreenedProxyRequest.body);
-      }
-
-      if (payload && Object.keys(payload).length) {
-        proxy_request.data = payload;
-      }
-      // Proxy request
-      axios(proxy_request)
-        .then((response) => {
-          setProxyResponse(response, res);
-        })
-        .catch((err) => {
-          const api_category = apiCategoryFromPath(req.path, config.routes);
-          if (api_category && api_category.old) {
-            proxy_request.url = api_category.old.issuer.metadata[metadata_type];
-            axios(proxy_request)
-              .then((response) => {
-                setProxyResponse(response, res);
-              })
-              .catch((err) => {
-                setProxyResponse(err.response, res);
-              });
-          } else {
-            setProxyResponse(err.response, res);
-          }
-        });
-    }
+  const clientScreenedProxyRequest = await v2TransitionReqRewrite(
+    req,
+    dynamoClient,
+    config
   );
+
+  delete clientScreenedProxyRequest.headers.host;
+  let redirectUrl = clientScreenedProxyRequest.old
+    ? clientScreenedProxyRequest.old.issuer.metadata[metadata_type]
+    : issuer_metadata[metadata_type];
+  let proxy_request = {
+    method: requestMethod,
+    url: redirectUrl,
+    headers: clientScreenedProxyRequest.headers,
+    responseType: "stream",
+  };
+  /*
+   * Build the proxied request body.
+   *
+   * Use the original request body and optionally encode it.
+   *
+   * If resulting body is empty, omit it from the proxied request.
+   */
+
+  let payload = clientScreenedProxyRequest.body;
+
+  if (bodyencoder !== undefined) {
+    payload = bodyencoder.stringify(clientScreenedProxyRequest.body);
+  }
+
+  if (payload && Object.keys(payload).length) {
+    proxy_request.data = payload;
+  }
+  // Proxy request
+  axios(proxy_request)
+    .then((response) => {
+      setProxyResponse(response, res);
+    })
+    .catch((err) => {
+      const api_category = apiCategoryFromPath(req.path, config.routes);
+      if (api_category && api_category.old) {
+        proxy_request.url = api_category.old.issuer.metadata[metadata_type];
+        axios(proxy_request)
+          .then((response) => {
+            setProxyResponse(response, res);
+          })
+          .catch((err) => {
+            setProxyResponse(err.response, res);
+          });
+      } else {
+        setProxyResponse(err.response, res);
+      }
+    });
 };
 
 module.exports = {

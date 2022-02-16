@@ -173,18 +173,6 @@ describe("proxymockin_request tests", () => {
         }
       );
     };
-    // const promise2check404 = (res) => {
-    //   return new Promise(
-    //     (resolve) => {
-    //       expect(res._status).toBe("404");
-    //       expect(res.body).toBe("Bad request");
-    //       resolve(true);
-    //     },
-    //     (reject) => {
-    //       reject("Should not be here");
-    //     }
-    //   );
-    // };
     const axiosPostPayload = {
       body: mock_result,
       headers: { "Content-type": "application/json" },

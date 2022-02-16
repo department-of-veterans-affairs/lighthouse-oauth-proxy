@@ -99,6 +99,98 @@ describe("proxymockin_request tests", () => {
         }
       );
     };
+    const axiosErrorPayloadBad = {
+      body: "Bad request",
+      headers: { "Content-type": "application/json" },
+      status: "404",
+      data: {},
+    };
+    const res = {
+      _status: "500",
+    };
+    res.set = (in_headers) => {
+      res._headers = in_headers;
+    };
+    res.status = (in_status) => {
+      res._status = in_status;
+    };
+    axiosErrorPayloadBad.data.pipe = (targetResp) => {
+      targetResp.body = axiosErrorPayloadBad.body;
+      promise2check404(res);
+    };
+
+    axios.mockRejectedValue({ response: axiosErrorPayloadBad });
+    const mock_config = createFakeConfig();
+
+    mock_config.routes.categories[0].old = {
+      issuer: {
+        upstream_issuer:
+          "https://deptva-eval.okta.com/oauth2/aus7y0ho1w0bSNLDV2p7",
+        manage_endpoint: "https://staging.va.gov/account",
+        audience: "https://sandbox-api.va.gov/services/fhir",
+        metadata: ISSUER_METADATA,
+      },
+    };
+    proxyRequest(
+      mock_in_req,
+      res,
+      ISSUER_METADATA,
+      "introspection_endpoint",
+      "POST",
+      mock_config,
+      dynnamoClient
+    );
+  });
+
+  it("proxymockin_first request bad so use old issuer", async () => {
+    jest.mock("../src/utils", () => ({
+      v2TransitionReqRewrite: () => Promise.resolve(mock_in_req),
+      apiCategoryFromPath: () => mock_app_category,
+    }));
+    const mock_result = {
+      active: true,
+      scope: "offline_access openid",
+      username: "user1",
+      exp: 1644943805,
+      iat: 1644940205,
+      sub: "sub1",
+      aud: "api://default",
+      iss: "https://deptva-eval.okta.com/oauth2/default",
+      jti: "jti1",
+      token_type: "Bearer",
+      client_id: "client1",
+      uid: "uid1",
+    };
+    const promise2check = (res) => {
+      return new Promise(
+        (resolve) => {
+          expect(res._status).toBe("200");
+          expect(res.body).toBe(mock_result);
+          resolve(true);
+        },
+        (reject) => {
+          reject("Should not be here");
+        }
+      );
+    };
+    // const promise2check404 = (res) => {
+    //   return new Promise(
+    //     (resolve) => {
+    //       expect(res._status).toBe("404");
+    //       expect(res.body).toBe("Bad request");
+    //       resolve(true);
+    //     },
+    //     (reject) => {
+    //       reject("Should not be here");
+    //     }
+    //   );
+    // };
+    const axiosPostPayload = {
+      body: mock_result,
+      headers: { "Content-type": "application/json" },
+      status: "200",
+      data: {},
+    };
     const axiosErrorPayload = {
       body: "Bad request",
       headers: { "Content-type": "application/json" },
@@ -114,12 +206,13 @@ describe("proxymockin_request tests", () => {
     res.status = (in_status) => {
       res._status = in_status;
     };
-    axiosErrorPayload.data.pipe = (targetResp) => {
-      targetResp.body = axiosErrorPayload.body;
-      promise2check404(res);
+    axiosPostPayload.data.pipe = (targetResp) => {
+      targetResp.body = axiosPostPayload.body;
+      promise2check(res);
     };
 
-    axios.mockRejectedValue({ response: axiosErrorPayload });
+    axios.mockRejectedValueOnce({ response: axiosErrorPayload });
+    axios.mockResolvedValueOnce(axiosPostPayload);
     const mock_config = createFakeConfig();
 
     mock_config.routes.categories[0].old = {

@@ -42,9 +42,9 @@ const authorizeHandler = async (
   let okta_client = oktaClient;
   const screenedClientId = v2transitiondata.client_id;
   let issuer_data = issuer;
-  if (v2transitiondata.previous) {
-    issuer_data = v2transitiondata.previous.issuer;
-    okta_client = app_category.previous.okta_client;
+  if (v2transitiondata.fallback) {
+    issuer_data = v2transitiondata.fallback.issuer;
+    okta_client = app_category.fallback.okta_client;
   }
 
   let clientValidation = await validateClient(

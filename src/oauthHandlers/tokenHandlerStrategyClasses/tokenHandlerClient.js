@@ -91,7 +91,7 @@ class TokenHandlerClient {
       }
     }
     /*
-     * Lookup a previous document (db record) associated with this request.
+     * Lookup a fallback document (db record) associated with this request.
      *
      * If nothing is found, log the event and return an error.
      */

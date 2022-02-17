@@ -295,9 +295,13 @@ function createTestClientEntry() {
   let itemParams = {
     TableName: "Clients",
     Item: {
-      client_id: { S: "testclient1" },
+      client_id: { S: "0oa6l93ab2tj25Zpv2p7" },
       redirect_uris: {
-        SS: ["http://localhost:8080/auth/cb", "http://localhost:18080/auth/cb"],
+        SS: [
+          "http://localhost:8080",
+          "http://localhost:8080/",
+          "http://localhost:18080/auth/cb",
+        ],
       },
       system: { S: "oauthi" },
     },
@@ -323,7 +327,7 @@ function createTestClientEntry() {
       },
       system: { S: "oauthi" },
       // This needs to be overridden with a valid client for local testing
-      v2_client_id: { S: "v2_testclient2" },
+      v2_client_id: { S: "0oa6l93ab2tj25Zpv2p7" },
     },
   };
   dynamo.putItem(itemParams, (err, data) => {

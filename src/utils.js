@@ -186,8 +186,8 @@ const screenForV2ClientId = async (client_id, dynamoClient, config, path) => {
     config && config.routes ? apiCategoryFromPath(path, config.routes) : null;
   if (
     apiCategory &&
-    apiCategory.previous &&
-    apiCategory.previous.upstream_issuer
+    apiCategory.fallback &&
+    apiCategory.fallback.upstream_issuer
   ) {
     try {
       const dynamo_clients_table = config.dynamo_clients_table;
@@ -209,9 +209,9 @@ const screenForV2ClientId = async (client_id, dynamoClient, config, path) => {
   if (
     v2transitiondata.client_id === client_id &&
     apiCategory &&
-    apiCategory.previous
+    apiCategory.fallback
   ) {
-    v2transitiondata.previous = apiCategory.previous;
+    v2transitiondata.fallback = apiCategory.fallback;
   }
   return v2transitiondata;
 };
@@ -235,7 +235,7 @@ const v2TransitionReqRewrite = async (req, dynamoClient, config) => {
     );
     req.body.client_id = v2transitiondata.client_id;
   }
-  req.previous = v2transitiondata.previous;
+  req.fallback = v2transitiondata.fallback;
   return req;
 };
 

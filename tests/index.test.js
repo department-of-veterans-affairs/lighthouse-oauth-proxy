@@ -9,19 +9,22 @@ const mock_config = createFakeConfig();
 const mock_app_category = mock_config.routes.categories[0];
 describe("proxymockin_request tests", () => {
   const mock_in_req = {
-    body: { client_id: "client1", token: "token1" },
-    headers: { host: "host1" },
+    method: "POST",
+    url: "http://example.com/introspect",
+    headers: {},
+    responseType: "stream",
+    data: "client_id=clientIdv2",
     path: "/health/v1/introspect",
   };
   jest.mock("../src/utils", () => ({
-    v2TransitionReqRewrite: () => Promise.resolve(mock_in_req),
-    apiCategoryFromPath: () => Promise.resolve(mock_app_category),
+    v2TransitionProxyRequest: () => Promise.resolve(mock_in_req),
+    appCategoryFromPath: () => Promise.resolve(mock_app_category),
   }));
   // Don't alter req config.routes.categories[0];
   it("proxymockin_request introspect", async () => {
     jest.mock("../src/utils", () => ({
-      v2TransitionReqRewrite: () => Promise.resolve(mock_in_req),
-      apiCategoryFromPath: () => Promise.resolve(mock_app_category),
+      v2TransitionProxyRequest: () => Promise.resolve(mock_in_req),
+      appCategoryFromPath: () => Promise.resolve(mock_app_category),
     }));
     const mock_result = {
       active: true,
@@ -84,8 +87,8 @@ describe("proxymockin_request tests", () => {
   });
   it("proxymockin_request bad", async () => {
     jest.mock("../src/utils", () => ({
-      v2TransitionReqRewrite: () => Promise.resolve(mock_in_req),
-      apiCategoryFromPath: () => mock_app_category,
+      v2TransitionProxyRequest: () => Promise.resolve(mock_in_req),
+      appCategoryFromPath: () => mock_app_category,
     }));
     const promise2check404 = (res) => {
       return new Promise(
@@ -144,8 +147,8 @@ describe("proxymockin_request tests", () => {
 
   it("proxymockin_first request bad so use old issuer", async () => {
     jest.mock("../src/utils", () => ({
-      v2TransitionReqRewrite: () => Promise.resolve(mock_in_req),
-      apiCategoryFromPath: () => mock_app_category,
+      v2TransitionProxyRequest: () => Promise.resolve(mock_in_req),
+      appCategoryFromPath: () => mock_app_category,
     }));
     const mock_result = {
       active: true,

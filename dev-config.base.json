@@ -38,7 +38,7 @@
         "upstream_issuer": "https://example2.com/oauth2/issuer/4",
         "manage_endpoint": "https://example2.com/manage/endpoint",
         "audience": "audience-3",
-        "previous": {
+        "fallback": {
           "upstream_issuer": "https://previous-example2.com/oauth2/issuer/3"
         },
         "client_store": "local"

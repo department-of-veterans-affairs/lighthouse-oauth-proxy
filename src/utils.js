@@ -217,17 +217,6 @@ const screenForV2ClientId = async (client_id, dynamoClient, config, path) => {
 };
 
 /**
- * Rewrites the client in the request
- *
- * @param {express.Request} req req express request object.
- * @param {DynamoClient} dynamoClient interacts with dynamodb.
- * @param {*} config application configuration.
- * @param {*} issuer_metadata metadata for an issuer, for example, the URL to the introspection endpoint for an issuer.
- * @param {*} metadata_type metadata type such as 'introspect' or 'revoke'
- * @returns A new request used for a subsequent HTTP request.
- */
-
-/**
  * Generates a request object used for an axios request
  *
  * @param {express.Request} req req express request object.

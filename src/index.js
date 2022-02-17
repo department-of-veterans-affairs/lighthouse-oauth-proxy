@@ -368,7 +368,7 @@ function startApp(config, isolatedIssuers) {
         token: config.okta_token,
         requestExecutor: new okta.DefaultRequestExecutor(),
       });
-      if (app_category.previous_app_category_settings && app_category.old.upstream_issuer) {
+      if (app_category.previous_app_category_settings && app_category.previous_app_category_settings.upstream_issuer) {
         app_category.previous_app_category_settings.okta_client = new okta.Client({
           orgUrl: config.okta_url,
           token: config.okta_token,
@@ -437,8 +437,8 @@ if (require.main === module) {
             app_category
           );
           app_category.issuer = isolatedIssuers[app_category.api_category];
-          if (app_category.previous_app_category_settings && app_category.old.upstream_issuer) {
-            app_category.previous_app_category_settings.issuer = await createIssuer(app_category.old);
+          if (app_category.previous_app_category_settings && app_category.previous_app_category_settings.upstream_issuer) {
+            app_category.previous_app_category_settings.issuer = await createIssuer(app_category.previous_app_category_settings);
           }
         }
       }

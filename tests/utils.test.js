@@ -320,7 +320,7 @@ const categories = [
   {
     api_category: "/community-care/v1",
     audience: "api://default",
-    previous_app_category_settings: { upstream_issuer: "http://whatever" },
+    previous: { upstream_issuer: "http://whatever" },
   },
   {
     api_category: "/health/v1",

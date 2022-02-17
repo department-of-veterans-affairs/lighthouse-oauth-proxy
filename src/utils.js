@@ -246,7 +246,10 @@ const v2TransitionProxyRequest = async (
       req.path
     );
     // Since there is no distinct v2 client id proxy to the appropriate fallback url
-    if (req.body.client_id === v2TransitionData.client_id) {
+    if (
+      req.body.client_id === v2TransitionData.client_id &&
+      v2TransitionData.fallback
+    ) {
       destinationUrl = v2TransitionData.fallback.issuer.metadata[metadata_type];
     } else {
       req.body.client_id = v2TransitionData.client_id;

@@ -295,33 +295,7 @@ function createTestClientEntry() {
   let itemParams = {
     TableName: "Clients",
     Item: {
-      client_id: { S: "0oa6l93ab2tj25Zpv2p7" },
-      redirect_uris: {
-        SS: [
-          "http://localhost:8080",
-          "http://localhost:8080/",
-          "http://localhost:18080/auth/cb",
-        ],
-      },
-      system: { S: "oauthi" },
-    },
-  };
-  dynamo.putItem(itemParams, (err, data) => {
-    if (err) {
-      console.error(
-        "Unable to create test client. Error JSON:",
-        JSON.stringify(err, null, 2)
-      );
-    } else {
-      console.log("Created test client.");
-      console.log(data);
-    }
-  });
-
-  itemParams = {
-    TableName: "Clients",
-    Item: {
-      client_id: { S: "testclient2" },
+      client_id: { S: "testclient1" },
       redirect_uris: {
         SS: ["http://localhost:8080/auth/cb", "http://localhost:18080/auth/cb"],
       },

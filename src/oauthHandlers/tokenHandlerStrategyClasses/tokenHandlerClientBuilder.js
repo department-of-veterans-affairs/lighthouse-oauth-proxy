@@ -115,7 +115,7 @@ const buildTokenHandlerClient = async (
  */
 const getStrategies = async (
   redirect_uri,
-  issuer_orig,
+  issuer,
   logger,
   dynamoClient,
   config,
@@ -131,14 +131,14 @@ const getStrategies = async (
       req,
       config,
       dynamoClient,
-      issuer_orig
+      issuer
     );
-    let issuer = clientMetadata.issuer;
+    const clientIssuer = clientMetadata.issuer;
     strategies = {
       getTokenStrategy: new RefreshTokenStrategy(
         req,
         logger,
-        new issuer.Client(clientMetadata)
+        new clientIssuer.Client(clientMetadata)
       ),
       getDocumentFromDynamoStrategy: new GetDocumentByRefreshTokenStrategy(
         req,
@@ -151,7 +151,7 @@ const getStrategies = async (
         logger,
         dynamoClient,
         config,
-        issuer.issuer,
+        clientIssuer.issuer,
         refreshTokenLifeCycleHistogram
       ),
       getPatientInfoStrategy: new GetPatientInfoFromValidateEndpointStrategy(
@@ -168,10 +168,9 @@ const getStrategies = async (
       req,
       config,
       dynamoClient,
-      issuer_orig
+      issuer
     );
-    const issuer = clientMetadata.issuer;
-    let issuerClient = new issuer.Client(clientMetadata);
+    let issuerClient = new clientMetadata.issuer.Client(clientMetadata);
     strategies = {
       getTokenStrategy: new AuthorizationCodeStrategy(
         req,
@@ -190,7 +189,7 @@ const getStrategies = async (
         logger,
         dynamoClient,
         config,
-        issuer.issuer,
+        clientMetadata.issuer.issuer,
         refreshTokenLifeCycleHistogram
       ),
       getPatientInfoStrategy: new GetPatientInfoFromValidateEndpointStrategy(
@@ -216,7 +215,7 @@ const getStrategies = async (
       getTokenStrategy: new ClientCredentialsStrategy(
         req,
         logger,
-        issuer_orig.token_endpoint
+        issuer.token_endpoint
       ),
       getDocumentFromDynamoStrategy: new GetDocumentByLaunchStrategy(req),
       saveDocumentToDynamoStrategy: new SaveDocumentLaunchStrategy(

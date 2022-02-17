@@ -133,12 +133,12 @@ const getStrategies = async (
       dynamoClient,
       issuer_orig
     );
-    let issuer = clientMetadata.issuer;
+    const clientIssuer = clientMetadata.issuer;
     strategies = {
       getTokenStrategy: new RefreshTokenStrategy(
         req,
         logger,
-        new issuer.Client(clientMetadata)
+        new clientIssuer.Client(clientMetadata)
       ),
       getDocumentFromDynamoStrategy: new GetDocumentByRefreshTokenStrategy(
         req,
@@ -151,7 +151,7 @@ const getStrategies = async (
         logger,
         dynamoClient,
         config,
-        issuer.issuer,
+        clientIssuer.issuer,
         refreshTokenLifeCycleHistogram
       ),
       getPatientInfoStrategy: new GetPatientInfoFromValidateEndpointStrategy(

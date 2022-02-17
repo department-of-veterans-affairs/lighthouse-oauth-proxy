@@ -280,8 +280,8 @@ async function createClientMetadata(
   );
   clientMetadata.issuer =
     v2transitiondata.client_id === clientMetadata.client_id &&
-    v2transitiondata.old
-      ? v2transitiondata.old.issuer
+    v2transitiondata.previous_app_category_settings
+      ? v2transitiondata.previous_app_category_settings.issuer
       : issuer;
   clientMetadata.client_id = v2transitiondata.client_id;
 

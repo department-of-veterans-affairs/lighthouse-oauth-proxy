@@ -122,7 +122,7 @@ describe("proxymockin_request tests", () => {
     axios.mockRejectedValue({ response: axiosErrorPayloadBad });
     const mock_config = createFakeConfig();
 
-    mock_config.routes.categories[0].old = {
+    mock_config.routes.categories[0].previous_app_category_settings = {
       issuer: {
         upstream_issuer:
           "https://deptva-eval.okta.com/oauth2/aus7y0ho1w0bSNLDV2p7",
@@ -203,7 +203,7 @@ describe("proxymockin_request tests", () => {
     axios.mockResolvedValueOnce(axiosPostPayload);
     const mock_config = createFakeConfig();
 
-    mock_config.routes.categories[0].old = {
+    mock_config.routes.categories[0].previous_app_category_settings = {
       issuer: {
         upstream_issuer:
           "https://deptva-eval.okta.com/oauth2/aus7y0ho1w0bSNLDV2p7",

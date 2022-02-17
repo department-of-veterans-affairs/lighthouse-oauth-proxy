@@ -46,7 +46,7 @@
   },
   "homepage": "https://github.com/department-of-veterans-affairs/lighthouse-oauth-proxy#readme",
   "dependencies": {
-    "@okta/okta-sdk-nodejs": "^6.0.0",
+    "@okta/okta-sdk-nodejs": "^6.3.0",
     "@sentry/node": "^6.2.3",
     "aws-sdk": "^2.859.0",
     "axios": "^0.21.2",

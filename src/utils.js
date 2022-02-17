@@ -184,7 +184,11 @@ const screenForV2ClientId = async (client_id, dynamoClient, config, path) => {
   let v2transitiondata = { client_id: client_id };
   const apiCategory =
     config && config.routes ? apiCategoryFromPath(path, config.routes) : null;
-  if (apiCategory && apiCategory.old && apiCategory.old.upstream_issuer) {
+  if (
+    apiCategory &&
+    apiCategory.previous &&
+    apiCategory.previous.upstream_issuer
+  ) {
     try {
       const dynamo_clients_table = config.dynamo_clients_table;
       let clientInfo = await dynamoClient.getPayloadFromDynamo(
@@ -205,9 +209,9 @@ const screenForV2ClientId = async (client_id, dynamoClient, config, path) => {
   if (
     v2transitiondata.client_id === client_id &&
     apiCategory &&
-    apiCategory.old
+    apiCategory.previous
   ) {
-    v2transitiondata.old = apiCategory.old;
+    v2transitiondata.previous = apiCategory.previous;
   }
   return v2transitiondata;
 };
@@ -231,7 +235,7 @@ const v2TransitionReqRewrite = async (req, dynamoClient, config) => {
     );
     req.body.client_id = v2transitiondata.client_id;
   }
-  req.old = v2transitiondata.old;
+  req.previous = v2transitiondata.previous;
   return req;
 };
 

@@ -368,8 +368,8 @@ function startApp(config, isolatedIssuers) {
         token: config.okta_token,
         requestExecutor: new okta.DefaultRequestExecutor(),
       });
-      if (app_category.old && app_category.old.upstream_issuer) {
-        app_category.old.okta_client = new okta.Client({
+      if (app_category.previous && app_category.previous.upstream_issuer) {
+        app_category.previous.okta_client = new okta.Client({
           orgUrl: config.okta_url,
           token: config.okta_token,
           requestExecutor: new okta.DefaultRequestExecutor(),
@@ -437,8 +437,10 @@ if (require.main === module) {
             app_category
           );
           app_category.issuer = isolatedIssuers[app_category.api_category];
-          if (app_category.old && app_category.old.upstream_issuer) {
-            app_category.old.issuer = await createIssuer(app_category.old);
+          if (app_category.previous && app_category.previous.upstream_issuer) {
+            app_category.previous.issuer = await createIssuer(
+              app_category.previous
+            );
           }
         }
       }
@@ -484,8 +486,8 @@ const proxyRequest = async (
   );
 
   delete clientScreenedProxyRequest.headers.host;
-  let redirectUrl = clientScreenedProxyRequest.old
-    ? clientScreenedProxyRequest.old.issuer.metadata[metadata_type]
+  let redirectUrl = clientScreenedProxyRequest.previous
+    ? clientScreenedProxyRequest.previous.issuer.metadata[metadata_type]
     : issuer_metadata[metadata_type];
   let proxy_request = {
     method: requestMethod,
@@ -517,8 +519,9 @@ const proxyRequest = async (
     })
     .catch((err) => {
       const api_category = apiCategoryFromPath(req.path, config.routes);
-      if (api_category && api_category.old) {
-        proxy_request.url = api_category.old.issuer.metadata[metadata_type];
+      if (api_category && api_category.previous) {
+        proxy_request.url =
+          api_category.previous.issuer.metadata[metadata_type];
         axios(proxy_request)
           .then((response) => {
             setProxyResponse(response, res);

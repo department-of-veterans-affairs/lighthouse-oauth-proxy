@@ -327,7 +327,7 @@ function createTestClientEntry() {
       },
       system: { S: "oauthi" },
       // This needs to be overridden with a valid client for local testing
-      v2_client_id: { S: "0oa6l93ab2tj25Zpv2p7" },
+      v2_client_id: { S: "v2testclient2" },
     },
   };
   dynamo.putItem(itemParams, (err, data) => {

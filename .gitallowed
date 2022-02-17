@@ -18,3 +18,4 @@ okta_token:\s{$
 
 accessKeyId: "NONE"
 secretAccessKey: "NONE"
+"client_id=clientIdv2"

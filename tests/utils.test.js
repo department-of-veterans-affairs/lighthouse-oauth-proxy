@@ -1,6 +1,8 @@
 "use strict";
-
+const querystring = require("querystring");
 require("jest");
+const { ISSUER_METADATA } = require("./testUtils");
+
 const {
   statusCodeFromError,
   parseBasicAuth,
@@ -10,8 +12,8 @@ const {
   minimalError,
   handleOpenIdClientError,
   screenForV2ClientId,
-  apiCategoryFromPath,
-  v2TransitionReqRewrite,
+  appCategoryFromPath,
+  v2TransitionProxyRequest,
 } = require("../src/utils");
 
 describe("statusCodeFromError", () => {
@@ -391,38 +393,48 @@ describe("screenForV2ClientId tests", () => {
   });
 });
 
-describe("apiCategoryFromPath tests", () => {
-  it("apiCategoryFromPath /health/v1", async () => {
-    let result = apiCategoryFromPath("/health/v1/token", config.routes);
+describe("appCategoryFromPath tests", () => {
+  it("appCategoryFromPath /health/v1", async () => {
+    let result = appCategoryFromPath("/health/v1/token", config.routes);
     expect(result.api_category).toBe("/health/v1");
-    result = apiCategoryFromPath("/health/v1/authorization", config.routes);
+    result = appCategoryFromPath("/health/v1/authorization", config.routes);
     expect(result.api_category).toBe("/health/v1");
-    result = apiCategoryFromPath("/health/v1/authorization/", config.routes);
+    result = appCategoryFromPath("/health/v1/authorization/", config.routes);
     expect(result.api_category).toBe("/health/v1");
   });
 
-  it("apiCategoryFromPath default", async () => {
-    const result = apiCategoryFromPath("/token", config.routes);
+  it("appCategoryFromPath default", async () => {
+    const result = appCategoryFromPath("/token", config.routes);
     expect(result.api_category).toBe("");
   });
 
-  it("apiCategoryFromPath not found", async () => {
-    const result = apiCategoryFromPath("/nothere/v0/token", config.routes);
+  it("appCategoryFromPath not found", async () => {
+    const result = appCategoryFromPath("/nothere/v0/token", config.routes);
     expect(result).toBe(undefined);
   });
 });
 
-describe("v2TransitionReqRewrite tests", () => {
+describe("v2TransitionProxyRequest tests", () => {
   const dynamoClient = {};
   dynamoClient.getPayloadFromDynamo = jest.fn();
-  it("v2TransitionReqRewrite possitive rewrite client body", async () => {
+  it("v2TransitionProxyRequest positive rewrite client body", async () => {
     const v2val = { Item: { v2_client_id: "clientIdv2" } };
     dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
     const req = {
-      body: { client_id: "clientidv1" },
+      headers: { host: "localhost" },
+      body: { client_id: "testClient2" },
       path: "/community-care/v1/introspect",
     };
-    const result = await v2TransitionReqRewrite(req, dynamoClient, config);
-    expect(result.body.client_id).toBe("clientIdv2");
+    const result = await v2TransitionProxyRequest(
+      req,
+      dynamoClient,
+      config,
+      ISSUER_METADATA,
+      "introspection_endpoint",
+      "POST",
+      querystring
+    );
+    expect(result.data).toBe("client_id=clientIdv2");
+    expect(result.url).toBe("http://example.com/introspect");
   });
 });

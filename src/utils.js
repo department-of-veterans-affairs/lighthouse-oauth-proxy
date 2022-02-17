@@ -157,7 +157,7 @@ const handleOpenIdClientError = (error) => {
  * @param {*} categories array of the app config route categories.
  * @returns The the appropriate app category object from the app config.
  */
-const apiCategoryFromPath = (path, routes) => {
+const appCategoryFromPath = (path, routes) => {
   let app_category;
   const reqPath =
     path && path.endsWith("/") ? path.slice(0, path.lastIndexOf("/")) : path;
@@ -171,7 +171,7 @@ const apiCategoryFromPath = (path, routes) => {
 };
 
 /**
- * Screens the client id and replaces it with its version 2 equivant if applicable.
+ * Screens the client id and replaces it with its version 2 equivalent if applicable.
  *
  * @param {string} client_id client id to screen for version 2 equivalent
  * @param {DynamoClient} dynamoClient interacts with dynamodb.
@@ -181,9 +181,9 @@ const apiCategoryFromPath = (path, routes) => {
  *  as well as an object with old issuer app_category data when there is no version 2 client id.
  */
 const screenForV2ClientId = async (client_id, dynamoClient, config, path) => {
-  let v2transitiondata = { client_id: client_id };
+  let v2transitional = { client_id: client_id };
   const apiCategory =
-    config && config.routes ? apiCategoryFromPath(path, config.routes) : null;
+    config && config.routes ? appCategoryFromPath(path, config.routes) : null;
   if (
     apiCategory &&
     apiCategory.fallback &&
@@ -193,12 +193,12 @@ const screenForV2ClientId = async (client_id, dynamoClient, config, path) => {
       const dynamo_clients_table = config.dynamo_clients_table;
       let clientInfo = await dynamoClient.getPayloadFromDynamo(
         {
-          client_id: v2transitiondata.client_id,
+          client_id: client_id,
         },
         dynamo_clients_table
       );
       if (clientInfo.Item) {
-        v2transitiondata.client_id = clientInfo.Item.v2_client_id
+        v2transitional.client_id = clientInfo.Item.v2_client_id
           ? clientInfo.Item.v2_client_id
           : client_id;
       }
@@ -207,13 +207,13 @@ const screenForV2ClientId = async (client_id, dynamoClient, config, path) => {
     }
   }
   if (
-    v2transitiondata.client_id === client_id &&
+    v2transitional.client_id === client_id &&
     apiCategory &&
     apiCategory.fallback
   ) {
-    v2transitiondata.fallback = apiCategory.fallback;
+    v2transitional.fallback = apiCategory.fallback;
   }
-  return v2transitiondata;
+  return v2transitional;
 };
 
 /**
@@ -222,21 +222,62 @@ const screenForV2ClientId = async (client_id, dynamoClient, config, path) => {
  * @param {express.Request} req req express request object.
  * @param {DynamoClient} dynamoClient interacts with dynamodb.
  * @param {*} config application configuration.
- * @returns The modified or unaltered request
+ * @param {*} issuer_metadata metadata for an issuer, for example, the URL to the introspection endpoint for an issuer.
+ * @param {*} metadata_type metadata type such as 'introspect' or 'revoke'
+ * @returns A new request used for a subsequent HTTP request.
  */
-const v2TransitionReqRewrite = async (req, dynamoClient, config) => {
-  let v2transitiondata = {};
+const v2TransitionProxyRequest = async (
+  req,
+  dynamoClient,
+  config,
+  issuer_metadata,
+  metadata_type,
+  requestMethod,
+  bodyEncoder
+) => {
+  delete req.headers.host;
+  let v2TransitionData = {};
+  let destinationUrl = issuer_metadata[metadata_type];
   if (req.body && req.body.client_id) {
-    v2transitiondata = await screenForV2ClientId(
+    v2TransitionData = await screenForV2ClientId(
       req.body.client_id,
       dynamoClient,
       config,
       req.path
     );
-    req.body.client_id = v2transitiondata.client_id;
+    // Since there is no distinct v2 client id proxy to the appropriate fallback url
+    if (req.body.clientId === v2TransitionData.client_id) {
+      destinationUrl = v2TransitionData.fallback.issuer.metadata[metadata_type];
+    } else {
+      req.body.client_id = v2TransitionData.client_id;
+    }
   }
-  req.fallback = v2transitiondata.fallback;
-  return req;
+  req.destinationUrl = destinationUrl;
+  let proxy_request = {
+    method: requestMethod,
+    url: destinationUrl,
+    headers: req.headers,
+    responseType: "stream",
+  };
+
+  /*
+   * Build the proxied request body.
+   *
+   * Use the original request body and optionally encode it.
+   *
+   * If resulting body is empty, omit it from the proxied request.
+   */
+
+  let payload = req.body;
+
+  if (bodyEncoder !== undefined) {
+    payload = bodyEncoder.stringify(req.body);
+  }
+
+  if (payload && Object.keys(payload).length) {
+    proxy_request.data = payload;
+  }
+  return proxy_request;
 };
 
 module.exports = {
@@ -251,6 +292,6 @@ module.exports = {
   minimalError,
   handleOpenIdClientError,
   screenForV2ClientId,
-  apiCategoryFromPath,
-  v2TransitionReqRewrite,
+  appCategoryFromPath,
+  v2TransitionProxyRequest,
 };

@@ -19,7 +19,7 @@ const { configureTokenValidator } = require("./tokenValidation");
 const rTracer = require("cls-rtracer");
 const { SlugHelper } = require("./slug_helper");
 const { buildIssuer } = require("./issuer_helper");
-const { v2TransitionReqRewrite, apiCategoryFromPath } = require("./utils");
+const { v2TransitionProxyRequest, apiCategoryFromPath } = require("./utils");
 
 const openidMetadataWhitelist = [
   "issuer",
@@ -467,7 +467,7 @@ const setProxyResponse = (response, targetResponse) => {
  * @param res The response.
  * @param redirectUrl The proxied location.
  * @param requestMethod The HTTP method.
- * @param bodyencoder The optional body encoder.
+ * @param bodyEncoder The optional body encoder.
  */
 const proxyRequest = async (
   req,
@@ -477,41 +477,18 @@ const proxyRequest = async (
   requestMethod,
   config,
   dynamoClient,
-  bodyencoder
+  bodyEncoder
 ) => {
-  const clientScreenedProxyRequest = await v2TransitionReqRewrite(
+  const proxy_request = await v2TransitionProxyRequest(
     req,
     dynamoClient,
-    config
+    config,
+    issuer_metadata,
+    metadata_type,
+    requestMethod,
+    bodyEncoder
   );
 
-  delete clientScreenedProxyRequest.headers.host;
-  let redirectUrl = clientScreenedProxyRequest.fallback
-    ? clientScreenedProxyRequest.fallback.issuer.metadata[metadata_type]
-    : issuer_metadata[metadata_type];
-  let proxy_request = {
-    method: requestMethod,
-    url: redirectUrl,
-    headers: clientScreenedProxyRequest.headers,
-    responseType: "stream",
-  };
-  /*
-   * Build the proxied request body.
-   *
-   * Use the original request body and optionally encode it.
-   *
-   * If resulting body is empty, omit it from the proxied request.
-   */
-
-  let payload = clientScreenedProxyRequest.body;
-
-  if (bodyencoder !== undefined) {
-    payload = bodyencoder.stringify(clientScreenedProxyRequest.body);
-  }
-
-  if (payload && Object.keys(payload).length) {
-    proxy_request.data = payload;
-  }
   // Proxy request
   axios(proxy_request)
     .then((response) => {

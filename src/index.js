@@ -19,7 +19,7 @@ const { configureTokenValidator } = require("./tokenValidation");
 const rTracer = require("cls-rtracer");
 const { SlugHelper } = require("./slug_helper");
 const { buildIssuer } = require("./issuer_helper");
-const { v2TransitionProxyRequest, apiCategoryFromPath } = require("./utils");
+const { v2TransitionProxyRequest, appCategoryFromPath } = require("./utils");
 
 const openidMetadataWhitelist = [
   "issuer",
@@ -495,7 +495,7 @@ const proxyRequest = async (
       setProxyResponse(response, res);
     })
     .catch((err) => {
-      const api_category = apiCategoryFromPath(req.path, config.routes);
+      const api_category = appCategoryFromPath(req.path, config.routes);
       if (api_category && api_category.fallback) {
         proxy_request.url =
           api_category.fallback.issuer.metadata[metadata_type];

@@ -463,11 +463,14 @@ const setProxyResponse = (response, targetResponse) => {
 /**
  * Proxy a request to another location.
  *
- * @param req The request.
- * @param res The response.
- * @param redirectUrl The proxied location.
- * @param requestMethod The HTTP method.
- * @param bodyEncoder The optional body encoder.
+ * @param {express.Request} req express request object.
+ * @param {express.Response} res express response object.
+ * @param {*} issuer_metadata metadata for the issuer.
+ * @param {string} metadata_type metadata type for the request, eg. 'introspect_endpoint' or 'userinfo_endpoint'
+ * @param {string} requestMethod The HTTP request method, eg. 'POST' or 'GET'
+ * @param {*} config application configuration.
+ * @param {DynamoClient} dynamoClient interacts with dynamodb.
+ * @param {StringifyOptions} bodyEncoder encodes a string for the body
  */
 const proxyRequest = async (
   req,

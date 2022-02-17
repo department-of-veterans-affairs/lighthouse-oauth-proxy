@@ -226,6 +226,19 @@ const screenForV2ClientId = async (client_id, dynamoClient, config, path) => {
  * @param {*} metadata_type metadata type such as 'introspect' or 'revoke'
  * @returns A new request used for a subsequent HTTP request.
  */
+
+/**
+ * Generates a request object used for an axios request
+ *
+ * @param {express.Request} req req express request object.
+ * @param {DynamoClient} dynamoClient interacts with dynamodb.
+ * @param {*} config application configuration.
+ * @param {*} issuer_metadata metadata for an issuer, for example, the URL to the introspection endpoint for an issuer.
+ * @param {*} metadata_type metadata type such as 'introspect' or 'revoke'
+ * @param {string} requestMethod The HTTP request method, eg. 'POST' or 'GET'
+ * @param {StringifyOptions} bodyEncoder encodes a string for the body
+ * @returns An object used for an axios request
+ */
 const v2TransitionProxyRequest = async (
   req,
   dynamoClient,

@@ -197,7 +197,7 @@ function processArgs() {
             },
             revocation_endpoint: {
               description:
-                "URL where the application will make the token revokation request.",
+                "URL where the application will make the token revocation request.",
               required: false,
               default: null,
             },
@@ -226,52 +226,6 @@ function processArgs() {
             upstream_issuer: {
               description: "URI of upstream issuer to be proxies",
               required: true,
-            },
-            custom_metadata: {
-              description:
-                "An object of endpoints that can be used to override the default metadata.",
-              required: false,
-              authorization_endpoint: {
-                description:
-                  "URL where the application will make the authorization request.",
-                required: false,
-                default: null,
-              },
-              token_endpoint: {
-                description:
-                  "URL where the application will make the token request.",
-                required: false,
-                default: null,
-              },
-              userinfo_endpoint: {
-                description:
-                  "URL where the application will make the user info request.",
-                required: false,
-                default: null,
-              },
-              introspection_endpoint: {
-                description:
-                  "URL where the application will make the introspection request.",
-                required: false,
-                default: null,
-              },
-              revocation_endpoint: {
-                description:
-                  "URL where the application will make the token revokation request.",
-                required: false,
-                default: null,
-              },
-              jwks_uri: {
-                description:
-                  "URL where the application will make the jwks request.",
-                required: false,
-                default: null,
-              },
-              issuer: {
-                description: "URL of the token issuer.",
-                required: false,
-                default: null,
-              },
             },
           },
         },

@@ -29,11 +29,13 @@ setup() {
  
   curl_status="$(mktemp)"
   curl_body="$(mktemp)"
+  token_file="$(mktemp)"
 }
 
 teardown() {
   rm $curl_status
   rm $curl_body
+  rm $token_file
 }
 
 @test 'Token Handler PKCE happy path' {
@@ -58,6 +60,26 @@ teardown() {
   [ "$(cat "$curl_body" | jq 'has("uid")')" == "true" ]
 }
 
+
+@test 'Token Handler PKCE refresh happy path' {
+  refresh=$(echo "$TOKEN_PAYLOAD" | jq ".refresh_token" | tr -d '"')
+
+  do_token "$(jq \
+                -scn \
+                --arg client_id "$PKCE_CLIENT_ID" \
+                --arg grant_type "refresh_token" \
+                --arg refresh_token "$refresh" \
+                '{"client_id": $client_id, "grant_type": $grant_type, "refresh_token": $refresh_token}')"
+
+  [ "$(cat "$curl_body" | jq 'has("access_token")')" == "true" ]
+  [ "$(cat "$curl_body" | jq 'has("id_token")')" == "true" ]
+  [ "$(cat "$curl_body" | jq 'has("refresh_token")')" == "true" ]
+  [ "$(cat "$curl_body" | jq .token_type | tr -d '"')" == "Bearer" ]
+  [ "$(cat "$curl_body" | jq 'has("scope")')" == "true" ]
+  [ "$(cat "$curl_body" | jq 'has("expires_in")')" == "true" ]
+  [ "$(cat "$curl_body" | jq 'has("state")')" == "true" ]
+}
+
 do_introspect() {
   local token="$1"
   local hint="$2"
@@ -72,4 +94,21 @@ do_introspect() {
     -d "token=$token" \
     -d "client_id=$client_id" \
     "$PKCE_AUTH_SERVER/introspect" > "$curl_status"
+}
+
+
+do_token() {
+  payload="$1"
+  curl -X POST \
+    -s \
+    -H 'Accept: application/json' \
+    -H 'Content-Type: application/json' \
+    -w "%{http_code}" \
+    -o "$curl_body" \
+    -d "$payload" \
+    "$PKCE_AUTH_SERVER/token?redirect_uri=$REDIRECT_URI" > "$curl_status"
+  if [[ "$(cat "$curl_status")" == "200" ]] && [ "$(cat "$curl_body" | jq ".error")" = "null" ];
+  then
+    echo "$(cat "$curl_body")" > "$token_file"
+  fi
 }

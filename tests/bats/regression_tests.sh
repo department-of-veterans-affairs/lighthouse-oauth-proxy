@@ -153,7 +153,9 @@ assign_code() {
 # ----
 
 # Pulling latest lighthouse-auth-utils docker image if necessary
-docker pull vasdvp/lighthouse-auth-utils:latest
+if [ -z "$USE_LOCAL_IMAGE" ]; then
+  docker pull vasdvp/lighthouse-auth-utils:latest
+fi
 
 # Start Tests
 
@@ -194,4 +196,9 @@ then
   exit 1
 fi
 
-echo "All tests passed!"
+if [ -z "$PKCE_AUTH_SERVER" ]; then
+  echo "All tests passed!"
+  exit 0
+fi
+
+./pkce_tests.sh

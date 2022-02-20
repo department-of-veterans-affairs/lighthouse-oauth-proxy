@@ -12,7 +12,7 @@ Example
   export PKCE_CLIENT_ID={{ client id }}
   export PKCE_AUTH_SERVER=https://sandbox-api.va.gov/oauth2
  
-  ./regression_tests.sh [--test-issued]
+  ./pkce_tests.sh [--test-issued]
 EOF
 exit 1
 }
@@ -67,6 +67,12 @@ then
   exit 1
 fi
 
+if [ -z "$PKCE_REDIRECT_URI" ];
+then
+  echo "ERROR - PKCE_REDIRECT_URI is a required parameter."
+  exit 1
+fi
+
 # Variables
 
 export REDIRECT_URI="https://app/after-auth"
@@ -100,7 +106,7 @@ tokan_payload_pkce() {
   payload=$(docker run \
       $network --rm \
       vasdvp/lighthouse-auth-utils:latest auth \
-      --redirect-uri="$REDIRECT_URI" \
+      --redirect-uri="$PKCE_REDIRECT_URI" \
       --authorization-url="$PKCE_AUTH_SERVER" \
       --user-email="$USER_EMAIL" \
       --user-password="$USER_PASSWORD" \

@@ -202,3 +202,10 @@ if [ -z "$PKCE_AUTH_SERVER" ]; then
 fi
 
 ./pkce_tests.sh
+
+if [ ! -z "$PKCE_AUTH_SERVER_V2" ]; then
+  echo "Running V2 PKCE tests for transition testing"
+  PKCE_AUTH_SERVER="$PKCE_AUTH_SERVER_V2" PKCE_CLIENT_ID="$PKCE_CLIENT_ID_V2" PKCE_REDIRECT_URI="$PKCE_REDIRECT_URI_V2" ./pkce_tests.sh
+fi
+
+echo "Testing complete!"

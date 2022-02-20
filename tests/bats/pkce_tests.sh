@@ -151,5 +151,3 @@ then
   echo "Some tests failed"
   exit 1
 fi
-
-echo "All tests passed!"

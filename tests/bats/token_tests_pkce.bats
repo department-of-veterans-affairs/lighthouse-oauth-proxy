@@ -80,6 +80,16 @@ teardown() {
   [ "$(cat "$curl_body" | jq 'has("state")')" == "true" ]
 }
 
+@test 'Revoke active token happy path' {
+  access_token=$(echo "$TOKEN_PAYLOAD" | jq ".access_token" | tr -d '"')
+  do_introspect "$access_token" "access_token" "$PKCE_CLIENT_ID"
+  [ "$(cat "$curl_body" | jq .active | tr -d '"')" == "true" ]
+  do_revoke_token "$access_token" "access_token" "$PKCE_CLIENT_ID"
+  [ "$(cat "$curl_status")" -eq 200 ]
+  do_introspect "$access_token" "access_token" "$PKCE_CLIENT_ID"
+  [ "$(cat "$curl_body" | jq .active | tr -d '"')" == "false" ]
+}
+
 do_introspect() {
   local token="$1"
   local hint="$2"
@@ -111,4 +121,20 @@ do_token() {
   then
     echo "$(cat "$curl_body")" > "$token_file"
   fi
+}
+
+do_revoke_token() { 
+  local token=$1
+  local grant_type=$2
+  local client_id=$3
+  curl -X POST \
+    -s \
+    -H 'Accept: application/json' \
+    -H 'Content-Type: application/x-www-form-urlencoded' \
+    -w "%{http_code}" \
+    -o "$curl_body" \
+    -d "grant_type=$grant_type" \
+    -d "token=$token" \
+    -d "client_id=$client_id" \
+    "$PKCE_AUTH_SERVER/revoke" > "$curl_status"
 }

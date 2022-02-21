@@ -117,7 +117,7 @@ tokan_payload_pkce() {
 
   if [[ -z $payload ]];
   then
-    echo -e "\nFailed to retrieve code."
+    echo -e "\nFailed to retrieve tokens."
     echo "This is likely a lighthouse-auth-utilities bot issue."
     echo "Check for valid configuration."
     echo "Exiting ... "

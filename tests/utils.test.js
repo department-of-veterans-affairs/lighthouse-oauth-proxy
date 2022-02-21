@@ -399,8 +399,6 @@ describe("appCategoryFromPath tests", () => {
     expect(result.api_category).toBe("/health/v1");
     result = appCategoryFromPath("/health/v1/authorization", config.routes);
     expect(result.api_category).toBe("/health/v1");
-    result = appCategoryFromPath("/health/v1/authorization/", config.routes);
-    expect(result.api_category).toBe("/health/v1");
   });
 
   it("appCategoryFromPath default", async () => {

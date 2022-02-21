@@ -159,10 +159,9 @@ const handleOpenIdClientError = (error) => {
  */
 const appCategoryFromPath = (path, routes) => {
   let app_category;
-  const reqPath =
-    path && path.endsWith("/") ? path.slice(0, path.lastIndexOf("/")) : path;
-  if (reqPath && routes && routes.categories) {
-    const category = reqPath.substring(0, reqPath.lastIndexOf("/"));
+
+  if (path && routes && routes.categories) {
+    const category = path.substring(0, path.lastIndexOf("/"));
     app_category = routes.categories.find(
       (appCategory) => appCategory.api_category === category
     );

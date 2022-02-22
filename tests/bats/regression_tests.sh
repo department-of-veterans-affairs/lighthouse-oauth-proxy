@@ -164,6 +164,7 @@ assign_code() {
 
 tokan_payload_pkce() {
   local network=""
+  local pkce_client_id=$1
   if [[ $PKCE_AUTH_SERVER == *"localhost"* ]];
   then
     network="-i --network container:lighthouse-oauth-proxy_oauth-proxy_1"
@@ -178,7 +179,7 @@ tokan_payload_pkce() {
       --authorization-url="$PKCE_AUTH_SERVER" \
       --user-email="$USER_EMAIL" \
       --user-password="$USER_PASSWORD" \
-      --client-id="$PKCE_CLIENT_ID" \
+      --client-id="$pkce_client_id" \
       --grant_consent="true" \
       --scope="openid offline_access" \
       --pkce)
@@ -220,7 +221,7 @@ HOST="$HOST" CODE="$CODE" TOKEN_FILE="$token_file" EXPIRED_TOKEN_FILE="$expired_
 status=$(($status + $?))
 
 echo "Running Token PKCE Client Tests ..."
-pkse_token_payload=$(tokan_payload_pkce)
+pkse_token_payload=$(tokan_payload_pkce $PKCE_CLIENT_ID)
 TOKEN_PAYLOAD="$pkse_token_payload" bats ./token_tests_pkce.bats
 status=$(($status + $?))
 # TOKEN and EXPIRED_ACCESS are assigned in token_tests.sh
@@ -236,6 +237,13 @@ status=$(($status + $?))
 if [ ! -z "$TEST_ISSUED" ]; then
   echo "Running Issued Tests ..."
   HOST="$HOST" TOKEN_FILE="$token_file" STATIC_ACCESS_TOKEN="$STATIC_ACCESS_TOKEN" bats "$DIR"/issued_tests.bats
+  status=$(($status + $?))
+fi
+
+if [ ! -z "$PKCE_CLIENT_ID_V2" ]; then
+  echo "Running PKCE Client V2 transition Tests ..."
+  pkse_token_payload=$(tokan_payload_pkce $PKCE_CLIENT_ID_V2)
+  TOKEN_PAYLOAD="$pkse_token_payload" PKCE_CLIENT_ID="$PKCE_CLIENT_ID_V2" bats ./token_tests_pkce.bats
   status=$(($status + $?))
 fi
 

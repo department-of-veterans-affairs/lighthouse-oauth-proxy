@@ -200,10 +200,9 @@ const screenForV2ClientId = async (client_id, dynamoClient, config, path) => {
         // This client is not translated and is current with this app category
         if (clientInfo.Item.v2_client_id) {
           v2transitional.client_id = clientInfo.Item.v2_client_id;
-        } else {
-          // Do not use fallback in this case
-          return v2transitional;
         }
+        // Do not use fallback in this case
+        return v2transitional;
       }
     } catch (err) {
       // No client entry

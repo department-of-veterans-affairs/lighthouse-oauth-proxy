@@ -165,9 +165,10 @@ assign_code() {
 tokan_payload_pkce() {
   local network=""
 
-  # This allows for testing with both a v1 an v2 client_id entry for a PKCE-enabled client
+  # This allows for testing with both a v1 and v2 client_id entry
+  # for a PKCE-enabled client
   local pkce_client_id=$1
-  
+
   if [[ $PKCE_AUTH_SERVER == *"localhost"* ]];
   then
     network="-i --network container:lighthouse-oauth-proxy_oauth-proxy_1"

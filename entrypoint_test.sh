@@ -56,6 +56,10 @@ case $i in
       export CC_CLIENT_ID="${i#*=}"; shift ;;
     --cc-client-secret*)
       export CC_CLIENT_SECRET="${i#*=}"; shift ;;
+    --pkce-client-id*)
+      export PKCE_CLIENT_ID="${i#*=}"; shift ;;
+    --pkce-auth-server*)
+      export PKCE_AUTH_SERVER="${i#*=}"; shift ;;
     --host*)
       export HOST="${i#*=}"; shift ;;
 esac

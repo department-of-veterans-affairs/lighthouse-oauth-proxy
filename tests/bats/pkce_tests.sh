@@ -106,7 +106,6 @@ tokan_payload_pkce() {
   payload=$(docker run \
       $network --rm \
       vasdvp/lighthouse-auth-utils:latest auth \
-      --redirect-uri="$PKCE_REDIRECT_URI" \
       --authorization-url="$PKCE_AUTH_SERVER" \
       --user-email="$USER_EMAIL" \
       --user-password="$USER_PASSWORD" \

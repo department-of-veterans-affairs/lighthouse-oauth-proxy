@@ -88,15 +88,15 @@ then
   exit 1
 fi
 
-if [ -z "$PKCE_CLIENT_ID" ];
-then
-  echo "ERROR - PKCE_CLIENT_ID is a required parameter."
-  exit 1
-fi
-
 if [ -z "$PKCE_AUTH_SERVER" ];
 then
   echo "ERROR - PKCE_AUTH_SERVER is a required parameter."
+  exit 1
+fi
+
+if [ -z "$PKCE_CLIENT_ID" ];
+then
+  echo "ERROR - PKCE_CLIENT_ID is a required parameter."
   exit 1
 fi
 
@@ -249,12 +249,5 @@ if [ -z "$PKCE_AUTH_SERVER" ]; then
   echo "All tests passed!"
   exit 0
 fi
-
-# ./pkce_tests.sh
-
-# if [ ! -z "$PKCE_AUTH_SERVER_V2" ]; then
-#   echo "Running V2 PKCE tests for transition testing"
-#   PKCE_AUTH_SERVER="$PKCE_AUTH_SERVER_V2" PKCE_CLIENT_ID="$PKCE_CLIENT_ID_V2" PKCE_REDIRECT_URI="$PKCE_REDIRECT_URI_V2" ./pkce_tests.sh
-# fi
 
 echo "Testing complete!"

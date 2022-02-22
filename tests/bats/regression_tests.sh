@@ -221,8 +221,8 @@ HOST="$HOST" CODE="$CODE" TOKEN_FILE="$token_file" EXPIRED_TOKEN_FILE="$expired_
 status=$(($status + $?))
 
 echo "Running Token PKCE Client Tests ..."
-pkse_token_payload=$(tokan_payload_pkce $PKCE_CLIENT_ID)
-TOKEN_PAYLOAD="$pkse_token_payload" bats ./token_tests_pkce.bats
+pkce_token_payload=$(tokan_payload_pkce $PKCE_CLIENT_ID)
+TOKEN_PAYLOAD="$pkce_token_payload" bats ./token_tests_pkce.bats
 status=$(($status + $?))
 # TOKEN and EXPIRED_ACCESS are assigned in token_tests.sh
 

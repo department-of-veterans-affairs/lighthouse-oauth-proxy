@@ -93,9 +93,6 @@ regression:
 	@:$(call check_defined, IMAGE, IMAGE variable should be oauth-proxy-tests)
 	docker run \
 		-v "/var/run/docker.sock:/var/run/docker.sock" \
-		-e PKCE_AUTH_SERVER=$(PKCE_AUTH_SERVER) \
-		-e PKCE_CLIENT_ID=$(PKCE_CLIENT_ID) \
-		-e PKCE_REDIRECT_URI=$(PKCE_REDIRECT_URI) \
 		--rm $(REPOSITORY)/$(NAMESPACE)/$(IMAGE):$(TAG) \
 		--user-email=$(USER_EMAIL) \
 		--user-password=$(USER_PASSWORD) \
@@ -103,6 +100,8 @@ regression:
 		--client-secret=$(CLIENT_SECRET) \
 		--cc-client-id=$(CC_CLIENT_ID) \
 		--cc-client-secret=$(CC_CLIENT_SECRET) \
+		--pkce-auth-server=$(PKCE_AUTH_SERVER) \
+		--pkce-client-id=$(PKCE_CLIENT_ID) \
 		--host=$(HOST)
 
 ## pull: 	Pull an image to ECR

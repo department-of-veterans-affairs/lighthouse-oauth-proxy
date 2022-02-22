@@ -120,8 +120,8 @@ phases:
               CC_CLIENT_ID=${CC_CLIENT_ID} \
               CC_CLIENT_SECRET=${CC_CLIENT_SECRET} \
               PKCE_AUTH_SERVER=https://${env}-api.va.gov/oauth2/health/internal/v1 \
-              PKCE_CLIENT_ID={PKCE_CLIENT_ID} \
-              PKCE_CLIENT_ID_TO_TRANSLATE={PKCE_CLIENT_ID_TO_TRANSLATE} \
+              PKCE_CLIENT_ID=${PKCE_CLIENT_ID} \
+              PKCE_CLIENT_ID_TO_TRANSLATE=${PKCE_CLIENT_ID_TO_TRANSLATE} \
               HOST=https://${env}-api.va.gov/oauth2
             if [[ $? -gt 0 ]]; then
               slackpost.sh -t warning "Some regression tests failed."

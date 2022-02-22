@@ -100,6 +100,8 @@ regression:
 		--client-secret=$(CLIENT_SECRET) \
 		--cc-client-id=$(CC_CLIENT_ID) \
 		--cc-client-secret=$(CC_CLIENT_SECRET) \
+		--pkce-auth-server=$(PKCE_AUTH_SERVER) \
+		--pkce-client-id=$(PKCE_CLIENT_ID) \
 		--host=$(HOST)
 
 ## pull: 	Pull an image to ECR

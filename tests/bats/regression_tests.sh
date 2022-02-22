@@ -88,6 +88,18 @@ then
   exit 1
 fi
 
+if [ -z "$PKCE_AUTH_SERVER" ];
+then
+  echo "ERROR - PKCE_AUTH_SERVER is a required parameter."
+  exit 1
+fi
+
+if [ -z "$PKCE_CLIENT_ID" ];
+then
+  echo "ERROR - PKCE_CLIENT_ID is a required parameter."
+  exit 1
+fi
+
 if [ "$TEST_ISSUED" == "true" ] && [ -z "$STATIC_ACCESS_TOKEN" ];
 then
   echo "ERROR - STATIC_ACCESS_TOKEN is a required parameter."
@@ -150,6 +162,38 @@ assign_code() {
   echo "$CODE"
 }
 
+tokan_payload_pkce() {
+  local network=""
+  if [[ $PKCE_AUTH_SERVER == *"localhost"* ]];
+  then
+    network="-i --network container:lighthouse-oauth-proxy_oauth-proxy_1"
+  else
+    network=""
+  fi
+
+  local payload
+  payload=$(docker run \
+      $network --rm \
+      vasdvp/lighthouse-auth-utils:latest auth \
+      --authorization-url="$PKCE_AUTH_SERVER" \
+      --user-email="$USER_EMAIL" \
+      --user-password="$USER_PASSWORD" \
+      --client-id="$PKCE_CLIENT_ID" \
+      --grant_consent="true" \
+      --scope="openid offline_access" \
+      --pkce)
+
+  if [[ -z $payload ]];
+  then
+    echo -e "\nFailed to retrieve tokens."
+    echo "This is likely a lighthouse-auth-utilities bot issue."
+    echo "Check for valid configuration."
+    echo "Exiting ... "
+    exit 1
+  fi
+  echo "$payload"
+}
+
 # ----
 
 # Pulling latest lighthouse-auth-utils docker image if necessary
@@ -173,6 +217,11 @@ echo "Running Token Tests ..."
 token_file="$(mktemp)"
 expired_token_file="$(mktemp)"
 HOST="$HOST" CODE="$CODE" TOKEN_FILE="$token_file" EXPIRED_TOKEN_FILE="$expired_token_file" CLIENT_ID="$CLIENT_ID" CLIENT_SECRET="$CLIENT_SECRET" CC_CLIENT_ID="$CC_CLIENT_ID" CC_CLIENT_SECRET="$CC_CLIENT_SECRET" STATIC_REFRESH_TOKEN="$STATIC_REFRESH_TOKEN" bats ./token_tests.bats
+status=$(($status + $?))
+
+echo "Running Token PKCE Client Tests ..."
+pkse_token_payload=$(tokan_payload_pkce)
+TOKEN_PAYLOAD="$pkse_token_payload" bats ./token_tests_pkce.bats
 status=$(($status + $?))
 # TOKEN and EXPIRED_ACCESS are assigned in token_tests.sh
 
@@ -199,13 +248,6 @@ fi
 if [ -z "$PKCE_AUTH_SERVER" ]; then
   echo "All tests passed!"
   exit 0
-fi
-
-./pkce_tests.sh
-
-if [ ! -z "$PKCE_AUTH_SERVER_V2" ]; then
-  echo "Running V2 PKCE tests for transition testing"
-  PKCE_AUTH_SERVER="$PKCE_AUTH_SERVER_V2" PKCE_CLIENT_ID="$PKCE_CLIENT_ID_V2" PKCE_REDIRECT_URI="$PKCE_REDIRECT_URI_V2" ./pkce_tests.sh
 fi
 
 echo "Testing complete!"

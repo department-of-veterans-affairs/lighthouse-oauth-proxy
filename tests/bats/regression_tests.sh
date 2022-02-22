@@ -14,6 +14,9 @@ Example
   export HOST=https://sandbox-api.va.gov/oauth2
   export CC_CLIENT_ID={{ client id }}
   export CC_CLIENT_SECRET={{ client secret }}
+  export PKCE_AUTH_SERVER=https://sandbox-api.va.gov/oauth2/health/internal/v1
+  export PKCE_CLIENT_ID={{pkce-enabled client id }}
+  export PKCE_CLIENT_ID_TO_TRANSLATE={{client id to translate}}
 
   ./regression_tests.sh [--test-issued]
 EOF
@@ -88,6 +91,18 @@ then
   exit 1
 fi
 
+if [ -z "$PKCE_AUTH_SERVER" ];
+then
+  echo "ERROR - PKCE_AUTH_SERVER is a required parameter."
+  exit 1
+fi
+
+if [ -z "$PKCE_CLIENT_ID" ];
+then
+  echo "ERROR - PKCE_CLIENT_ID is a required parameter."
+  exit 1
+fi
+
 if [ "$TEST_ISSUED" == "true" ] && [ -z "$STATIC_ACCESS_TOKEN" ];
 then
   echo "ERROR - STATIC_ACCESS_TOKEN is a required parameter."
@@ -150,10 +165,49 @@ assign_code() {
   echo "$CODE"
 }
 
+tokan_payload_pkce() {
+  local network=""
+
+  # This allows for testing with both a v1 and v2 client_id entry
+  # for a PKCE-enabled client
+  local pkce_client_id=$1
+
+  if [[ $PKCE_AUTH_SERVER == *"localhost"* ]];
+  then
+    network="-i --network container:lighthouse-oauth-proxy_oauth-proxy_1"
+  else
+    network=""
+  fi
+
+  local payload
+  payload=$(docker run \
+      $network --rm \
+      vasdvp/lighthouse-auth-utils:latest auth \
+      --authorization-url="$PKCE_AUTH_SERVER" \
+      --user-email="$USER_EMAIL" \
+      --user-password="$USER_PASSWORD" \
+      --client-id="$pkce_client_id" \
+      --grant_consent="true" \
+      --scope="openid offline_access" \
+      --pkce)
+
+  if [[ -z $payload ]];
+  then
+    echo -e "\nFailed to retrieve tokens."
+    echo "This is likely a lighthouse-auth-utilities bot issue."
+    echo "Check for valid configuration."
+    echo "Exiting ... "
+    exit 1
+  fi
+  echo "$payload"
+}
+
 # ----
 
 # Pulling latest lighthouse-auth-utils docker image if necessary
-docker pull vasdvp/lighthouse-auth-utils:latest
+if [ -z "$USE_LOCAL_IMAGE" ]; then
+  docker pull vasdvp/lighthouse-auth-utils:latest
+fi
 
 # Start Tests
 
@@ -172,6 +226,11 @@ token_file="$(mktemp)"
 expired_token_file="$(mktemp)"
 HOST="$HOST" CODE="$CODE" TOKEN_FILE="$token_file" EXPIRED_TOKEN_FILE="$expired_token_file" CLIENT_ID="$CLIENT_ID" CLIENT_SECRET="$CLIENT_SECRET" CC_CLIENT_ID="$CC_CLIENT_ID" CC_CLIENT_SECRET="$CC_CLIENT_SECRET" STATIC_REFRESH_TOKEN="$STATIC_REFRESH_TOKEN" bats ./token_tests.bats
 status=$(($status + $?))
+
+echo "Running Token PKCE Client Tests ..."
+pkce_token_payload=$(tokan_payload_pkce $PKCE_CLIENT_ID)
+TOKEN_PAYLOAD="$pkce_token_payload" bats ./token_tests_pkce.bats
+status=$(($status + $?))
 # TOKEN and EXPIRED_ACCESS are assigned in token_tests.sh
 
 echo "Running Introspect Tests"
@@ -185,6 +244,13 @@ status=$(($status + $?))
 if [ ! -z "$TEST_ISSUED" ]; then
   echo "Running Issued Tests ..."
   HOST="$HOST" TOKEN_FILE="$token_file" STATIC_ACCESS_TOKEN="$STATIC_ACCESS_TOKEN" bats "$DIR"/issued_tests.bats
+  status=$(($status + $?))
+fi
+
+if [ ! -z "$PKCE_CLIENT_ID_TO_TRANSLATE" ]; then
+  echo "Running PKCE Client V2 transition Tests ..."
+  pkce_token_payload=$(tokan_payload_pkce $PKCE_CLIENT_ID_TO_TRANSLATE)
+  TOKEN_PAYLOAD="$pkce_token_payload" PKCE_CLIENT_ID="$PKCE_CLIENT_ID_TO_TRANSLATE" bats ./token_tests_pkce.bats
   status=$(($status + $?))
 fi
 

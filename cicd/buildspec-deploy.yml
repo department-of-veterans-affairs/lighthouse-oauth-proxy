@@ -46,6 +46,8 @@ env:
     CLIENT_SECRET: "/dvp/common/ecs-oauth-proxy/codebuild/client_secret"
     CC_CLIENT_ID: "/dvp/common/ecs-oauth-proxy/codebuild/cc_client_id"
     CC_CLIENT_SECRET: "/dvp/common/ecs-oauth-proxy/codebuild/cc_client_secret"
+    PKCE_CLIENT_ID: "/dvp/common/ecs-oauth-proxy/codebuild/pkce_client_id"
+    PKCE_CLIENT_ID_TO_TRANSLATE: "/dvp/common/ecs-oauth-proxy/codebuild/pkce_client_id_to_translate"
     USER_EMAIL: "/dvp/common/ecs-oauth-proxy/codebuild/user_email"
     USER_PASSWORD: "/dvp/common/ecs-oauth-proxy/codebuild/user_password"
   exported-variables:
@@ -117,6 +119,9 @@ phases:
               CLIENT_SECRET=${CLIENT_SECRET} \
               CC_CLIENT_ID=${CC_CLIENT_ID} \
               CC_CLIENT_SECRET=${CC_CLIENT_SECRET} \
+              PKCE_AUTH_SERVER=https://${env}-api.va.gov/oauth2/health/internal/v1 \
+              PKCE_CLIENT_ID={PKCE_CLIENT_ID} \
+              PKCE_CLIENT_ID_TO_TRANSLATE={PKCE_CLIENT_ID_TO_TRANSLATE} \
               HOST=https://${env}-api.va.gov/oauth2
             if [[ $? -gt 0 ]]; then
               slackpost.sh -t warning "Some regression tests failed."

@@ -32,7 +32,7 @@ const {
 const {
   GetPatientInfoFromLaunchStrategy,
 } = require("./getPatientInfoStrategies/getPatientInfoFromLaunchStrategy");
-const { parseBasicAuth } = require("../../utils");
+const { parseBasicAuth, screenForV2ClientId } = require("../../utils");
 const {
   codeTokenIssueCounter,
   refreshTokenIssueCounter,
@@ -58,7 +58,7 @@ const {
  * @param {*} app_category - The proxy route config.
  * @returns {TokenHandlerClient} a token handler client.
  */
-const buildTokenHandlerClient = (
+const buildTokenHandlerClient = async (
   redirect_uri,
   issuer,
   logger,
@@ -71,7 +71,7 @@ const buildTokenHandlerClient = (
   staticTokens,
   app_category
 ) => {
-  const strategies = getStrategies(
+  const strategies = await getStrategies(
     redirect_uri,
     issuer,
     logger,
@@ -113,7 +113,7 @@ const buildTokenHandlerClient = (
  * @param {*} app_category - The proxy route config.
  * @returns {*} an object of strategies.
  */
-const getStrategies = (
+const getStrategies = async (
   redirect_uri,
   issuer,
   logger,
@@ -126,12 +126,19 @@ const getStrategies = (
 ) => {
   let strategies;
   if (req.body.grant_type === "refresh_token") {
-    const clientMetadata = createClientMetadata(redirect_uri, req, config);
+    const clientMetadata = await createClientMetadata(
+      redirect_uri,
+      req,
+      config,
+      dynamoClient,
+      issuer
+    );
+    const clientIssuer = clientMetadata.issuer;
     strategies = {
       getTokenStrategy: new RefreshTokenStrategy(
         req,
         logger,
-        new issuer.Client(clientMetadata)
+        new clientIssuer.Client(clientMetadata)
       ),
       getDocumentFromDynamoStrategy: new GetDocumentByRefreshTokenStrategy(
         req,
@@ -144,7 +151,7 @@ const getStrategies = (
         logger,
         dynamoClient,
         config,
-        issuer.issuer,
+        clientIssuer.issuer,
         refreshTokenLifeCycleHistogram
       ),
       getPatientInfoStrategy: new GetPatientInfoFromValidateEndpointStrategy(
@@ -156,13 +163,20 @@ const getStrategies = (
       dbMissCounter: missRefreshTokenCounter,
     };
   } else if (req.body.grant_type === "authorization_code") {
-    const clientMetadata = createClientMetadata(redirect_uri, req, config);
+    const clientMetadata = await createClientMetadata(
+      redirect_uri,
+      req,
+      config,
+      dynamoClient,
+      issuer
+    );
+    let issuerClient = new clientMetadata.issuer.Client(clientMetadata);
     strategies = {
       getTokenStrategy: new AuthorizationCodeStrategy(
         req,
         logger,
         redirect_uri,
-        new issuer.Client(clientMetadata)
+        issuerClient
       ),
       getDocumentFromDynamoStrategy: new GetDocumentByCodeStrategy(
         req,
@@ -175,7 +189,7 @@ const getStrategies = (
         logger,
         dynamoClient,
         config,
-        issuer.issuer,
+        clientMetadata.issuer.issuer,
         refreshTokenLifeCycleHistogram
       ),
       getPatientInfoStrategy: new GetPatientInfoFromValidateEndpointStrategy(
@@ -226,7 +240,13 @@ const getStrategies = (
   return strategies;
 };
 
-function createClientMetadata(redirect_uri, req, config) {
+async function createClientMetadata(
+  redirect_uri,
+  req,
+  config,
+  dynamoClient,
+  issuer
+) {
   let clientMetadata = {
     redirect_uris: [redirect_uri],
   };
@@ -251,6 +271,19 @@ function createClientMetadata(redirect_uri, req, config) {
       error_description: "Client authentication failed",
     };
   }
+  const v2transitiondata = await screenForV2ClientId(
+    clientMetadata.client_id,
+    dynamoClient,
+    config,
+    req.path
+  );
+  clientMetadata.issuer =
+    v2transitiondata.client_id === clientMetadata.client_id &&
+    v2transitiondata.fallback
+      ? v2transitiondata.fallback.issuer
+      : issuer;
+  clientMetadata.client_id = v2transitiondata.client_id;
+
   return clientMetadata;
 }
 

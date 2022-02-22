@@ -2,7 +2,7 @@ const { URLSearchParams, URL } = require("url");
 const { loginBegin } = require("../metrics");
 const { v4: uuidv4 } = require("uuid");
 const { addMinutes, getUnixTime } = require("date-fns");
-
+const { screenForV2ClientId } = require("../utils");
 /**
  * Checks for valid authorization request and proxies to authorization server.
  *
@@ -33,15 +33,30 @@ const authorizeHandler = async (
 ) => {
   loginBegin.inc();
   const { state, client_id, redirect_uri: client_redirect } = req.query;
+  let v2TransitionData = await screenForV2ClientId(
+    client_id,
+    dynamoClient,
+    config,
+    req.path
+  );
+  let okta_client = oktaClient;
+  const screenedClientId = v2TransitionData.client_id;
+  let issuer_data = issuer;
+  let client_validation_app_category = app_category;
+  if (v2TransitionData.fallback) {
+    issuer_data = v2TransitionData.fallback.issuer;
+    okta_client = app_category.fallback.okta_client;
+    client_validation_app_category = v2TransitionData.fallback;
+  }
 
   let clientValidation = await validateClient(
     logger,
-    client_id,
+    screenedClientId,
     client_redirect,
     dynamoClient,
     config.dynamo_clients_table,
-    oktaClient,
-    app_category
+    okta_client,
+    client_validation_app_category
   );
 
   if (!clientValidation.valid) {
@@ -72,7 +87,7 @@ const authorizeHandler = async (
       state: state,
       redirect_uri: client_redirect,
       expires_on: getUnixTime(addMinutes(Date.now(), 10)),
-      client_id: client_id,
+      client_id: screenedClientId,
       proxy:
         config.host + config.well_known_base_path + app_category.api_category,
       aud: app_category.audience,
@@ -100,6 +115,7 @@ const authorizeHandler = async (
   }
 
   const params = new URLSearchParams(req.query);
+  params.set("client_id", screenedClientId);
   params.set("redirect_uri", redirect_uri);
   // Rewrite to an internally maintained state
   params.set("state", internal_state);
@@ -115,7 +131,7 @@ const authorizeHandler = async (
   }
 
   res.redirect(
-    `${issuer.metadata.authorization_endpoint}?${params.toString()}`
+    `${issuer_data.metadata.authorization_endpoint}?${params.toString()}`
   );
 };
 

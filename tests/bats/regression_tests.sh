@@ -257,9 +257,4 @@ then
   exit 1
 fi
 
-if [ -z "$PKCE_AUTH_SERVER" ]; then
-  echo "All tests passed!"
-  exit 0
-fi
-
-echo "Testing complete!"
+echo "All tests passed!"

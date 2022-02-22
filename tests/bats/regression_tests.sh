@@ -242,8 +242,8 @@ fi
 
 if [ ! -z "$PKCE_CLIENT_ID_V2" ]; then
   echo "Running PKCE Client V2 transition Tests ..."
-  pkse_token_payload=$(tokan_payload_pkce $PKCE_CLIENT_ID_V2)
-  TOKEN_PAYLOAD="$pkse_token_payload" PKCE_CLIENT_ID="$PKCE_CLIENT_ID_V2" bats ./token_tests_pkce.bats
+  pkce_token_payload=$(tokan_payload_pkce $PKCE_CLIENT_ID_V2)
+  TOKEN_PAYLOAD="$pkce_token_payload" PKCE_CLIENT_ID="$PKCE_CLIENT_ID_V2" bats ./token_tests_pkce.bats
   status=$(($status + $?))
 fi
 

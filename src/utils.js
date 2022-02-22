@@ -197,9 +197,12 @@ const screenForV2ClientId = async (client_id, dynamoClient, config, path) => {
         dynamo_clients_table
       );
       if (clientInfo.Item) {
-        v2transitional.client_id = clientInfo.Item.v2_client_id
-          ? clientInfo.Item.v2_client_id
-          : client_id;
+        // This client is not translated and is current with this app category
+        if (clientInfo.Item.v2_client_id) {
+          v2transitional.client_id = clientInfo.Item.v2_client_id;
+        } else {
+          return v2transitional;
+        }
       }
     } catch (err) {
       // No client entry

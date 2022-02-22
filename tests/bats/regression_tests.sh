@@ -14,6 +14,9 @@ Example
   export HOST=https://sandbox-api.va.gov/oauth2
   export CC_CLIENT_ID={{ client id }}
   export CC_CLIENT_SECRET={{ client secret }}
+  export PKCE_AUTH_SERVER=https://sandbox-api.va.gov/oauth2/health/internal/v1
+  export PKCE_CLIENT_ID={{pkce-enabled client id }}
+  export PKCE_CLIENT_ID_TO_TRANSLATE={{client id to translate}}
 
   ./regression_tests.sh [--test-issued]
 EOF

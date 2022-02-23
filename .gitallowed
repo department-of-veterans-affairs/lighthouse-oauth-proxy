@@ -15,3 +15,7 @@ validate_apiKey:\s{$
 .*config.okta_token,$
 okta_token:\s{$
 \"?okta_token\"?:\s\"fakeOktaToken\",$
+
+accessKeyId: "NONE"
+secretAccessKey: "NONE"
+"client_id=clientIdv2"

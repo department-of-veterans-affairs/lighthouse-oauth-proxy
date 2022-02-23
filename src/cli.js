@@ -197,7 +197,7 @@ function processArgs() {
             },
             revocation_endpoint: {
               description:
-                "URL where the application will make the token revokation request.",
+                "URL where the application will make the token revocation request.",
               required: false,
               default: null,
             },
@@ -217,6 +217,16 @@ function processArgs() {
             description:
               "Default Okta IDP for this authz server (overrides global default)",
             required: false,
+          },
+          fallback: {
+            description:
+              "Indicates that an application category is in transition to a new upstream issuer where a differing client id is assigned",
+            required: false,
+            default: null,
+            upstream_issuer: {
+              description: "URI of upstream issuer to be proxies",
+              required: true,
+            },
           },
         },
         app_routes: {

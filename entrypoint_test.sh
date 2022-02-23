@@ -14,6 +14,8 @@ docker run \
   --client-secret="\$CLIENT_SECRET" \
   --cc-client-id="\$CC_CLIENT_ID" \
   --cc-client-secret="\$CC_CLIENT_SECRET" \
+  --pkce-auth-server=$PKCE_AUTH_SERVER \
+  --pkce-client-id=$PKCE_CLIENT_ID \
   --host="\$HOST" \
   --test-claims
 
@@ -56,6 +58,12 @@ case $i in
       export CC_CLIENT_ID="${i#*=}"; shift ;;
     --cc-client-secret*)
       export CC_CLIENT_SECRET="${i#*=}"; shift ;;
+    --pkce-client-id-to-translate*)
+      export PKCE_CLIENT_ID_TO_TRANSLATE="${i#*=}"; shift ;;
+    --pkce-client-id*)
+      export PKCE_CLIENT_ID="${i#*=}"; shift ;;
+    --pkce-auth-server*)
+      export PKCE_AUTH_SERVER="${i#*=}"; shift ;;
     --host*)
       export HOST="${i#*=}"; shift ;;
 esac

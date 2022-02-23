@@ -32,6 +32,16 @@
         "audience": "audience-2",
         "enable_consent_endpoint" : true,
         "idp": "idp-slug-2"
+      },
+      {
+        "api_category": "/api-category-2/v2",
+        "upstream_issuer": "https://example2.com/oauth2/issuer/4",
+        "manage_endpoint": "https://example2.com/manage/endpoint",
+        "audience": "audience-3",
+        "fallback": {
+          "upstream_issuer": "https://previous-example2.com/oauth2/issuer/3"
+        },
+        "client_store": "local"
       }
     ],
     "app_routes": {

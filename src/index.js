@@ -19,6 +19,7 @@ const { configureTokenValidator } = require("./tokenValidation");
 const rTracer = require("cls-rtracer");
 const { SlugHelper } = require("./slug_helper");
 const { buildIssuer } = require("./issuer_helper");
+const { v2TransitionProxyRequest, appCategoryFromPath } = require("./utils");
 
 const openidMetadataWhitelist = [
   "issuer",
@@ -92,63 +93,6 @@ function buildApp(
     });
   }
   const slugHelper = new SlugHelper(config);
-
-  const setProxyResponse = (response, targetResponse) => {
-    if (response.headers !== undefined) {
-      targetResponse.set(response.headers);
-    }
-    targetResponse.status(response.status);
-    response.data.pipe(targetResponse);
-  };
-
-  /**
-   * Proxy a request to another location.
-   *
-   * @param req The request.
-   * @param res The response.
-   * @param redirectUrl The proxied location.
-   * @param requestMethod The HTTP method.
-   * @param bodyencoder The optional body encoder.
-   */
-  const proxyRequest = (req, res, redirectUrl, requestMethod, bodyencoder) => {
-    delete req.headers.host;
-
-    let proxyRequest = {
-      method: requestMethod,
-      url: redirectUrl,
-      headers: req.headers,
-      responseType: "stream",
-    };
-
-    /*
-     * Build the proxied request body.
-     *
-     * Use the original request body and optionally encode it.
-     *
-     * If resulting body is empty, omit it from the proxied request.
-     */
-
-    let payload = req.body;
-
-    if (bodyencoder !== undefined) {
-      payload = bodyencoder.stringify(req.body);
-    }
-
-    if (payload && Object.keys(payload).length) {
-      proxyRequest.data = payload;
-    }
-
-    // Proxy request
-
-    axios(proxyRequest)
-      .then((response) => {
-        setProxyResponse(response, res);
-      })
-      .catch((err) => {
-        setProxyResponse(err.response, res);
-      });
-  };
-
   const { well_known_base_path } = config;
   const redirect_uri = `${config.host}${well_known_base_path}${config.routes.app_routes.redirect}`;
 
@@ -353,27 +297,49 @@ function buildApp(
     }
 
     router.get(api_category + app_routes.jwks, (req, res) =>
-      proxyRequest(req, res, service_issuer.metadata.jwks_uri, "GET")
-    );
-    router.get(api_category + app_routes.userinfo, (req, res) =>
-      proxyRequest(req, res, service_issuer.metadata.userinfo_endpoint, "GET")
-    );
-    router.post(api_category + app_routes.introspection, (req, res) =>
       proxyRequest(
         req,
         res,
-        service_issuer.metadata.introspection_endpoint,
-        "POST",
-        querystring
+        service_issuer.metadata,
+        "jwks_uri",
+        "GET",
+        config,
+        dynamoClient
       )
     );
+    router.get(api_category + app_routes.userinfo, (req, res) =>
+      proxyRequest(
+        req,
+        res,
+        service_issuer.metadata,
+        "userinfo_endpoint",
+        "GET",
+        config,
+        dynamoClient
+      )
+    );
+    router.post(api_category + app_routes.introspection, (req, res) => {
+      proxyRequest(
+        req,
+        res,
+        service_issuer.metadata,
+        "introspection_endpoint",
+        "POST",
+        config,
+        dynamoClient,
+        querystring
+      );
+    });
 
     router.post(api_category + app_routes.revoke, (req, res) => {
       proxyRequest(
         req,
         res,
-        service_issuer.metadata.revocation_endpoint,
+        service_issuer.metadata,
+        "revocation_endpoint",
         "POST",
+        config,
+        dynamoClient,
         querystring
       );
     });
@@ -402,6 +368,13 @@ function startApp(config, isolatedIssuers) {
         token: config.okta_token,
         requestExecutor: new okta.DefaultRequestExecutor(),
       });
+      if (app_category.fallback && app_category.fallback.upstream_issuer) {
+        app_category.fallback.okta_client = new okta.Client({
+          orgUrl: config.okta_url,
+          token: config.okta_token,
+          requestExecutor: new okta.DefaultRequestExecutor(),
+        });
+      }
     });
   }
 
@@ -459,10 +432,16 @@ if (require.main === module) {
 
       const isolatedIssuers = {};
       if (config.routes && config.routes.categories) {
-        for (const service_config of config.routes.categories) {
-          isolatedIssuers[service_config.api_category] = await createIssuer(
-            service_config
+        for (const app_category of config.routes.categories) {
+          isolatedIssuers[app_category.api_category] = await createIssuer(
+            app_category
           );
+          app_category.issuer = isolatedIssuers[app_category.api_category];
+          if (app_category.fallback && app_category.fallback.upstream_issuer) {
+            app_category.fallback.issuer = await createIssuer(
+              app_category.fallback
+            );
+          }
         }
       }
       startApp(config, isolatedIssuers);
@@ -473,8 +452,72 @@ if (require.main === module) {
   })();
 }
 
+const setProxyResponse = (response, targetResponse) => {
+  if (response.headers !== undefined) {
+    targetResponse.set(response.headers);
+  }
+  targetResponse.status(response.status);
+  response.data.pipe(targetResponse);
+};
+
+/**
+ * Proxy a request to another location.
+ *
+ * @param {express.Request} req express request object.
+ * @param {express.Response} res express response object.
+ * @param {*} issuer_metadata metadata for the issuer.
+ * @param {string} metadata_type metadata type for the request, eg. 'introspect_endpoint' or 'userinfo_endpoint'
+ * @param {string} requestMethod The HTTP request method, eg. 'POST' or 'GET'
+ * @param {*} config application configuration.
+ * @param {DynamoClient} dynamoClient interacts with dynamodb.
+ * @param {StringifyOptions} bodyEncoder encodes a string for the body
+ */
+const proxyRequest = async (
+  req,
+  res,
+  issuer_metadata,
+  metadata_type,
+  requestMethod,
+  config,
+  dynamoClient,
+  bodyEncoder
+) => {
+  const proxy_request = await v2TransitionProxyRequest(
+    req,
+    dynamoClient,
+    config,
+    issuer_metadata,
+    metadata_type,
+    requestMethod,
+    bodyEncoder
+  );
+
+  // Proxy request
+  axios(proxy_request)
+    .then((response) => {
+      setProxyResponse(response, res);
+    })
+    .catch((err) => {
+      const api_category = appCategoryFromPath(req.path, config.routes);
+      if (api_category && api_category.fallback) {
+        proxy_request.url =
+          api_category.fallback.issuer.metadata[metadata_type];
+        axios(proxy_request)
+          .then((response) => {
+            setProxyResponse(response, res);
+          })
+          .catch((err) => {
+            setProxyResponse(err.response, res);
+          });
+      } else {
+        setProxyResponse(err.response, res);
+      }
+    });
+};
+
 module.exports = {
   buildApp,
   createIssuer,
   startApp,
+  proxyRequest,
 };

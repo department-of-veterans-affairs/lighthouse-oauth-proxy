@@ -1,6 +1,8 @@
 "use strict";
-
+const querystring = require("querystring");
 require("jest");
+const { ISSUER_METADATA } = require("./testUtils");
+
 const {
   statusCodeFromError,
   parseBasicAuth,
@@ -9,6 +11,9 @@ const {
   hashString,
   minimalError,
   handleOpenIdClientError,
+  screenForV2ClientId,
+  appCategoryFromPath,
+  v2TransitionProxyRequest,
 } = require("../src/utils");
 
 describe("statusCodeFromError", () => {
@@ -303,5 +308,131 @@ describe("handleOpenIdClientError tests", () => {
     } catch (err) {
       expect(err).toEqual(error);
     }
+  });
+});
+const categories = [
+  {
+    api_category: "",
+    audience: "api://default",
+  },
+  {
+    api_category: "/claims/v1",
+    audience: "api://default",
+  },
+  {
+    api_category: "/community-care/v1",
+    audience: "api://default",
+    fallback: { upstream_issuer: "http://whatever" },
+  },
+  {
+    api_category: "/health/v1",
+    audience: "api://default",
+  },
+];
+const app_routes = {
+  authorize: "/authorization",
+  token: "/token",
+  userinfo: "/userinfo",
+  introspection: "/introspect",
+  manage: "/manage",
+  revoke: "/revoke",
+  jwks: "/keys",
+  issued: "/issued",
+  grants: "/grants",
+  smart_launch: "/smart/launch",
+  redirect: "/redirect",
+  claims: "/claims",
+};
+
+const config = { routes: { categories: categories, app_routes: app_routes } };
+
+describe("screenForV2ClientId tests", () => {
+  const dynamoClient = {};
+  dynamoClient.getPayloadFromDynamo = jest.fn();
+  it("screenForV2ClientId happy v2", async () => {
+    const v2val = { Item: { v2_client_id: "clientIdv2" } };
+    dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
+    const result = await screenForV2ClientId(
+      "clientId",
+      dynamoClient,
+      config,
+      "/community-care/v1/token"
+    );
+    expect(result.client_id).toBe("clientIdv2");
+  });
+  it("screenForV2ClientId happy v1 2", async () => {
+    let v2val = {};
+    dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
+    let result = await screenForV2ClientId(
+      "clientId",
+      dynamoClient,
+      config,
+      "/community-care/v1/token"
+    );
+    expect(result.client_id).toBe("clientId");
+    v2val = { Item: { something: "xxxx" } };
+    dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
+    result = await screenForV2ClientId(
+      "clientId",
+      dynamoClient,
+      config,
+      "/community-care/v1/token"
+    );
+    expect(result.client_id).toBe("clientId");
+  });
+  it("screenForV2ClientId mapping not applicable", async () => {
+    const v2val = { Item: { v2_client_id: "clientIdv2" } };
+    dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
+    const result = await screenForV2ClientId(
+      "clientId",
+      dynamoClient,
+      config,
+      "/health/v1/token"
+    );
+    expect(result.client_id).toBe("clientId");
+  });
+});
+
+describe("appCategoryFromPath tests", () => {
+  it("appCategoryFromPath /health/v1", async () => {
+    let result = appCategoryFromPath("/health/v1/token", config.routes);
+    expect(result.api_category).toBe("/health/v1");
+    result = appCategoryFromPath("/health/v1/authorization", config.routes);
+    expect(result.api_category).toBe("/health/v1");
+  });
+
+  it("appCategoryFromPath default", async () => {
+    const result = appCategoryFromPath("/token", config.routes);
+    expect(result.api_category).toBe("");
+  });
+
+  it("appCategoryFromPath not found", async () => {
+    const result = appCategoryFromPath("/nothere/v0/token", config.routes);
+    expect(result).toBe(undefined);
+  });
+});
+
+describe("v2TransitionProxyRequest tests", () => {
+  const dynamoClient = {};
+  dynamoClient.getPayloadFromDynamo = jest.fn();
+  it("v2TransitionProxyRequest positive rewrite client body", async () => {
+    const v2val = { Item: { v2_client_id: "clientIdv2" } };
+    dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
+    const req = {
+      headers: { host: "localhost" },
+      body: { client_id: "testClient2" },
+      path: "/community-care/v1/introspect",
+    };
+    const result = await v2TransitionProxyRequest(
+      req,
+      dynamoClient,
+      config,
+      ISSUER_METADATA,
+      "introspection_endpoint",
+      "POST",
+      querystring
+    );
+    expect(result.data).toBe("client_id=clientIdv2");
+    expect(result.url).toBe("http://example.com/introspect");
   });
 });

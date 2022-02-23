@@ -6,6 +6,7 @@ RUN cat  /ca-certificates/ca-certs.pem > ./ca-certs.pem
 
 FROM vasdvp/lighthouse-node-application-base:node16
 
+WORKDIR /home/ca-certificates
 COPY ./fwdproxy.crt ./fwdproxy.crt
 RUN openssl x509 -in ./fwdproxy.crt >> ./fwdproxy.pem
 COPY --from=0 /home/ca-certificates/ca-certs.pem ./ca-certs.pem

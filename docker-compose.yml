@@ -15,7 +15,7 @@ services:
     build:
       context: ./
       target: base
-      dockerfile: ./DockerfileFG
+      dockerfile: ./Dockerfile
     depends_on:
       - dynamodb
     ports:

@@ -28,3 +28,4 @@ services:
       - AWS_DEFAULT_REGION=us-west-2
     volumes:
       - ./dev-config.json:/etc/oauth-proxy/config.json
+    command: "node --inspect=0.0.0.0:9229 src/index.js --config /etc/oauth-proxy/config.json"

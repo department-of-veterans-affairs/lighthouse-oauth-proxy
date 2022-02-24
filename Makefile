@@ -53,6 +53,7 @@ build/oauth:
 		--build-arg BUILD_TOOL=$(BUILD_TOOL) \
 		--build-arg VERSION=$(BUILD_VERSION) \
 		--build-arg BUILD_NUMBER=$(BUILD_NUMBER) \
+		--build-arg FWDPROXYCRT="true" \
 		--no-cache .
 
 ## build/oauth_tests:	Build oauth-proxy-tests image

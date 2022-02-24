@@ -1,16 +1,18 @@
 FROM vasdvp/lighthouse-node-application-base:node12
 
 USER node
-WORKDIR /home/ca-certificates
+WORKDIR /home/node
 RUN cat  /ca-certificates/ca-certs.pem > ./ca-certs.pem
 
 FROM vasdvp/lighthouse-node-application-base:node16
 
-WORKDIR /home/ca-certificates
-COPY ./fwdproxy.crt ./fwdproxy.crt
-RUN openssl x509 -in ./fwdproxy.crt >> ./fwdproxy.pem
-COPY --from=0 /home/ca-certificates/ca-certs.pem ./ca-certs.pem
-RUN cat  ./fwdproxy.pem >> ./ca-certs.pem
+# Build Args
+ARG FWDPROXYCRT
+WORKDIR /home/node
+COPY ./fwdproxy*.crt ./
+RUN if [ "$FWDPROXYCRT" = "true" ] ; then openssl x509 -in ./fwdproxy.crt >> ./fwdproxy.pem; else echo "fwdproxy.crt does not exist"; fi
+COPY --from=0 /home/node/ca-certs.pem ./ca-certs.pem
+RUN if [ "$FWDPROXYCRT" = "true" ] ; then cat ./fwdproxy.pem >> ./ca-certs.pem; else echo "fwdproxy.pem does not exist"; fi
 
 FROM vasdvp/lighthouse-node-application-base:node16 as base
 
@@ -54,4 +56,4 @@ ENTRYPOINT ["/usr/local/bin/tini", "--"]
 CMD ["node", "src/index.js", "--config", "/etc/oauth-proxy/config.json"]
 
 from base as deploy
-COPY --from=1 /home/ca-certificates/ca-certs.pem /ca-certificates/ca-certs.pem
+COPY --from=1 /home/node/ca-certs.pem /ca-certificates/ca-certs.pem

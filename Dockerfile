@@ -1,8 +1,8 @@
-FROM vasdvp/lighthouse-node-application-base:node12
+FROM vasdvp/lighthouse-node-application-base:node16
 
 USER node
 WORKDIR /home/node
-RUN cat  /ca-certificates/ca-certs.pem > ./ca-certs.pem
+RUN cat  /opt/octopus/ca-certificates/ca-certs.pem > ./ca-certs.pem
 
 FROM vasdvp/lighthouse-node-application-base:node16
 

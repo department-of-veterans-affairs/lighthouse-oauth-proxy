@@ -46,14 +46,13 @@ build/oauth : IMAGE = oauth-proxy
 build/oauth:
 	## build:	Build Docker image
 	docker build -t $(REPOSITORY)/$(NAMESPACE)/$(IMAGE):$(TAG) \
-		-f Dockerfile \
+		-f DockerfileFG \
 		--target $(TARGET) \
 		--build-arg AWS_ACCOUNT_ID=$(AWS_ACCOUNT_ID) \
 		--build-arg BUILD_DATE_TIME=$(BUILD_DATE_TIME) \
 		--build-arg BUILD_TOOL=$(BUILD_TOOL) \
 		--build-arg VERSION=$(BUILD_VERSION) \
 		--build-arg BUILD_NUMBER=$(BUILD_NUMBER) \
-		--build-arg FWDPROXYCRT="true" \
 		--no-cache .
 
 ## build/oauth_tests:	Build oauth-proxy-tests image

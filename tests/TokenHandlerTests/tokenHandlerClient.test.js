@@ -216,7 +216,7 @@ describe("handleToken tests", () => {
     expect(response.responseBody.patient).toBe("patient");
   });
 
-  it("Happy Path with launch", async () => {
+  it("Invalid old style of launch launch", async () => {
     let token = buildToken(false, true, false, "launch");
 
     let tokenHandlerClient = buildTokenClient({
@@ -230,9 +230,8 @@ describe("handleToken tests", () => {
     let response = await tokenHandlerClient.handleToken();
 
     expect(tokenIssueCounter.inc).toHaveBeenCalled();
-    expect(response.statusCode).toBe(200);
-    expect(response.responseBody.access_token).toBe(token.access_token);
-    expect(response.responseBody.patient).toBe("patient");
+    expect(response.statusCode).toBe(400);
+    expect(response.responseBody).toBe("Bad request");
   });
 
   it("Happy Path with launch base64", async () => {

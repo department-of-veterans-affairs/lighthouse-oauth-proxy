@@ -163,8 +163,9 @@ class TokenHandlerClient {
             }
           }
         } catch (error) {
-          //Assume patient and add normally
+          //launch is not assumed to be a b64 encoded json structure
           responseBody["patient"] = launch;
+          return { statusCode: 400, responseBody: "Bad request" };
         }
       }
     }

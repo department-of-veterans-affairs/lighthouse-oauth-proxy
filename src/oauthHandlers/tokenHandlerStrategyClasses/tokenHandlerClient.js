@@ -168,7 +168,13 @@ class TokenHandlerClient {
             "The launch parameter was not base64-encoded",
             minimalError(error)
           );
-          return { statusCode: 400, responseBody: "Bad request" };
+          return {
+            statusCode: 400,
+            responseBody: {
+              error: "invalid_request",
+              error_description: "Bad request.",
+            },
+          };
         }
       }
     }

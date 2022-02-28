@@ -316,6 +316,11 @@ do_token "$(jq \
   [ "$(echo "$cc" | jq 'has("expires_in")')" == "true" ]
 }
 
+@test 'Client Credentials reject non b64 encoded launch' {
+  cc=$(do_client_credentials "launch" "123V456")
+  [ $cc == *"Request failed with status code 401"* ]
+}
+
 @test 'Token Handler invalid strategy' {
   do_token "$(jq \
                 -scn \

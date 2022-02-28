@@ -83,7 +83,7 @@ describe("handleToken tests", () => {
 
     logger = Object.prototype.hasOwnProperty.call(clientConfig, "logger")
       ? clientConfig.logger
-      : { warn: jest.fn() };
+      : { warn: jest.fn(), error: jest.fn() };
 
     dynamoClient = Object.prototype.hasOwnProperty.call(
       clientConfig,
@@ -218,7 +218,6 @@ describe("handleToken tests", () => {
 
   it("Invalid old style of launch launch", async () => {
     let token = buildToken(false, true, false, "launch");
-
     let tokenHandlerClient = buildTokenClient({
       token: token,
       pullDocumentFromDynamoStrategy: buildGetDocumentStrategy({
@@ -231,7 +230,7 @@ describe("handleToken tests", () => {
 
     expect(tokenIssueCounter.inc).toHaveBeenCalled();
     expect(response.statusCode).toBe(400);
-    expect(response.responseBody).toBe("Bad request");
+    expect(tokenHandlerClient.logger.error).toHaveBeenCalled();
   });
 
   it("Happy Path with launch base64", async () => {

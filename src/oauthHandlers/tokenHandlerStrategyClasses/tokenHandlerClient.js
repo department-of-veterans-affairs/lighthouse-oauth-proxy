@@ -164,7 +164,10 @@ class TokenHandlerClient {
           }
         } catch (error) {
           // launch is assumed to be a b64 encoded json structure
-          responseBody["patient"] = launch;
+          this.logger.error(
+            "The launch parameter was not base64-encoded",
+            minimalError(error)
+          );
           return { statusCode: 400, responseBody: "Bad request" };
         }
       }

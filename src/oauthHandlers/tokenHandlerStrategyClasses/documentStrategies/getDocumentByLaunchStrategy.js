@@ -17,7 +17,6 @@ class GetDocumentByLaunchStrategy {
     let doc = {};
     // Only applies to launch or launch/patient
     if (this.req.body.scope.split(" ").includes("launch")) {
-      let doc = {};
       doc.launch = this.req.body.launch;
     }
     if (!this.req.body.scope.split(" ").includes("launch/patient")) {

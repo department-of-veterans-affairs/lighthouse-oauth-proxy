@@ -141,6 +141,12 @@ class TokenHandlerClient {
     }
 
     let state;
+    let decoded_launch;
+    if (document.decoded_launch) {
+      decoded_launch = document.decoded_launch;
+      delete document.decoded_launch;
+      delete document.is_launch;
+    }
     if (tokens) {
       await this.saveDocumentToDynamoStrategy.saveDocumentToDynamo(
         document,
@@ -159,6 +165,12 @@ class TokenHandlerClient {
         responseBody[
           "patient"
         ] = await this.getPatientInfoStrategy.createPatientInfo(tokens);
+      } else if (decoded_launch) {
+        for (let key in decoded_launch) {
+          if (!responseBody[key]) {
+            responseBody[key] = decoded_launch[key];
+          }
+        }
       }
     }
     return { statusCode: 200, responseBody: responseBody };

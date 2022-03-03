@@ -317,8 +317,11 @@ do_token "$(jq \
 }
 
 @test 'Client Credentials reject non b64 encoded launch' {
-  cc=$(do_client_credentials "launch" "123v456")
-  [ "$(echo "$cc" | jq .message | tr -d '"')" == "Request failed with status code 400" ]
+  local cc_result="$(mktemp)"
+  $(do_client_credentials "launch" "123v456" >& $cc_result)
+  result=$(head /tmp/test2.txt -n 1)
+  [ "$result" == "Error: Request failed with status code 400" ]
+  $(rm $cc_result)
 }
 
 @test 'Token Handler invalid strategy' {

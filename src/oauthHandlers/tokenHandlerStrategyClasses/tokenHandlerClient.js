@@ -114,6 +114,15 @@ class TokenHandlerClient {
       }
     }
 
+    // Reject if launch and not base64 decoded json
+    if (
+      document.is_launch &&
+      document.decoded_launch.statusCode &&
+      document.decoded_launch.statusCode == 400
+    ) {
+      return document.decoded_launch;
+    }
+
     try {
       tokens = await this.getTokenStrategy.getToken();
       this.tokenIssueCounter.inc();
@@ -132,14 +141,12 @@ class TokenHandlerClient {
     }
 
     let state;
-    let launch;
     if (tokens) {
       await this.saveDocumentToDynamoStrategy.saveDocumentToDynamo(
         document,
         tokens
       );
       state = document.state || null;
-      launch = document.launch;
     }
     state = state || null;
 
@@ -152,30 +159,6 @@ class TokenHandlerClient {
         responseBody[
           "patient"
         ] = await this.getPatientInfoStrategy.createPatientInfo(tokens);
-      } else if (tokens.scope.split(" ").includes("launch") && launch) {
-        try {
-          let decodedLaunch = JSON.parse(
-            Buffer.from(launch, "base64").toString("ascii")
-          );
-          for (let key in decodedLaunch) {
-            if (!responseBody[key]) {
-              responseBody[key] = decodedLaunch[key];
-            }
-          }
-        } catch (error) {
-          // launch is assumed to be a b64 encoded json structure
-          this.logger.error(
-            "The launch parameter was not base64-encoded",
-            minimalError(error)
-          );
-          return {
-            statusCode: 400,
-            responseBody: {
-              error: "invalid_request",
-              error_description: "Bad request.",
-            },
-          };
-        }
       }
     }
     return { statusCode: 200, responseBody: responseBody };

@@ -287,31 +287,25 @@ const v2TransitionProxyRequest = async (
   return proxy_request;
 };
 
-const screenLaunchForB64Json = (tokens, launch) => {
-  if (
-    !tokens.scope.split(" ").includes("launch/patient") &&
-    tokens.scope.split(" ").includes("launch") &&
-    launch
-  ) {
-    try {
-      let decodedLaunch = JSON.parse(
-        Buffer.from(launch, "base64").toString("ascii")
-      );
-      return decodedLaunch;
-    } catch (error) {
-      // launch is assumed to be a b64 encoded json structure
-      this.logger.error(
-        "The launch parameter was not base64-encoded",
-        minimalError(error)
-      );
-      return {
-        statusCode: 400,
-        responseBody: {
-          error: "invalid_request",
-          error_description: "Bad request.",
-        },
-      };
-    }
+const screenLaunchForB64Json = (launch) => {
+  try {
+    let decodedLaunch = JSON.parse(
+      Buffer.from(launch, "base64").toString("ascii")
+    );
+    return decodedLaunch;
+  } catch (error) {
+    // launch is assumed to be a b64 encoded json structure
+    this.logger.error(
+      "The launch parameter was not base64-encoded",
+      minimalError(error)
+    );
+    return {
+      statusCode: 400,
+      responseBody: {
+        error: "invalid_request",
+        error_description: "Bad request.",
+      },
+    };
   }
 };
 

@@ -5,6 +5,7 @@ const {
 } = require("../../utils");
 const { translateTokenSet } = require("../tokenResponse");
 const { staticRefreshTokenIssueCounter } = require("../../metrics");
+const { de } = require("date-fns/locale");
 
 class TokenHandlerClient {
   constructor(
@@ -114,6 +115,29 @@ class TokenHandlerClient {
       }
     }
 
+    // Reject if launch and not base64 decoded json
+    let decodedLaunch;
+    let isLaunch;
+    if (document.isLaunch) {
+      decodedLaunch = document.decodedLaunch;
+      delete document.decodedLaunch;
+      isLaunch = document.isLaunch;
+      delete document.isLaunch;
+    }
+    if (isLaunch && decodedLaunch.isError) {
+      this.logger.error(
+        decodedLaunch.errorPayload.message,
+        minimalError(decodedLaunch.errorPayload.cause)
+      );
+      return {
+        statusCode: 400,
+        responseBody: {
+          error: "invalid_request",
+          error_description: "Bad request.",
+        },
+      };
+    }
+
     try {
       tokens = await this.getTokenStrategy.getToken();
       this.tokenIssueCounter.inc();
@@ -132,14 +156,12 @@ class TokenHandlerClient {
     }
 
     let state;
-    let launch;
     if (tokens) {
       await this.saveDocumentToDynamoStrategy.saveDocumentToDynamo(
         document,
         tokens
       );
       state = document.state || null;
-      launch = document.launch;
     }
     state = state || null;
 
@@ -152,29 +174,11 @@ class TokenHandlerClient {
         responseBody[
           "patient"
         ] = await this.getPatientInfoStrategy.createPatientInfo(tokens);
-      } else if (tokens.scope.split(" ").includes("launch") && launch) {
-        try {
-          let decodedLaunch = JSON.parse(
-            Buffer.from(launch, "base64").toString("ascii")
-          );
-          for (let key in decodedLaunch) {
-            if (!responseBody[key]) {
-              responseBody[key] = decodedLaunch[key];
-            }
+      } else if (decodedLaunch) {
+        for (let key in decodedLaunch) {
+          if (!responseBody[key]) {
+            responseBody[key] = decodedLaunch[key];
           }
-        } catch (error) {
-          // launch is assumed to be a b64 encoded json structure
-          this.logger.error(
-            "The launch parameter was not base64-encoded",
-            minimalError(error)
-          );
-          return {
-            statusCode: 400,
-            responseBody: {
-              error: "invalid_request",
-              error_description: "Bad request.",
-            },
-          };
         }
       }
     }

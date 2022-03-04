@@ -287,6 +287,25 @@ const v2TransitionProxyRequest = async (
   return proxy_request;
 };
 
+const screenLaunchForB64Json = (launch) => {
+  try {
+    let decodedLaunch = JSON.parse(
+      Buffer.from(launch, "base64").toString("ascii")
+    );
+    return decodedLaunch;
+  } catch (error) {
+    // launch is assumed to be a b64 encoded json structure
+    const errorPayload = {
+      message: "The launch parameter was not base64-encoded",
+      cause: minimalError(error),
+    };
+    return {
+      isError: true,
+      errorPayload: errorPayload,
+    };
+  }
+};
+
 module.exports = {
   isRuntimeError,
   rethrowIfRuntimeError,
@@ -301,4 +320,5 @@ module.exports = {
   screenForV2ClientId,
   appCategoryFromPath,
   v2TransitionProxyRequest,
+  screenLaunchForB64Json,
 };

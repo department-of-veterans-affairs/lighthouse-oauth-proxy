@@ -241,6 +241,8 @@ describe("handleToken tests", () => {
       pullDocumentFromDynamoStrategy: buildGetDocumentStrategy({
         launch:
           "ewogICJwYXRpZW50IjogIjEyMzRWNTY3OCIsCiAgImVuY291bnRlciI6ICI5ODc2LTU0MzItMTAwMCIKfQ==",
+        isLaunch: true,
+        decodedLaunch: { patient: "1234V5678" },
       }),
       getPatientInfoStrategy: buildGetPatientInfoStrategy("patient"),
     });

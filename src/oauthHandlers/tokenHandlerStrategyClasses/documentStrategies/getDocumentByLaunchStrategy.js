@@ -20,8 +20,8 @@ class GetDocumentByLaunchStrategy {
       doc.launch = this.req.body.launch;
     }
     if (!this.req.body.scope.split(" ").includes("launch/patient")) {
-      doc.is_launch = true;
-      doc.decoded_launch = screenLaunchForB64Json(doc.launch);
+      doc.isLaunch = true;
+      doc.decodedLaunch = screenLaunchForB64Json(doc.launch);
     }
     return doc;
   }

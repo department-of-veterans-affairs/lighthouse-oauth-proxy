@@ -5,6 +5,7 @@ const {
 } = require("../../utils");
 const { translateTokenSet } = require("../tokenResponse");
 const { staticRefreshTokenIssueCounter } = require("../../metrics");
+const { de } = require("date-fns/locale");
 
 class TokenHandlerClient {
   constructor(
@@ -115,12 +116,26 @@ class TokenHandlerClient {
     }
 
     // Reject if launch and not base64 decoded json
-    if (
-      document.is_launch &&
-      document.decoded_launch.statusCode &&
-      document.decoded_launch.statusCode == 400
-    ) {
-      return document.decoded_launch;
+    let decodedLaunch;
+    let isLaunch;
+    if (document.isLaunch) {
+      decodedLaunch = document.decodedLaunch;
+      delete document.decodedLaunch;
+      isLaunch = document.isLaunch;
+      delete document.isLaunch;
+    }
+    if (isLaunch && decodedLaunch.isError) {
+      this.logger.error(
+        decodedLaunch.errorPayload.message,
+        minimalError(decodedLaunch.errorPayload.cause)
+      );
+      return {
+        statusCode: 400,
+        responseBody: {
+          error: "invalid_request",
+          error_description: "Bad request.",
+        },
+      };
     }
 
     try {
@@ -141,12 +156,6 @@ class TokenHandlerClient {
     }
 
     let state;
-    let decoded_launch;
-    if (document.decoded_launch) {
-      decoded_launch = document.decoded_launch;
-      delete document.decoded_launch;
-      delete document.is_launch;
-    }
     if (tokens) {
       await this.saveDocumentToDynamoStrategy.saveDocumentToDynamo(
         document,
@@ -165,10 +174,10 @@ class TokenHandlerClient {
         responseBody[
           "patient"
         ] = await this.getPatientInfoStrategy.createPatientInfo(tokens);
-      } else if (decoded_launch) {
-        for (let key in decoded_launch) {
+      } else if (decodedLaunch) {
+        for (let key in decodedLaunch) {
           if (!responseBody[key]) {
-            responseBody[key] = decoded_launch[key];
+            responseBody[key] = decodedLaunch[key];
           }
         }
       }

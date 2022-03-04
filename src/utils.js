@@ -295,16 +295,13 @@ const screenLaunchForB64Json = (launch) => {
     return decodedLaunch;
   } catch (error) {
     // launch is assumed to be a b64 encoded json structure
-    this.logger.error(
-      "The launch parameter was not base64-encoded",
-      minimalError(error)
-    );
+    const errorPayload = {
+      message: "The launch parameter was not base64-encoded",
+      cause: minimalError(error),
+    };
     return {
-      statusCode: 400,
-      responseBody: {
-        error: "invalid_request",
-        error_description: "Bad request.",
-      },
+      isError: true,
+      errorPayload: errorPayload,
     };
   }
 };

@@ -127,7 +127,7 @@ class TokenHandlerClient {
     if (isLaunch && decodedLaunch.isError) {
       this.logger.error(
         decodedLaunch.errorPayload.message,
-        minimalError(decodedLaunch.errorPayload.cause)
+        decodedLaunch.errorPayload.cause
       );
       return {
         statusCode: 400,

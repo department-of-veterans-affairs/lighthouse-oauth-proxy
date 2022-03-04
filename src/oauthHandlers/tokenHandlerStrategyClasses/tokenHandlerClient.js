@@ -5,7 +5,6 @@ const {
 } = require("../../utils");
 const { translateTokenSet } = require("../tokenResponse");
 const { staticRefreshTokenIssueCounter } = require("../../metrics");
-const { de } = require("date-fns/locale");
 
 class TokenHandlerClient {
   constructor(

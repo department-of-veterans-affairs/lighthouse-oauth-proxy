@@ -1,13 +1,13 @@
-from vasdvp/lighthouse-node-application-base:node12
+FROM vasdvp/lighthouse-node-application-base:node16
 
 USER node
 WORKDIR /home/ca-certificates
 COPY ./fwdproxy.crt ./fwdproxy.crt
 RUN openssl x509 -in ./fwdproxy.crt >> ./fwdproxy.pem
-RUN cat  /ca-certificates/ca-certs.pem > ./ca-certs.pem
+RUN cat /opt/octopus/ca-certificates/ca-certs.pem > ./ca-certs.pem
 RUN cat  ./fwdproxy.pem >> ./ca-certs.pem
 
-FROM vasdvp/lighthouse-node-application-base:node12 as base
+FROM vasdvp/lighthouse-node-application-base:node16 as base
 
 # Build Args
 ARG BUILD_DATE_TIME

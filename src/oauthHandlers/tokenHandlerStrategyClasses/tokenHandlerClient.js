@@ -117,7 +117,7 @@ class TokenHandlerClient {
     // Reject if launch and not base64 decoded json
     let decodedLaunch;
     let isLaunch;
-    if (document.isLaunch) {
+    if (document && document.isLaunch) {
       decodedLaunch = document.decodedLaunch;
       delete document.decodedLaunch;
       isLaunch = document.isLaunch;

@@ -16,10 +16,16 @@ class GetDocumentByLaunchStrategy {
   async getDocument() {
     let doc = {};
     // Only applies to launch or launch/patient
-    if (this.req.body.scope.split(" ").includes("launch")) {
+    if (
+      this.req.body.scope &&
+      this.req.body.scope.split(" ").includes("launch")
+    ) {
       doc.launch = this.req.body.launch;
     }
-    if (!this.req.body.scope.split(" ").includes("launch/patient")) {
+    if (
+      this.req.body.scope &&
+      !this.req.body.scope.split(" ").includes("launch/patient")
+    ) {
       doc.isLaunch = true;
       doc.decodedLaunch = screenLaunchForB64Json(doc.launch);
     }

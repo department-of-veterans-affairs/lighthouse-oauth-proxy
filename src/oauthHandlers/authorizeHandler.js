@@ -104,7 +104,10 @@ const authorizeHandler = async (
       // Reject non b64 encoded json for with launch content
       let decodedLaunch = screenLaunchForB64Json(authorizePayload.launch);
       if (decodedLaunch.isError) {
-        logger.error(decodedLaunch.errorPayload.message, decodedLaunch.errorPayload.cause);
+        logger.error(
+          decodedLaunch.errorPayload.message,
+          decodedLaunch.errorPayload.cause
+        );
         return next(decodedLaunch.errorPayload.cause);
       }
     }

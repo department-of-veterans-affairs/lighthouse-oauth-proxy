@@ -287,6 +287,12 @@ const v2TransitionProxyRequest = async (
   return proxy_request;
 };
 
+/**
+ * Screens a launch value and returns its decoded value, otherwise return an error.
+ * 
+ * @param { string } launch The base64-encoded launch value
+ * @returns Object as the decoded launch entries or an error result
+ */
 const screenLaunchForB64Json = (launch) => {
   try {
     let decodedLaunch = JSON.parse(

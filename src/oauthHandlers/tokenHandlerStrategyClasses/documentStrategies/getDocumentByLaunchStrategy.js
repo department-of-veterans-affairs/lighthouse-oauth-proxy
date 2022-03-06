@@ -1,4 +1,4 @@
-const { screenLaunchForB64Json } = require("../../../utils");
+const { decodeBase64Launch } = require("../../../utils");
 class GetDocumentByLaunchStrategy {
   constructor(req) {
     this.req = req;
@@ -27,7 +27,7 @@ class GetDocumentByLaunchStrategy {
       !this.req.body.scope.split(" ").includes("launch/patient")
     ) {
       doc.isLaunch = true;
-      doc.decodedLaunch = screenLaunchForB64Json(doc.launch);
+      doc.decodedLaunch = decodeBase64Launch(doc.launch);
     }
     return doc;
   }

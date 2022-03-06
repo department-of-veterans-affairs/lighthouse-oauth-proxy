@@ -2,7 +2,7 @@ const { URLSearchParams, URL } = require("url");
 const { loginBegin } = require("../metrics");
 const { v4: uuidv4 } = require("uuid");
 const { addMinutes, getUnixTime } = require("date-fns");
-const { screenForV2ClientId, screenLaunchForB64Json } = require("../utils");
+const { screenForV2ClientId, decodeBase64Launch } = require("../utils");
 /**
  * Checks for valid authorization request and proxies to authorization server.
  *
@@ -102,7 +102,7 @@ const authorizeHandler = async (
     ) {
       authorizePayload.launch = req.query.launch;
       // Reject non b64 encoded json for with launch content
-      let decodedLaunch = screenLaunchForB64Json(authorizePayload.launch);
+      let decodedLaunch = decodeBase64Launch(authorizePayload.launch);
       if (decodedLaunch.isError) {
         logger.error(
           decodedLaunch.errorPayload.message,

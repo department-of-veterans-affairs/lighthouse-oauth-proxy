@@ -293,7 +293,7 @@ const v2TransitionProxyRequest = async (
  * @param { string } launch The base64-encoded launch value
  * @returns Object as the decoded launch entries or an error result
  */
-const screenLaunchForB64Json = (launch) => {
+const decodeBase64Launch = (launch) => {
   try {
     let decodedLaunch = JSON.parse(
       Buffer.from(launch, "base64").toString("ascii")
@@ -326,5 +326,5 @@ module.exports = {
   screenForV2ClientId,
   appCategoryFromPath,
   v2TransitionProxyRequest,
-  screenLaunchForB64Json,
+  decodeBase64Launch,
 };

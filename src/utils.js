@@ -291,7 +291,8 @@ const v2TransitionProxyRequest = async (
  * Screens a launch value and returns its decoded value, otherwise throws an error.
  *
  * @param { string } launch The base64-encoded launch value
- * @returns Object as the decoded launch entries or an error result
+ * @returns Object as the decoded launch entries
+ * @throws { EvalError } If there is an error decoding and deriving the json object
  */
 const decodeBase64Launch = (launch) => {
   try {
@@ -300,15 +301,7 @@ const decodeBase64Launch = (launch) => {
     );
     return decodedLaunch;
   } catch (error) {
-    // launch is assumed to be a b64 encoded json structure
-    const errorPayload = {
-      message: "The launch parameter was not base64-encoded",
-      cause: minimalError(error),
-    };
-    return {
-      isError: true,
-      errorPayload: errorPayload,
-    };
+    throw new EvalError("Error evaluating launch");
   }
 };
 

@@ -311,7 +311,7 @@ const validateBase64Encoding = (payload) => {
 };
 
 const validateBase64EncodedJson = (payload) => {
-  if (!validateBase64EncodedJson(payload)) {
+  if (!validateBase64Encoding(payload)) {
     return {
       valid: false,
       error: "invalid_request",

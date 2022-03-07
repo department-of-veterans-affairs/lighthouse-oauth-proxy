@@ -288,7 +288,7 @@ const v2TransitionProxyRequest = async (
 };
 
 /**
- * Screens a launch value and returns its decoded value, otherwise return an error.
+ * Screens a launch value and returns its decoded value, otherwise throws an error.
  *
  * @param { string } launch The base64-encoded launch value
  * @returns Object as the decoded launch entries or an error result
@@ -312,6 +312,12 @@ const decodeBase64Launch = (launch) => {
   }
 };
 
+const validateBase64Encoding = (payload) => {
+  const base64regex = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
+  const valid = base64regex.test(payload);
+  return { valid: valid };
+};
+
 module.exports = {
   isRuntimeError,
   rethrowIfRuntimeError,
@@ -327,4 +333,5 @@ module.exports = {
   appCategoryFromPath,
   v2TransitionProxyRequest,
   decodeBase64Launch,
+  validateBase64Encoding,
 };

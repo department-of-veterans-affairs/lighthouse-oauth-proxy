@@ -2,6 +2,8 @@ const {
   rethrowIfRuntimeError,
   hashString,
   minimalError,
+  validateBase64EncodedJson,
+  decodeBase64Launch,
 } = require("../../utils");
 const { translateTokenSet } = require("../tokenResponse");
 const { staticRefreshTokenIssueCounter } = require("../../metrics");
@@ -90,6 +92,17 @@ class TokenHandlerClient {
         };
       }
     }
+
+    if (!validateIfLaunch(this.req, this.logger)) {
+      return {
+        statusCode: 400,
+        responseBody: {
+          error: "invalid_request",
+          error_description: "Bad request.",
+        },
+      };
+    }
+
     /*
      * Lookup a previous document (db record) associated with this request.
      *
@@ -112,29 +125,6 @@ class TokenHandlerClient {
           },
         };
       }
-    }
-
-    // Reject if launch and not base64 decoded json
-    let decodedLaunch;
-    let isLaunch;
-    if (document && document.isLaunch) {
-      decodedLaunch = document.decodedLaunch;
-      delete document.decodedLaunch;
-      isLaunch = document.isLaunch;
-      delete document.isLaunch;
-    }
-    if (isLaunch && decodedLaunch.isError) {
-      this.logger.error(
-        decodedLaunch.errorPayload.message,
-        decodedLaunch.errorPayload.cause
-      );
-      return {
-        statusCode: 400,
-        responseBody: {
-          error: "invalid_request",
-          error_description: "Bad request.",
-        },
-      };
     }
 
     try {
@@ -173,7 +163,8 @@ class TokenHandlerClient {
         responseBody[
           "patient"
         ] = await this.getPatientInfoStrategy.createPatientInfo(tokens);
-      } else if (decodedLaunch) {
+      } else if (tokens.scope.split(" ").includes("launch")) {
+        let decodedLaunch = decodeBase64Launch(document.launch);
         for (let key in decodedLaunch) {
           if (!responseBody[key]) {
             responseBody[key] = decodedLaunch[key];
@@ -184,5 +175,28 @@ class TokenHandlerClient {
     return { statusCode: 200, responseBody: responseBody };
   }
 }
+
+const validateIfLaunch = (req, logger) => {
+  if (
+    req.body.scope &&
+    req.body.scope.split(" ").includes("launch") &&
+    !req.body.scope.split(" ").includes("launch/patient")
+  ) {
+    let launch = req.body && req.body.launch ? req.body.launch : undefined;
+    if (!launch) {
+      logger.error("launch context required");
+      return false;
+    }
+    let launchValidation;
+    if (launch) {
+      launchValidation = validateBase64EncodedJson(launch);
+      if (!launchValidation.valid) {
+        logger.error(launchValidation.error_description);
+        return false;
+      }
+    }
+    return true;
+  }
+};
 
 module.exports = { TokenHandlerClient };

@@ -164,7 +164,7 @@ class TokenHandlerClient {
           "patient"
         ] = await this.getPatientInfoStrategy.createPatientInfo(tokens);
       } else if (tokens.scope.split(" ").includes("launch")) {
-        let decodedLaunch = decodeBase64Launch(document.launch);
+        const decodedLaunch = decodeBase64Launch(document.launch);
         for (let key in decodedLaunch) {
           if (!responseBody[key]) {
             responseBody[key] = decodedLaunch[key];
@@ -195,8 +195,8 @@ const validateIfLaunch = (req, logger) => {
         return false;
       }
     }
-    return true;
   }
+  return true;
 };
 
 module.exports = { TokenHandlerClient };

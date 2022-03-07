@@ -222,23 +222,11 @@ describe("handleToken tests", () => {
       token: token,
       pullDocumentFromDynamoStrategy: buildGetDocumentStrategy({
         launch: "patient",
-        isLaunch: true,
-        decodedLaunch: {
-          isError: true,
-          errorPayload: {
-            message: "Bad request",
-            cause: {
-              message: "Bad request",
-              statusCode: "400",
-              error_description: "Invalid old style of launch launch",
-            },
-          },
-        },
       }),
       getPatientInfoStrategy: buildGetPatientInfoStrategy("patient"),
     });
-
-    let response = await tokenHandlerClient.handleToken();
+    tokenHandlerClient.req.body.scope = "launch";
+    const response = await tokenHandlerClient.handleToken();
 
     expect(tokenIssueCounter.inc).not.toHaveBeenCalled();
     expect(response.statusCode).toBe(400);

@@ -2,11 +2,8 @@ const { URLSearchParams, URL } = require("url");
 const { loginBegin } = require("../metrics");
 const { v4: uuidv4 } = require("uuid");
 const { addMinutes, getUnixTime } = require("date-fns");
-const {
-  screenForV2ClientId,
-  decodeBase64Launch,
-  validateBase64EncodedJson,
-} = require("../utils");
+const { screenForV2ClientId, validateBase64EncodedJson } = require("../utils");
+
 /**
  * Checks for valid authorization request and proxies to authorization server.
  *

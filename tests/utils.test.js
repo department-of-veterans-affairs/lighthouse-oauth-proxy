@@ -443,11 +443,11 @@ describe("validateBase64Encoding tests", () => {
     const payload =
       "ewogICJwYXRpZW50IjogIjEyMzRWNTY3OCIsCiAgImVuY291bnRlciI6ICI5ODc2LTU0MzItMTAwMCIKfQ==";
     const result = validateBase64Encoding(payload);
-    expect(result.valid).toBe(true);
+    expect(result).toBe(true);
   });
   it("validateBase64Encoding invalid", async () => {
     const payload = "bad encoding";
     const result = validateBase64Encoding(payload);
-    expect(result.valid).toBe(false);
+    expect(result).toBe(false);
   });
 });

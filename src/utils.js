@@ -314,8 +314,27 @@ const decodeBase64Launch = (launch) => {
 
 const validateBase64Encoding = (payload) => {
   const base64regex = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
-  const valid = base64regex.test(payload);
-  return { valid: valid };
+  return base64regex.test(payload);
+};
+
+const validateBase64EncodedJson = (payload) => {
+  if (!validateBase64EncodedJson(payload)) {
+    return {
+      valid: false,
+      error: "invalid_request",
+      error_description: "Base64-encoded value required",
+    };
+  }
+  try {
+    JSON.parse(Buffer.from(payload, "base64").toString("ascii"));
+    return { valid: true };
+  } catch (error) {
+    return {
+      valid: false,
+      error: "invalid_request",
+      error_description: "Invalid Base64-encoded JSON payload",
+    };
+  }
 };
 
 module.exports = {
@@ -334,4 +353,5 @@ module.exports = {
   v2TransitionProxyRequest,
   decodeBase64Launch,
   validateBase64Encoding,
+  validateBase64EncodedJson,
 };

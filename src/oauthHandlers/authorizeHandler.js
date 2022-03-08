@@ -110,6 +110,16 @@ const authorizeHandler = async (
       aud: app_category.audience,
     };
 
+    // If the launch scope is included then also
+    // save the launch context provided (if any)
+    if (
+      req.query.scope &&
+      req.query.scope.split(" ").includes("launch") &&
+      req.query.launch
+    ) {
+      authorizePayload.launch = req.query.launch;
+    }
+
     await dynamoClient.savePayloadToDynamo(
       authorizePayload,
       config.dynamo_oauth_requests_table

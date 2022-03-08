@@ -242,8 +242,6 @@ describe("handleToken tests", () => {
       pullDocumentFromDynamoStrategy: buildGetDocumentStrategy({
         launch:
           "ewogICJwYXRpZW50IjogIjEyMzRWNTY3OCIsCiAgImVuY291bnRlciI6ICI5ODc2LTU0MzItMTAwMCIKfQ==",
-        isLaunch: true,
-        decodedLaunch: { patient: "1234V5678" },
       }),
       getPatientInfoStrategy: buildGetPatientInfoStrategy("patient"),
     });
@@ -257,6 +255,26 @@ describe("handleToken tests", () => {
     expect(response.statusCode).toBe(200);
     expect(response.responseBody.access_token).toBe(token.access_token);
     expect(response.responseBody.patient).toBe("1234V5678");
+  });
+
+  it("Invalid missing launch", async () => {
+    let token = buildToken(false, true, false, "launch");
+
+    let tokenHandlerClient = buildTokenClient({
+      token: token,
+      pullDocumentFromDynamoStrategy: buildGetDocumentStrategy({
+        launch:
+          "ewogICJwYXRpZW50IjogIjEyMzRWNTY3OCIsCiAgImVuY291bnRlciI6ICI5ODc2LTU0MzItMTAwMCIKfQ==",
+      }),
+      getPatientInfoStrategy: buildGetPatientInfoStrategy("patient"),
+    });
+    tokenHandlerClient.req.body.scope = "launch";
+
+    let response = await tokenHandlerClient.handleToken();
+
+    expect(tokenIssueCounter.inc).not.toHaveBeenCalled();
+    expect(response.statusCode).toBe(400);
+    expect(tokenHandlerClient.logger.error).toHaveBeenCalled();
   });
 
   it("getToken 401 Response", async () => {

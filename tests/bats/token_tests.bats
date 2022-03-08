@@ -328,7 +328,6 @@ do_token "$(jq \
                 --arg grant_type "invalid" \
                 --arg secret "$CLIENT_SECRET" \
                 '{"client_id": $client_id, "grant_type": $grant_type, "client_secret": $secret}')"
-
   [ "$(cat "$curl_status")" -eq 400 ]
   [ "$(cat "$curl_body" | jq .error | tr -d '"')" == "unsupported_grant_type" ]
   [ "$(cat "$curl_body" | jq .error_description | tr -d '"')" == "Only authorization_code, refresh_token, and client_credentials grant types are supported" ]

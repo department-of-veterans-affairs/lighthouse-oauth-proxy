@@ -15,6 +15,7 @@ const {
   appCategoryFromPath,
   v2TransitionProxyRequest,
   validateBase64Encoding,
+  validateBase64EncodedJson,
 } = require("../src/utils");
 
 describe("statusCodeFromError", () => {
@@ -435,6 +436,20 @@ describe("v2TransitionProxyRequest tests", () => {
     );
     expect(result.data).toBe("client_id=clientIdv2");
     expect(result.url).toBe("http://example.com/introspect");
+  });
+});
+
+describe("validateBase64EncodedJson tests", () => {
+  it("validateBase64EncodedJson valid", async () => {
+    const payload =
+      "ewogICJwYXRpZW50IjogIjEyMzRWNTY3OCIsCiAgImVuY291bnRlciI6ICI5ODc2LTU0MzItMTAwMCIKfQ==";
+    const result = validateBase64EncodedJson(payload);
+    expect(result.valid).toBe(true);
+  });
+  it("validateBase64EncodedJson invalid", async () => {
+    const payload = "bad encoding";
+    const result = validateBase64EncodedJson(payload);
+    expect(result.valid).toBe(false);
   });
 });
 

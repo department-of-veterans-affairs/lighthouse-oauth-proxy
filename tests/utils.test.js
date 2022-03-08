@@ -16,6 +16,7 @@ const {
   v2TransitionProxyRequest,
   validateBase64Encoding,
   validateBase64EncodedJson,
+  decodeBase64Launch,
 } = require("../src/utils");
 
 describe("statusCodeFromError", () => {
@@ -436,6 +437,31 @@ describe("v2TransitionProxyRequest tests", () => {
     );
     expect(result.data).toBe("client_id=clientIdv2");
     expect(result.url).toBe("http://example.com/introspect");
+  });
+});
+
+describe("decodeBase64Launch tests", () => {
+  it("decodeBase64Launch happy", async () => {
+    const payload =
+      "ewogICJwYXRpZW50IjogIjEyMzRWNTY3OCIsCiAgImVuY291bnRlciI6ICI5ODc2LTU0MzItMTAwMCIKfQ==";
+    const result = decodeBase64Launch(payload);
+    expect(result.patient).toBe("1234V5678");
+    expect(result.encounter).toBe("9876-5432-1000");
+  });
+  it("decodeBase64Launch invalid", async () => {
+    const payload = "bad encoding";
+    const result = decodeBase64Launch(payload);
+    expect(result.valid).toBe(false);
+    expect(result.error_description).toBe("Base64-encoded value required");
+  });
+  it("decodeBase64Launch EvalError", async () => {
+    const payload = "VG90YWxseSBub3QganNvbg==";
+    try {
+      decodeBase64Launch(payload);
+      expect(false).toBe(true); //should not reach here.
+    } catch (err) {
+      expect(err.message).toBe("Error evaluating launch");
+    }
   });
 });
 

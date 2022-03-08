@@ -226,6 +226,7 @@ describe("handleToken tests", () => {
       getPatientInfoStrategy: buildGetPatientInfoStrategy("patient"),
     });
     tokenHandlerClient.req.body.scope = "launch";
+    tokenHandlerClient.req.body.launch = "patient";
     const response = await tokenHandlerClient.handleToken();
 
     expect(tokenIssueCounter.inc).not.toHaveBeenCalled();

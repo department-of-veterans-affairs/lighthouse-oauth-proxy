@@ -28,7 +28,7 @@ describe("getDocumentByLaunchStrategy tests", () => {
     const strategy = new GetDocumentByLaunchStrategy(req);
 
     const document = await strategy.getDocument();
-    expect(document.launch).toBe(undefined);
+    expect(document.launch).toBe("");
   });
 
   it("empty request body", async () => {
@@ -44,7 +44,6 @@ describe("getDocumentByLaunchStrategy tests", () => {
   it("non-empty launch", async () => {
     const req = new MockExpressRequest({
       body: {
-        scope: "launch",
         launch: "42",
       },
     });
@@ -53,10 +52,5 @@ describe("getDocumentByLaunchStrategy tests", () => {
 
     const document = await strategy.getDocument();
     expect(document.launch).toBe("42");
-    expect(document.isLaunch).toBe(true);
-    expect(document.decodedLaunch.isError).toBe(true);
-    expect(document.decodedLaunch.errorPayload.message).toBe(
-      "The launch parameter was not base64-encoded"
-    );
   });
 });

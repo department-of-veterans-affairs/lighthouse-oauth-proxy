@@ -2,7 +2,8 @@ const { URLSearchParams, URL } = require("url");
 const { loginBegin } = require("../metrics");
 const { v4: uuidv4 } = require("uuid");
 const { addMinutes, getUnixTime } = require("date-fns");
-const { screenForV2ClientId, decodeBase64Launch } = require("../utils");
+const { screenForV2ClientId, validateBase64EncodedJson } = require("../utils");
+
 /**
  * Checks for valid authorization request and proxies to authorization server.
  *
@@ -67,6 +68,22 @@ const authorizeHandler = async (
     return next();
   }
 
+  if (
+    req.query.scope &&
+    req.query.scope.split(" ").includes("launch") &&
+    !req.query.scope.split(" ").includes("launch/patient") &&
+    req.query.launch
+  ) {
+    // Reject non b64 encoded json for with launch content
+    let launchValidation = validateBase64EncodedJson(req.query.launch);
+    if (!launchValidation) {
+      res.status(400).json({
+        error: launchValidation.error,
+        error_description: launchValidation.error_description,
+      });
+      return next();
+    }
+  }
   let paramValidation = checkParameters(state, logger);
 
   if (!paramValidation.valid) {
@@ -92,25 +109,6 @@ const authorizeHandler = async (
         config.host + config.well_known_base_path + app_category.api_category,
       aud: app_category.audience,
     };
-
-    // If the launch scope is included then also
-    // save the launch context provided (if any)
-    if (
-      req.query.scope &&
-      req.query.scope.split(" ").includes("launch") &&
-      req.query.launch
-    ) {
-      authorizePayload.launch = req.query.launch;
-      // Reject non b64 encoded json for with launch content
-      let decodedLaunch = decodeBase64Launch(authorizePayload.launch);
-      if (decodedLaunch.isError) {
-        logger.error(
-          decodedLaunch.errorPayload.message,
-          decodedLaunch.errorPayload.cause
-        );
-        return next(decodedLaunch.errorPayload.cause);
-      }
-    }
 
     await dynamoClient.savePayloadToDynamo(
       authorizePayload,

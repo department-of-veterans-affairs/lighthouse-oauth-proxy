@@ -288,10 +288,11 @@ const v2TransitionProxyRequest = async (
 };
 
 /**
- * Screens a launch value and returns its decoded value, otherwise return an error.
+ * Screens a launch value and returns its decoded value, otherwise throws an error.
  *
  * @param { string } launch The base64-encoded launch value
- * @returns Object as the decoded launch entries or an error result
+ * @returns Object as the decoded launch entries
+ * @throws { EvalError } If there is an error decoding and deriving the json object
  */
 const decodeBase64Launch = (launch) => {
   try {
@@ -300,14 +301,31 @@ const decodeBase64Launch = (launch) => {
     );
     return decodedLaunch;
   } catch (error) {
-    // launch is assumed to be a b64 encoded json structure
-    const errorPayload = {
-      message: "The launch parameter was not base64-encoded",
-      cause: minimalError(error),
-    };
+    throw new EvalError("Error evaluating launch");
+  }
+};
+
+const validateBase64Encoding = (payload) => {
+  const base64regex = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
+  return base64regex.test(payload);
+};
+
+const validateBase64EncodedJson = (payload) => {
+  if (!validateBase64Encoding(payload)) {
     return {
-      isError: true,
-      errorPayload: errorPayload,
+      valid: false,
+      error: "invalid_request",
+      error_description: "Base64-encoded value required",
+    };
+  }
+  try {
+    JSON.parse(Buffer.from(payload, "base64").toString("ascii"));
+    return { valid: true };
+  } catch (error) {
+    return {
+      valid: false,
+      error: "invalid_request",
+      error_description: "Invalid Base64-encoded JSON payload",
     };
   }
 };
@@ -327,4 +345,6 @@ module.exports = {
   appCategoryFromPath,
   v2TransitionProxyRequest,
   decodeBase64Launch,
+  validateBase64Encoding,
+  validateBase64EncodedJson,
 };

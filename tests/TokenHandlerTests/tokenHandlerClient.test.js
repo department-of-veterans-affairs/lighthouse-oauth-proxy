@@ -246,6 +246,9 @@ describe("handleToken tests", () => {
       }),
       getPatientInfoStrategy: buildGetPatientInfoStrategy("patient"),
     });
+    tokenHandlerClient.req.body.scope = "launch";
+    tokenHandlerClient.req.body.launch =
+      "ewogICJwYXRpZW50IjogIjEyMzRWNTY3OCIsCiAgImVuY291bnRlciI6ICI5ODc2LTU0MzItMTAwMCIKfQ==";
 
     let response = await tokenHandlerClient.handleToken();
 

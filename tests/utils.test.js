@@ -450,9 +450,12 @@ describe("decodeBase64Launch tests", () => {
   });
   it("decodeBase64Launch invalid", async () => {
     const payload = "bad encoding";
-    const result = decodeBase64Launch(payload);
-    expect(result.valid).toBe(false);
-    expect(result.error_description).toBe("Base64-encoded value required");
+    try {
+      decodeBase64Launch(payload);
+      expect(false).toBe(true); //should not reach here.
+    } catch (err) {
+      expect(err.message).toBe("Error evaluating launch");
+    }
   });
   it("decodeBase64Launch EvalError", async () => {
     const payload = "VG90YWxseSBub3QganNvbg==";
@@ -474,6 +477,11 @@ describe("validateBase64EncodedJson tests", () => {
   });
   it("validateBase64EncodedJson invalid", async () => {
     const payload = "bad encoding";
+    const result = validateBase64EncodedJson(payload);
+    expect(result.valid).toBe(false);
+  });
+  it("validateBase64EncodedJson invalid not json", async () => {
+    const payload = "VG90YWxseSBub3QganNvbg==";
     const result = validateBase64EncodedJson(payload);
     expect(result.valid).toBe(false);
   });

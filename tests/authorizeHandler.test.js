@@ -737,6 +737,46 @@ describe("Invalid Request", () => {
   });
 });
 
+it("Invalid launch context in request", async () => {
+  dynamoClient = mockDynamoClient({
+    client_id: "clientId123",
+    redirect_uris: { values: ["http://localhost:8080/oauth/redirect"] },
+  });
+
+  res.redirect = jest.fn();
+
+  req.query = {
+    state: "fake_state",
+    client_id: "clientId123",
+    redirect_uri: "http://localhost:8080/oauth/redirect",
+    scope: "launch",
+    launch: "Invalid launch",
+  };
+  api_category.client_store = "local";
+
+  await authorizeHandler(
+    redirect_uri,
+    logger,
+    issuer,
+    dynamoClient,
+    oktaClient,
+    mockSlugHelper,
+    api_category,
+    config,
+    req,
+    res,
+    next
+  );
+
+  expect(res.statusCode).toEqual(400);
+  expect(res.json).toHaveBeenCalledWith({
+    error: "invalid_request",
+    error_description: "Base64-encoded value required",
+  });
+  expect(next).toHaveBeenCalled();
+  expect(res.redirect).not.toHaveBeenCalled();
+});
+
 describe("Server Error", () => {
   it("Error on save to dynamo", async () => {
     dynamoClient.savePayloadToDynamo = jest.fn().mockImplementation(() => {

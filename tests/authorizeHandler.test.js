@@ -771,7 +771,7 @@ it("Invalid launch context in request", async () => {
   expect(res.statusCode).toEqual(400);
   expect(res.json).toHaveBeenCalledWith({
     error: "invalid_request",
-    error_description: "Base64-encoded value required",
+    error_description: "Bad request.",
   });
   expect(next).toHaveBeenCalled();
   expect(res.redirect).not.toHaveBeenCalled();

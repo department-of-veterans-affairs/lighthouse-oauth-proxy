@@ -77,9 +77,10 @@ const authorizeHandler = async (
     // Reject non b64 encoded json for with launch content
     let launchValidation = validateBase64EncodedJson(req.query.launch);
     if (!launchValidation.valid) {
+      logger.error(launchValidation.error_description);
       res.status(400).json({
-        error: launchValidation.error,
-        error_description: launchValidation.error_description,
+        error: "invalid_request",
+        error_description: "Bad request.",
       });
       return next();
     }

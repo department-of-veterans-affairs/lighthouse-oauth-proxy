@@ -71,8 +71,7 @@ const authorizeHandler = async (
   if (
     req.query.scope &&
     req.query.scope.split(" ").includes("launch") &&
-    !req.query.scope.split(" ").includes("launch/patient") &&
-    req.query.launch
+    !req.query.scope.split(" ").includes("launch/patient")
   ) {
     // Reject non b64 encoded json for with launch content
     let launchValidation = validateBase64EncodedJson(req.query.launch);

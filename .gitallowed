@@ -19,6 +19,5 @@ okta_token:\s{$
 accessKeyId: "NONE"
 secretAccessKey: "NONE"
 "client_id=clientIdv2"
-
 AWS_ACCESS_KEY_ID=NONE
 AWS_SECRET_ACCESS_KEY=NONE

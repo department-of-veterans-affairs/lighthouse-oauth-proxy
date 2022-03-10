@@ -305,11 +305,21 @@ const decodeBase64Launch = (launch) => {
   }
 };
 
+/**
+ * Validates the payload as a base64 encoded string
+ * @param { string } payload The payload to validate
+ * @returns true if valid, false otherwise
+ */
 const validateBase64Encoding = (payload) => {
   const base64regex = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
   return base64regex.test(payload);
 };
 
+/**
+ * Validates the payload string as a base64 encoded json
+ * @param { string } payload The payload to validate
+ * @returns An object with validity information. The valid fields is true if valid, false otherwise.
+ */
 const validateBase64EncodedJson = (payload) => {
   if (!validateBase64Encoding(payload)) {
     return {

@@ -4,7 +4,7 @@ FROM vasdvp/lighthouse-node-application-base:node16
 ARG FWDPROXYCRT
 
 USER node
-WORKDIR /home/ca-certificates
+WORKDIR /home/node
 RUN cat /opt/octopus/ca-certificates/ca-certs.pem > ./ca-certs.pem
 
 # Wildcard can handle copy of non-existent file
@@ -55,4 +55,4 @@ ENTRYPOINT ["/usr/local/bin/tini", "--"]
 CMD ["node", "src/index.js", "--config", "/etc/oauth-proxy/config.json"]
 
 from base as deploy
-COPY --from=0 /home/ca-certificates/ca-certs.pem /opt/octopus/ca-certificates/ca-certs.pem
+COPY --from=0 /home/node/ca-certs.pem /opt/octopus/ca-certificates/ca-certs.pem

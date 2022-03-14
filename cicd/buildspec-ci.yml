@@ -33,6 +33,7 @@ phases:
       # Therefore we use our own Alpine based image. In order to activate the Docker Daemon these lines are needed.
       - /usr/bin/dockerd --host=unix:///var/run/docker.sock --host=tcp://127.0.0.1:2375 --storage-driver=overlay2 &
       - timeout 15 sh -c "until docker info; do echo .; sleep 1; done"
+      - echo debug
   pre_build:
     commands:
       # Set Start time

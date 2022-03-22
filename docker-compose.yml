@@ -27,5 +27,5 @@ services:
       - AWS_SECRET_ACCESS_KEY=NONE
       - AWS_DEFAULT_REGION=us-west-2
     volumes:
-      - .:/opt/app
-    command: "node --inspect=0.0.0.0:9229 src/index.js --config dev-config.json"
+      - ./dev-config.json:/etc/oauth-proxy/config.json
+    command: "node --inspect=0.0.0.0:9229 src/index.js --config /etc/oauth-proxy/config.json"

@@ -8,4 +8,4 @@ buildspec.yml
 node_modules
 cicd
 dist
-tests
+

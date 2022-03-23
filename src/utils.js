@@ -225,7 +225,7 @@ const screenClientForFallback = async (
 /**
  * Generates a request object used for an axios request
  *
- * @param {express.Request} req req express request object.
+ * @param {express.Request} req express request object.
  * @param {DynamoClient} dynamoClient interacts with dynamodb.
  * @param {*} config application configuration.
  * @param {*} issuer_metadata metadata for an issuer, for example, the URL to the introspection endpoint for an issuer.
@@ -234,7 +234,7 @@ const screenClientForFallback = async (
  * @param {StringifyOptions} bodyEncoder encodes a string for the body
  * @returns An object used for an axios request
  */
-const v2TransitionProxyRequest = async (
+const getProxyRequest = async (
   req,
   dynamoClient,
   config,
@@ -304,5 +304,5 @@ module.exports = {
   handleOpenIdClientError,
   screenClientForFallback,
   appCategoryFromPath,
-  v2TransitionProxyRequest,
+  getProxyRequest,
 };

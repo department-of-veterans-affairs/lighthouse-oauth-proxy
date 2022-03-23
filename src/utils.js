@@ -170,16 +170,21 @@ const appCategoryFromPath = (path, routes) => {
 };
 
 /**
- * Screens the client id and replaces it with its version 2 equivalent if applicable.
+ * Screens the client id and determines if the fallback issuer should be used
  *
  * @param {string} client_id client id to screen for version 2 equivalent
  * @param {DynamoClient} dynamoClient interacts with dynamodb.
  * @param {*} config application configuration.
  * @param {string} path  path in the request.
- * @returns An object with either the original client ID or its version 2 equivalent,
- *  as well as an object with old issuer app_category data when there is no version 2 client id.
+ * @returns An object with the original client ID,
+ *  as well as an object with old issuer app_category data when there is no db instance of the client.
  */
-const screenForV2ClientId = async (client_id, dynamoClient, config, path) => {
+const screenClientForFallback = async (
+  client_id,
+  dynamoClient,
+  config,
+  path
+) => {
   let v2transitional = { client_id: client_id };
   const apiCategory =
     config && config.routes ? appCategoryFromPath(path, config.routes) : null;
@@ -243,7 +248,7 @@ const v2TransitionProxyRequest = async (
   let v2TransitionData = {};
   let destinationUrl = issuer_metadata[metadata_type];
   if (req.body && req.body.client_id) {
-    v2TransitionData = await screenForV2ClientId(
+    v2TransitionData = await screenClientForFallback(
       req.body.client_id,
       dynamoClient,
       config,
@@ -298,7 +303,7 @@ module.exports = {
   parseBearerAuthorization,
   minimalError,
   handleOpenIdClientError,
-  screenForV2ClientId,
+  screenClientForFallback,
   appCategoryFromPath,
   v2TransitionProxyRequest,
 };

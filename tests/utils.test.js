@@ -11,7 +11,7 @@ const {
   hashString,
   minimalError,
   handleOpenIdClientError,
-  screenForV2ClientId,
+  screenClientForFallback,
   appCategoryFromPath,
   v2TransitionProxyRequest,
 } = require("../src/utils");
@@ -346,13 +346,13 @@ const app_routes = {
 
 const config = { routes: { categories: categories, app_routes: app_routes } };
 
-describe("screenForV2ClientId tests", () => {
+describe("screenClientForFallback tests", () => {
   const dynamoClient = {};
   dynamoClient.getPayloadFromDynamo = jest.fn();
-  it("screenForV2ClientId happy v2", async () => {
+  it("screenClientForFallback happy v2", async () => {
     const v2val = { Item: { v2_client_id: "clientIdv2" } };
     dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
-    const result = await screenForV2ClientId(
+    const result = await screenClientForFallback(
       "clientId",
       dynamoClient,
       config,
@@ -360,10 +360,10 @@ describe("screenForV2ClientId tests", () => {
     );
     expect(result.client_id).toBe("clientIdv2");
   });
-  it("screenForV2ClientId happy v1 2", async () => {
+  it("screenClientForFallback happy v1 2", async () => {
     let v2val = {};
     dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
-    let result = await screenForV2ClientId(
+    let result = await screenClientForFallback(
       "clientId",
       dynamoClient,
       config,
@@ -372,7 +372,7 @@ describe("screenForV2ClientId tests", () => {
     expect(result.client_id).toBe("clientId");
     v2val = { Item: { something: "xxxx" } };
     dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
-    result = await screenForV2ClientId(
+    result = await screenClientForFallback(
       "clientId",
       dynamoClient,
       config,
@@ -380,10 +380,10 @@ describe("screenForV2ClientId tests", () => {
     );
     expect(result.client_id).toBe("clientId");
   });
-  it("screenForV2ClientId mapping not applicable", async () => {
+  it("screenClientForFallback mapping not applicable", async () => {
     const v2val = { Item: { v2_client_id: "clientIdv2" } };
     dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
-    const result = await screenForV2ClientId(
+    const result = await screenClientForFallback(
       "clientId",
       dynamoClient,
       config,

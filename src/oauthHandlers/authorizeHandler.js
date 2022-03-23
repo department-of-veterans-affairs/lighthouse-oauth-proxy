@@ -2,7 +2,7 @@ const { URLSearchParams, URL } = require("url");
 const { loginBegin } = require("../metrics");
 const { v4: uuidv4 } = require("uuid");
 const { addMinutes, getUnixTime } = require("date-fns");
-const { screenForV2ClientId } = require("../utils");
+const { screenClientForFallback } = require("../utils");
 /**
  * Checks for valid authorization request and proxies to authorization server.
  *
@@ -33,7 +33,7 @@ const authorizeHandler = async (
 ) => {
   loginBegin.inc();
   const { state, client_id, redirect_uri: client_redirect } = req.query;
-  let v2TransitionData = await screenForV2ClientId(
+  let v2TransitionData = await screenClientForFallback(
     client_id,
     dynamoClient,
     config,

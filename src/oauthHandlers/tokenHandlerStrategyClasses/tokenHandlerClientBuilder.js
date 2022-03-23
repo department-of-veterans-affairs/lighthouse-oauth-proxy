@@ -32,7 +32,7 @@ const {
 const {
   GetPatientInfoFromLaunchStrategy,
 } = require("./getPatientInfoStrategies/getPatientInfoFromLaunchStrategy");
-const { parseBasicAuth, screenForV2ClientId } = require("../../utils");
+const { parseBasicAuth, screenClientForFallback } = require("../../utils");
 const {
   codeTokenIssueCounter,
   refreshTokenIssueCounter,
@@ -271,7 +271,7 @@ async function createClientMetadata(
       error_description: "Client authentication failed",
     };
   }
-  const v2transitiondata = await screenForV2ClientId(
+  const v2transitiondata = await screenClientForFallback(
     clientMetadata.client_id,
     dynamoClient,
     config,

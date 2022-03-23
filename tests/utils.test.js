@@ -13,7 +13,7 @@ const {
   handleOpenIdClientError,
   screenClientForFallback,
   appCategoryFromPath,
-  v2TransitionProxyRequest,
+  getProxyRequest,
 } = require("../src/utils");
 
 describe("statusCodeFromError", () => {
@@ -412,18 +412,18 @@ describe("appCategoryFromPath tests", () => {
   });
 });
 
-describe("v2TransitionProxyRequest tests", () => {
+describe("getProxyRequest tests", () => {
   const dynamoClient = {};
   dynamoClient.getPayloadFromDynamo = jest.fn();
-  it("v2TransitionProxyRequest positive rewrite client body", async () => {
-    const v2val = { Item: { v2_client_id: "clientIdv2" } };
+  it("getProxyRequest no fallback", async () => {
+    const v2val = { Item: { client_id: "testClient2" } };
     dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
     const req = {
       headers: { host: "localhost" },
       body: { client_id: "testClient2" },
       path: "/community-care/v1/introspect",
     };
-    const result = await v2TransitionProxyRequest(
+    const result = await getProxyRequest(
       req,
       dynamoClient,
       config,
@@ -432,7 +432,7 @@ describe("v2TransitionProxyRequest tests", () => {
       "POST",
       querystring
     );
-    expect(result.data).toBe("client_id=clientIdv2");
+    expect(result.data).toBe("client_id=testClient2");
     expect(result.url).toBe("http://example.com/introspect");
   });
 });

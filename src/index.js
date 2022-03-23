@@ -19,7 +19,7 @@ const { configureTokenValidator } = require("./tokenValidation");
 const rTracer = require("cls-rtracer");
 const { SlugHelper } = require("./slug_helper");
 const { buildIssuer } = require("./issuer_helper");
-const { v2TransitionProxyRequest, appCategoryFromPath } = require("./utils");
+const { getProxyRequest, appCategoryFromPath } = require("./utils");
 
 const openidMetadataWhitelist = [
   "issuer",
@@ -482,7 +482,7 @@ const proxyRequest = async (
   dynamoClient,
   bodyEncoder
 ) => {
-  const proxy_request = await v2TransitionProxyRequest(
+  const proxy_request = await getProxyRequest(
     req,
     dynamoClient,
     config,

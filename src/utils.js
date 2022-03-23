@@ -185,7 +185,7 @@ const screenClientForFallback = async (
   config,
   path
 ) => {
-  let v2transitional = { client_id: client_id };
+  let clientIdAndFallback = { client_id: client_id };
   const apiCategory =
     config && config.routes ? appCategoryFromPath(path, config.routes) : null;
   if (
@@ -202,25 +202,24 @@ const screenClientForFallback = async (
         dynamo_clients_table
       );
       if (clientInfo.Item) {
-        // This client is not translated and is current with this app category
-        if (clientInfo.Item.v2_client_id) {
-          v2transitional.client_id = clientInfo.Item.v2_client_id;
-        }
+        // This client is current with this app category
         // Do not use fallback in this case
-        return v2transitional;
+        return clientIdAndFallback;
       }
     } catch (err) {
       // No client entry
     }
   }
+
+  // No client entry implies that the fallback issuer is needed for the given client
   if (
-    v2transitional.client_id === client_id &&
+    clientIdAndFallback.client_id === client_id &&
     apiCategory &&
     apiCategory.fallback
   ) {
-    v2transitional.fallback = apiCategory.fallback;
+    clientIdAndFallback.fallback = apiCategory.fallback;
   }
-  return v2transitional;
+  return clientIdAndFallback;
 };
 
 /**

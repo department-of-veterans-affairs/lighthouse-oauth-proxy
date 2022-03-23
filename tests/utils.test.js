@@ -349,18 +349,7 @@ const config = { routes: { categories: categories, app_routes: app_routes } };
 describe("screenClientForFallback tests", () => {
   const dynamoClient = {};
   dynamoClient.getPayloadFromDynamo = jest.fn();
-  it("screenClientForFallback happy v2", async () => {
-    const v2val = { Item: { v2_client_id: "clientIdv2" } };
-    dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
-    const result = await screenClientForFallback(
-      "clientId",
-      dynamoClient,
-      config,
-      "/community-care/v1/token"
-    );
-    expect(result.client_id).toBe("clientIdv2");
-  });
-  it("screenClientForFallback happy v1 2", async () => {
+  it("screenClientForFallback happy", async () => {
     let v2val = {};
     dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
     let result = await screenClientForFallback(
@@ -370,6 +359,8 @@ describe("screenClientForFallback tests", () => {
       "/community-care/v1/token"
     );
     expect(result.client_id).toBe("clientId");
+    expect(result.fallback).not.toBeNull();
+    expect(result.fallback.upstream_issuer).toBe("http://whatever");
     v2val = { Item: { something: "xxxx" } };
     dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
     result = await screenClientForFallback(
@@ -379,6 +370,7 @@ describe("screenClientForFallback tests", () => {
       "/community-care/v1/token"
     );
     expect(result.client_id).toBe("clientId");
+    expect(result.fallback).toBeUndefined();
   });
   it("screenClientForFallback mapping not applicable", async () => {
     const v2val = { Item: { v2_client_id: "clientIdv2" } };

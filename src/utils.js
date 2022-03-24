@@ -258,7 +258,8 @@ const getProxyRequest = async (
       req.body.client_id === clientTransitionData.client_id &&
       clientTransitionData.fallback
     ) {
-      destinationUrl = clientTransitionData.fallback.issuer.metadata[metadata_type];
+      destinationUrl =
+        clientTransitionData.fallback.issuer.metadata[metadata_type];
     } else {
       req.body.client_id = clientTransitionData.client_id;
     }

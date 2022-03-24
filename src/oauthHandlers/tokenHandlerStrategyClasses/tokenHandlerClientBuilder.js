@@ -271,18 +271,18 @@ async function createClientMetadata(
       error_description: "Client authentication failed",
     };
   }
-  const v2transitiondata = await screenClientForFallback(
+  const clientTransitionData = await screenClientForFallback(
     clientMetadata.client_id,
     dynamoClient,
     config,
     req.path
   );
   clientMetadata.issuer =
-    v2transitiondata.client_id === clientMetadata.client_id &&
-    v2transitiondata.fallback
-      ? v2transitiondata.fallback.issuer
+    clientTransitionData.client_id === clientMetadata.client_id &&
+    clientTransitionData.fallback
+      ? clientTransitionData.fallback.issuer
       : issuer;
-  clientMetadata.client_id = v2transitiondata.client_id;
+  clientMetadata.client_id = clientTransitionData.client_id;
 
   return clientMetadata;
 }

@@ -244,10 +244,10 @@ const getProxyRequest = async (
   bodyEncoder
 ) => {
   delete req.headers.host;
-  let v2TransitionData = {};
+  let clientTransitionData = {};
   let destinationUrl = issuer_metadata[metadata_type];
   if (req.body && req.body.client_id) {
-    v2TransitionData = await screenClientForFallback(
+    clientTransitionData = await screenClientForFallback(
       req.body.client_id,
       dynamoClient,
       config,
@@ -255,12 +255,12 @@ const getProxyRequest = async (
     );
     // Since there is no distinct v2 client id proxy to the appropriate fallback url
     if (
-      req.body.client_id === v2TransitionData.client_id &&
-      v2TransitionData.fallback
+      req.body.client_id === clientTransitionData.client_id &&
+      clientTransitionData.fallback
     ) {
-      destinationUrl = v2TransitionData.fallback.issuer.metadata[metadata_type];
+      destinationUrl = clientTransitionData.fallback.issuer.metadata[metadata_type];
     } else {
-      req.body.client_id = v2TransitionData.client_id;
+      req.body.client_id = clientTransitionData.client_id;
     }
   }
   req.destinationUrl = destinationUrl;

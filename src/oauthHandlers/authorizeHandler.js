@@ -33,20 +33,20 @@ const authorizeHandler = async (
 ) => {
   loginBegin.inc();
   const { state, client_id, redirect_uri: client_redirect } = req.query;
-  let v2TransitionData = await screenClientForFallback(
+  let clientTransitionData = await screenClientForFallback(
     client_id,
     dynamoClient,
     config,
     req.path
   );
   let okta_client = oktaClient;
-  const screenedClientId = v2TransitionData.client_id;
+  const screenedClientId = clientTransitionData.client_id;
   let issuer_data = issuer;
   let client_validation_app_category = app_category;
-  if (v2TransitionData.fallback) {
-    issuer_data = v2TransitionData.fallback.issuer;
+  if (clientTransitionData.fallback) {
+    issuer_data = clientTransitionData.fallback.issuer;
     okta_client = app_category.fallback.okta_client;
-    client_validation_app_category = v2TransitionData.fallback;
+    client_validation_app_category = clientTransitionData.fallback;
   }
 
   let clientValidation = await validateClient(

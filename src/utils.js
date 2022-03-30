@@ -211,13 +211,10 @@ const screenClientForFallback = async (
   }
 
   // No client entry implies that the fallback issuer is needed for the given client
-  if (
-    apiCategory &&
-    apiCategory.fallback
-  ) {
-    clientIdAndFallback.fallback = apiCategory.fallback;
+  if (apiCategory && apiCategory.fallback) {
+    return { fallback: apiCategory.fallback, client_id: client_id };
   }
-  return clientIdAndFallback;
+  return { client_id: client_id };
 };
 
 /**

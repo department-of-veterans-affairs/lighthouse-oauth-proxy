@@ -11,6 +11,16 @@ const ISSUER_METADATA = {
   issuer: "http://example.com/issuer",
 };
 
+const FALLBACK_ISSUER_METADATA = {
+  authorization_endpoint: "http://fallback.com/authorization",
+  token_endpoint: "http://fallback.com/token",
+  userinfo_endpoint: "http://fallback.com/userinfo",
+  introspection_endpoint: "http://fallback.com/introspect",
+  revocation_endpoint: "http://fallback.com/revoke",
+  jwks_uri: "http://fallback.com/keys",
+  issuer: "http://fallback.com/issuer",
+};
+
 function buildDynamoAttributeValue(value) {
   // BEWARE: This doesn't work with number sets and a few other Dynamo types.
   if (value.constructor === String) {
@@ -429,4 +439,5 @@ module.exports = {
   jwtEncodeClaims,
   createFakeHashingFunction,
   ISSUER_METADATA,
+  FALLBACK_ISSUER_METADATA,
 };

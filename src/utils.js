@@ -248,11 +248,7 @@ const getProxyRequest = async (
       config,
       req.path
     );
-    // Since there is no distinct v2 client id proxy to the appropriate fallback url
-    if (
-      req.body.client_id === clientTransitionData.client_id &&
-      clientTransitionData.fallback
-    ) {
+    if (clientTransitionData.fallback) {
       destinationUrl =
         clientTransitionData.fallback.issuer.metadata[metadata_type];
     } else {

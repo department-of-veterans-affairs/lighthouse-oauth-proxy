@@ -1,7 +1,7 @@
 "use strict";
 const querystring = require("querystring");
 require("jest");
-const { ISSUER_METADATA } = require("./testUtils");
+const { ISSUER_METADATA, FALLBACK_ISSUER_METADATA } = require("./testUtils");
 
 const {
   statusCodeFromError,
@@ -322,7 +322,10 @@ const categories = [
   {
     api_category: "/community-care/v1",
     audience: "api://default",
-    fallback: { upstream_issuer: "http://whatever" },
+    fallback: {
+      upstream_issuer: "http://whatever",
+      issuer: { metadata: FALLBACK_ISSUER_METADATA },
+    },
   },
   {
     api_category: "/health/v1",
@@ -426,5 +429,25 @@ describe("getProxyRequest tests", () => {
     );
     expect(result.data).toBe("client_id=testClient2");
     expect(result.url).toBe("http://example.com/introspect");
+  });
+  it("getProxyRequest with fallback", async () => {
+    const v2val = {};
+    dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
+    const req = {
+      headers: { host: "localhost" },
+      body: { client_id: "testClient2" },
+      path: "/community-care/v1/introspect",
+    };
+    const result = await getProxyRequest(
+      req,
+      dynamoClient,
+      config,
+      ISSUER_METADATA,
+      "introspection_endpoint",
+      "POST",
+      querystring
+    );
+    expect(result.data).toBe("client_id=testClient2");
+    expect(result.url).toBe("http://fallback.com/introspect");
   });
 });

@@ -187,6 +187,7 @@ const screenClientForFallback = async (
 ) => {
   const apiCategory =
     config && config.routes ? appCategoryFromPath(path, config.routes) : null;
+  let clientInfo;
   if (
     apiCategory &&
     apiCategory.fallback &&
@@ -194,24 +195,23 @@ const screenClientForFallback = async (
   ) {
     try {
       const dynamo_clients_table = config.dynamo_clients_table;
-      let clientInfo = await dynamoClient.getPayloadFromDynamo(
+      clientInfo = await dynamoClient.getPayloadFromDynamo(
         {
           client_id: client_id,
         },
         dynamo_clients_table
       );
-      if (clientInfo.Item) {
-        // This client is current with this app category
-        // Do not use fallback in this case
-        return { client_id: client_id };
-      }
     } catch (err) {
       // No client entry
     }
   }
 
   // No client entry implies that the fallback issuer is needed for the given client
-  if (apiCategory && apiCategory.fallback) {
+  if (
+    !clientInfo ||
+    !clientInfo.Item ||
+    (apiCategory && apiCategory.fallback)
+  ) {
     return { fallback: apiCategory.fallback, client_id: client_id };
   }
   return { client_id: client_id };

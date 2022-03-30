@@ -185,7 +185,6 @@ const screenClientForFallback = async (
   config,
   path
 ) => {
-  let clientIdAndFallback = { client_id: client_id };
   const apiCategory =
     config && config.routes ? appCategoryFromPath(path, config.routes) : null;
   if (
@@ -204,7 +203,7 @@ const screenClientForFallback = async (
       if (clientInfo.Item) {
         // This client is current with this app category
         // Do not use fallback in this case
-        return clientIdAndFallback;
+        return { client_id: client_id };
       }
     } catch (err) {
       // No client entry
@@ -213,7 +212,6 @@ const screenClientForFallback = async (
 
   // No client entry implies that the fallback issuer is needed for the given client
   if (
-    clientIdAndFallback.client_id === client_id &&
     apiCategory &&
     apiCategory.fallback
   ) {

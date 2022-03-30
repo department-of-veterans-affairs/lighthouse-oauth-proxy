@@ -103,6 +103,7 @@ regression:
 		--cc-client-secret=$(CC_CLIENT_SECRET) \
 		--pkce-auth-server=$(PKCE_AUTH_SERVER) \
 		--pkce-client-id=$(PKCE_CLIENT_ID) \
+		--pkce-client-id-to-translate=$(PKCE_CLIENT_ID_TO_TRANSLATE) \
 		--host=$(HOST)
 
 ## pull: 	Pull an image to ECR

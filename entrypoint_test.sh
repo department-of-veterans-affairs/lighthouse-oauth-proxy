@@ -58,6 +58,8 @@ case $i in
       export CC_CLIENT_ID="${i#*=}"; shift ;;
     --cc-client-secret*)
       export CC_CLIENT_SECRET="${i#*=}"; shift ;;
+    --pkce-client-id-to-translate*)
+      export PKCE_CLIENT_ID_TO_TRANSLATE="${i#*=}"; shift ;;
     --pkce-client-id*)
       export PKCE_CLIENT_ID="${i#*=}"; shift ;;
     --pkce-auth-server*)

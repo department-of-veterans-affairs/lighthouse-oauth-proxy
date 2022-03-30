@@ -16,6 +16,7 @@ Example
   export CC_CLIENT_SECRET={{ client secret }}
   export PKCE_AUTH_SERVER=https://sandbox-api.va.gov/oauth2/health/internal/v1
   export PKCE_CLIENT_ID={{pkce-enabled client id }}
+  export PKCE_CLIENT_ID_TO_TRANSLATE={{client id to translate}}
 
   ./regression_tests.sh [--test-issued]
 EOF
@@ -243,6 +244,13 @@ status=$(($status + $?))
 if [ ! -z "$TEST_ISSUED" ]; then
   echo "Running Issued Tests ..."
   HOST="$HOST" TOKEN_FILE="$token_file" STATIC_ACCESS_TOKEN="$STATIC_ACCESS_TOKEN" bats "$DIR"/issued_tests.bats
+  status=$(($status + $?))
+fi
+
+if [ ! -z "$PKCE_CLIENT_ID_TO_TRANSLATE" ]; then
+  echo "Running PKCE Client V2 transition Tests ..."
+  pkce_token_payload=$(tokan_payload_pkce $PKCE_CLIENT_ID_TO_TRANSLATE)
+  TOKEN_PAYLOAD="$pkce_token_payload" PKCE_CLIENT_ID="$PKCE_CLIENT_ID_TO_TRANSLATE" bats ./token_tests_pkce.bats
   status=$(($status + $?))
 fi
 

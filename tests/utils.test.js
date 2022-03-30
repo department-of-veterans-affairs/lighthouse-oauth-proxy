@@ -350,8 +350,7 @@ describe("screenClientForFallback tests", () => {
   const dynamoClient = {};
   dynamoClient.getPayloadFromDynamo = jest.fn();
   it("screenClientForFallback happy", async () => {
-    let v2val = {};
-    dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
+    dynamoClient.getPayloadFromDynamo.mockReturnValueOnce({});
     let result = await screenClientForFallback(
       "clientId",
       dynamoClient,
@@ -361,8 +360,9 @@ describe("screenClientForFallback tests", () => {
     expect(result.client_id).toBe("clientId");
     expect(result.fallback).not.toBeNull();
     expect(result.fallback.upstream_issuer).toBe("http://whatever");
-    v2val = { Item: { something: "xxxx" } };
-    dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
+    dynamoClient.getPayloadFromDynamo.mockReturnValue({
+      Item: { something: "xxxx" },
+    });
     result = await screenClientForFallback(
       "clientId",
       dynamoClient,

@@ -239,20 +239,20 @@ const getProxyRequest = async (
   bodyEncoder
 ) => {
   delete req.headers.host;
-  let clientTransitionData = {};
+  let screenedClient = {};
   let destinationUrl = issuer_metadata[metadata_type];
   if (req.body && req.body.client_id) {
-    clientTransitionData = await screenClientForFallback(
+    screenedClient = await screenClientForFallback(
       req.body.client_id,
       dynamoClient,
       config,
       req.path
     );
-    if (clientTransitionData.fallback) {
+    if (screenedClient.fallback) {
       destinationUrl =
-        clientTransitionData.fallback.issuer.metadata[metadata_type];
+        screenedClient.fallback.issuer.metadata[metadata_type];
     } else {
-      req.body.client_id = clientTransitionData.client_id;
+      req.body.client_id = screenedClient.client_id;
     }
   }
   req.destinationUrl = destinationUrl;

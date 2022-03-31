@@ -248,7 +248,7 @@ if [ ! -z "$TEST_ISSUED" ]; then
 fi
 
 if [ ! -z "$PKCE_CLIENT_ID_TO_SCREEN" ]; then
-  echo "Running PKCE Client Fallback Issuer Tests ..."
+  echo "Testing PKCE Client using Fallback Issuer ..."
   pkce_token_payload=$(tokan_payload_pkce $PKCE_CLIENT_ID_TO_SCREEN)
   TOKEN_PAYLOAD="$pkce_token_payload" PKCE_CLIENT_ID="$PKCE_CLIENT_ID_TO_SCREEN" bats ./token_tests_pkce.bats
   status=$(($status + $?))

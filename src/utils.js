@@ -249,8 +249,7 @@ const getProxyRequest = async (
       req.path
     );
     if (screenedClient.fallback) {
-      destinationUrl =
-        screenedClient.fallback.issuer.metadata[metadata_type];
+      destinationUrl = screenedClient.fallback.issuer.metadata[metadata_type];
     } else {
       req.body.client_id = screenedClient.client_id;
     }

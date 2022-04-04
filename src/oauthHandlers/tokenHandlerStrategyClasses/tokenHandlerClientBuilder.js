@@ -277,11 +277,9 @@ async function createClientMetadata(
     config,
     req.path
   );
-  clientMetadata.issuer =
-    screenedClient.client_id === clientMetadata.client_id &&
-    screenedClient.fallback
-      ? screenedClient.fallback.issuer
-      : issuer;
+  clientMetadata.issuer = screenedClient.fallback
+    ? screenedClient.fallback.issuer
+    : issuer;
   clientMetadata.client_id = screenedClient.client_id;
 
   return clientMetadata;

@@ -16,7 +16,7 @@ Example
   export CC_CLIENT_SECRET={{ client secret }}
   export PKCE_AUTH_SERVER=https://sandbox-api.va.gov/oauth2/health/internal/v1
   export PKCE_CLIENT_ID={{pkce-enabled client id }}
-  export PKCE_CLIENT_ID_TO_SCREEN=={{client id to screen for fallback issuer}}
+  export PKCE_CLIENT_ID_TO_SCREEN={{client id to screen for fallback issuer}}
 
   ./regression_tests.sh [--test-issued]
 EOF

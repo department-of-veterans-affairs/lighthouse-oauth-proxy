@@ -204,16 +204,12 @@ const screenClientForFallback = async (
     } catch (err) {
       // No client entry
     }
+    // No client entry implies that the fallback issuer is needed for the given client
+    if (!clientInfo || !clientInfo.Item) {
+      return { fallback: apiCategory.fallback, client_id: client_id };
+    }
   }
 
-  // No client entry implies that the fallback issuer is needed for the given client
-  if (
-    (!clientInfo || !clientInfo.Item) &&
-    apiCategory &&
-    apiCategory.fallback
-  ) {
-    return { fallback: apiCategory.fallback, client_id: client_id };
-  }
   return { client_id: client_id };
 };
 

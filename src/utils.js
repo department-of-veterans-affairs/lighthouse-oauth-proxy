@@ -187,12 +187,12 @@ const screenClientForFallback = async (
 ) => {
   const apiCategory =
     config && config.routes ? appCategoryFromPath(path, config.routes) : null;
-  let clientInfo;
   if (
     apiCategory &&
     apiCategory.fallback &&
     apiCategory.fallback.upstream_issuer
   ) {
+    let clientInfo;
     try {
       const dynamo_clients_table = config.dynamo_clients_table;
       clientInfo = await dynamoClient.getPayloadFromDynamo(

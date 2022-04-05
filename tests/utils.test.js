@@ -360,9 +360,8 @@ describe("screenClientForFallback tests", () => {
       config,
       "/community-care/v1/token"
     );
-    expect(result.client_id).toBe("clientId");
-    expect(result.fallback).not.toBeNull();
-    expect(result.fallback.upstream_issuer).toBe("http://whatever");
+    expect(result).not.toBeNull();
+    expect(result.upstream_issuer).toBe("http://whatever");
     dynamoClient.getPayloadFromDynamo.mockReturnValue({
       Item: { something: "xxxx" },
     });
@@ -372,8 +371,7 @@ describe("screenClientForFallback tests", () => {
       config,
       "/community-care/v1/token"
     );
-    expect(result.client_id).toBe("clientId");
-    expect(result.fallback).toBeUndefined();
+    expect(result).toBeUndefined();
   });
   it("screenClientForFallback mapping not applicable", async () => {
     const v2val = { Item: { v2_client_id: "clientIdv2" } };
@@ -384,7 +382,7 @@ describe("screenClientForFallback tests", () => {
       config,
       "/health/v1/token"
     );
-    expect(result.client_id).toBe("clientId");
+    expect(result).toBeUndefined();
   });
 });
 

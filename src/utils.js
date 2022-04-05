@@ -176,8 +176,7 @@ const appCategoryFromPath = (path, routes) => {
  * @param {DynamoClient} dynamoClient interacts with dynamodb.
  * @param {*} config application configuration.
  * @param {string} path  path in the request.
- * @returns An object with the original client ID,
- *  as well as an object with old issuer app_category data when there is no db instance of the client.
+ * @returns An object with the fallback data if applicable, otherwise undefined.
  */
 const screenClientForFallback = async (
   client_id,

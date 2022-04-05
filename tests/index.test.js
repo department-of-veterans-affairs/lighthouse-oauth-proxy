@@ -17,13 +17,13 @@ describe("proxymockin_request tests", () => {
     path: "/health/v1/introspect",
   };
   jest.mock("../src/utils", () => ({
-    v2TransitionProxyRequest: () => Promise.resolve(mock_in_req),
+    getProxyRequest: () => Promise.resolve(mock_in_req),
     appCategoryFromPath: () => Promise.resolve(mock_app_category),
   }));
   // Don't alter req config.routes.categories[0];
   it("proxymockin_request introspect", async () => {
     jest.mock("../src/utils", () => ({
-      v2TransitionProxyRequest: () => Promise.resolve(mock_in_req),
+      getProxyRequest: () => Promise.resolve(mock_in_req),
       appCategoryFromPath: () => Promise.resolve(mock_app_category),
     }));
     const mock_result = {
@@ -87,7 +87,7 @@ describe("proxymockin_request tests", () => {
   });
   it("proxymockin_request bad", async () => {
     jest.mock("../src/utils", () => ({
-      v2TransitionProxyRequest: () => Promise.resolve(mock_in_req),
+      getProxyRequest: () => Promise.resolve(mock_in_req),
       appCategoryFromPath: () => mock_app_category,
     }));
     const promise2check404 = (res) => {
@@ -147,7 +147,7 @@ describe("proxymockin_request tests", () => {
 
   it("proxymockin_first request bad so use old issuer", async () => {
     jest.mock("../src/utils", () => ({
-      v2TransitionProxyRequest: () => Promise.resolve(mock_in_req),
+      getProxyRequest: () => Promise.resolve(mock_in_req),
       appCategoryFromPath: () => mock_app_category,
     }));
     const mock_result = {

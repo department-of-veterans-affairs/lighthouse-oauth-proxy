@@ -32,7 +32,7 @@ const {
 const {
   GetPatientInfoFromLaunchStrategy,
 } = require("./getPatientInfoStrategies/getPatientInfoFromLaunchStrategy");
-const { parseBasicAuth, screenForV2ClientId } = require("../../utils");
+const { parseBasicAuth, screenClientForFallback } = require("../../utils");
 const {
   codeTokenIssueCounter,
   refreshTokenIssueCounter,
@@ -271,18 +271,13 @@ async function createClientMetadata(
       error_description: "Client authentication failed",
     };
   }
-  const v2transitiondata = await screenForV2ClientId(
+  const fallback = await screenClientForFallback(
     clientMetadata.client_id,
     dynamoClient,
     config,
     req.path
   );
-  clientMetadata.issuer =
-    v2transitiondata.client_id === clientMetadata.client_id &&
-    v2transitiondata.fallback
-      ? v2transitiondata.fallback.issuer
-      : issuer;
-  clientMetadata.client_id = v2transitiondata.client_id;
+  clientMetadata.issuer = fallback ? fallback.issuer : issuer;
 
   return clientMetadata;
 }

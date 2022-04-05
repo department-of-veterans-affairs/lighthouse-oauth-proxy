@@ -1,7 +1,7 @@
 "use strict";
 const querystring = require("querystring");
 require("jest");
-const { ISSUER_METADATA } = require("./testUtils");
+const { ISSUER_METADATA, FALLBACK_ISSUER_METADATA } = require("./testUtils");
 
 const {
   statusCodeFromError,
@@ -11,9 +11,9 @@ const {
   hashString,
   minimalError,
   handleOpenIdClientError,
-  screenForV2ClientId,
+  screenClientForFallback,
   appCategoryFromPath,
-  v2TransitionProxyRequest,
+  getProxyRequest,
 } = require("../src/utils");
 
 describe("statusCodeFromError", () => {
@@ -322,7 +322,10 @@ const categories = [
   {
     api_category: "/community-care/v1",
     audience: "api://default",
-    fallback: { upstream_issuer: "http://whatever" },
+    fallback: {
+      upstream_issuer: "http://whatever",
+      issuer: { metadata: FALLBACK_ISSUER_METADATA },
+    },
   },
   {
     api_category: "/health/v1",
@@ -346,50 +349,40 @@ const app_routes = {
 
 const config = { routes: { categories: categories, app_routes: app_routes } };
 
-describe("screenForV2ClientId tests", () => {
+describe("screenClientForFallback tests", () => {
   const dynamoClient = {};
   dynamoClient.getPayloadFromDynamo = jest.fn();
-  it("screenForV2ClientId happy v2", async () => {
+  it("screenClientForFallback happy", async () => {
+    dynamoClient.getPayloadFromDynamo.mockReturnValueOnce({});
+    let result = await screenClientForFallback(
+      "clientId",
+      dynamoClient,
+      config,
+      "/community-care/v1/token"
+    );
+    expect(result).not.toBeNull();
+    expect(result.upstream_issuer).toBe("http://whatever");
+    dynamoClient.getPayloadFromDynamo.mockReturnValue({
+      Item: { something: "xxxx" },
+    });
+    result = await screenClientForFallback(
+      "clientId",
+      dynamoClient,
+      config,
+      "/community-care/v1/token"
+    );
+    expect(result).toBeUndefined();
+  });
+  it("screenClientForFallback mapping not applicable", async () => {
     const v2val = { Item: { v2_client_id: "clientIdv2" } };
     dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
-    const result = await screenForV2ClientId(
-      "clientId",
-      dynamoClient,
-      config,
-      "/community-care/v1/token"
-    );
-    expect(result.client_id).toBe("clientIdv2");
-  });
-  it("screenForV2ClientId happy v1 2", async () => {
-    let v2val = {};
-    dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
-    let result = await screenForV2ClientId(
-      "clientId",
-      dynamoClient,
-      config,
-      "/community-care/v1/token"
-    );
-    expect(result.client_id).toBe("clientId");
-    v2val = { Item: { something: "xxxx" } };
-    dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
-    result = await screenForV2ClientId(
-      "clientId",
-      dynamoClient,
-      config,
-      "/community-care/v1/token"
-    );
-    expect(result.client_id).toBe("clientId");
-  });
-  it("screenForV2ClientId mapping not applicable", async () => {
-    const v2val = { Item: { v2_client_id: "clientIdv2" } };
-    dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
-    const result = await screenForV2ClientId(
+    const result = await screenClientForFallback(
       "clientId",
       dynamoClient,
       config,
       "/health/v1/token"
     );
-    expect(result.client_id).toBe("clientId");
+    expect(result).toBeUndefined();
   });
 });
 
@@ -412,18 +405,18 @@ describe("appCategoryFromPath tests", () => {
   });
 });
 
-describe("v2TransitionProxyRequest tests", () => {
+describe("getProxyRequest tests", () => {
   const dynamoClient = {};
   dynamoClient.getPayloadFromDynamo = jest.fn();
-  it("v2TransitionProxyRequest positive rewrite client body", async () => {
-    const v2val = { Item: { v2_client_id: "clientIdv2" } };
+  it("getProxyRequest no fallback", async () => {
+    const v2val = { Item: { client_id: "testClient2" } };
     dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
     const req = {
       headers: { host: "localhost" },
       body: { client_id: "testClient2" },
       path: "/community-care/v1/introspect",
     };
-    const result = await v2TransitionProxyRequest(
+    const result = await getProxyRequest(
       req,
       dynamoClient,
       config,
@@ -432,7 +425,27 @@ describe("v2TransitionProxyRequest tests", () => {
       "POST",
       querystring
     );
-    expect(result.data).toBe("client_id=clientIdv2");
+    expect(result.data).toBe("client_id=testClient2");
     expect(result.url).toBe("http://example.com/introspect");
+  });
+  it("getProxyRequest with fallback", async () => {
+    const v2val = {};
+    dynamoClient.getPayloadFromDynamo.mockReturnValue(v2val);
+    const req = {
+      headers: { host: "localhost" },
+      body: { client_id: "testClient2" },
+      path: "/community-care/v1/introspect",
+    };
+    const result = await getProxyRequest(
+      req,
+      dynamoClient,
+      config,
+      ISSUER_METADATA,
+      "introspection_endpoint",
+      "POST",
+      querystring
+    );
+    expect(result.data).toBe("client_id=testClient2");
+    expect(result.url).toBe("http://fallback.com/introspect");
   });
 });

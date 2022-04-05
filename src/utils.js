@@ -170,17 +170,20 @@ const appCategoryFromPath = (path, routes) => {
 };
 
 /**
- * Screens the client id and replaces it with its version 2 equivalent if applicable.
+ * Screens the client id and determines if the fallback issuer should be used
  *
  * @param {string} client_id client id to screen for version 2 equivalent
  * @param {DynamoClient} dynamoClient interacts with dynamodb.
  * @param {*} config application configuration.
  * @param {string} path  path in the request.
- * @returns An object with either the original client ID or its version 2 equivalent,
- *  as well as an object with old issuer app_category data when there is no version 2 client id.
+ * @returns An object with the fallback data if applicable, otherwise undefined.
  */
-const screenForV2ClientId = async (client_id, dynamoClient, config, path) => {
-  let v2transitional = { client_id: client_id };
+const screenClientForFallback = async (
+  client_id,
+  dynamoClient,
+  config,
+  path
+) => {
   const apiCategory =
     config && config.routes ? appCategoryFromPath(path, config.routes) : null;
   if (
@@ -188,40 +191,31 @@ const screenForV2ClientId = async (client_id, dynamoClient, config, path) => {
     apiCategory.fallback &&
     apiCategory.fallback.upstream_issuer
   ) {
+    let clientInfo;
     try {
       const dynamo_clients_table = config.dynamo_clients_table;
-      let clientInfo = await dynamoClient.getPayloadFromDynamo(
+      clientInfo = await dynamoClient.getPayloadFromDynamo(
         {
           client_id: client_id,
         },
         dynamo_clients_table
       );
-      if (clientInfo.Item) {
-        // This client is not translated and is current with this app category
-        if (clientInfo.Item.v2_client_id) {
-          v2transitional.client_id = clientInfo.Item.v2_client_id;
-        }
-        // Do not use fallback in this case
-        return v2transitional;
-      }
     } catch (err) {
       // No client entry
     }
+    // No client entry implies that the fallback issuer is needed for the given client
+    if (!clientInfo || !clientInfo.Item) {
+      return apiCategory.fallback;
+    }
   }
-  if (
-    v2transitional.client_id === client_id &&
-    apiCategory &&
-    apiCategory.fallback
-  ) {
-    v2transitional.fallback = apiCategory.fallback;
-  }
-  return v2transitional;
+
+  return undefined;
 };
 
 /**
  * Generates a request object used for an axios request
  *
- * @param {express.Request} req req express request object.
+ * @param {express.Request} req express request object.
  * @param {DynamoClient} dynamoClient interacts with dynamodb.
  * @param {*} config application configuration.
  * @param {*} issuer_metadata metadata for an issuer, for example, the URL to the introspection endpoint for an issuer.
@@ -230,7 +224,7 @@ const screenForV2ClientId = async (client_id, dynamoClient, config, path) => {
  * @param {StringifyOptions} bodyEncoder encodes a string for the body
  * @returns An object used for an axios request
  */
-const v2TransitionProxyRequest = async (
+const getProxyRequest = async (
   req,
   dynamoClient,
   config,
@@ -240,23 +234,17 @@ const v2TransitionProxyRequest = async (
   bodyEncoder
 ) => {
   delete req.headers.host;
-  let v2TransitionData = {};
+  let fallback;
   let destinationUrl = issuer_metadata[metadata_type];
   if (req.body && req.body.client_id) {
-    v2TransitionData = await screenForV2ClientId(
+    fallback = await screenClientForFallback(
       req.body.client_id,
       dynamoClient,
       config,
       req.path
     );
-    // Since there is no distinct v2 client id proxy to the appropriate fallback url
-    if (
-      req.body.client_id === v2TransitionData.client_id &&
-      v2TransitionData.fallback
-    ) {
-      destinationUrl = v2TransitionData.fallback.issuer.metadata[metadata_type];
-    } else {
-      req.body.client_id = v2TransitionData.client_id;
+    if (fallback) {
+      destinationUrl = fallback.issuer.metadata[metadata_type];
     }
   }
   req.destinationUrl = destinationUrl;
@@ -298,7 +286,7 @@ module.exports = {
   parseBearerAuthorization,
   minimalError,
   handleOpenIdClientError,
-  screenForV2ClientId,
+  screenClientForFallback,
   appCategoryFromPath,
-  v2TransitionProxyRequest,
+  getProxyRequest,
 };

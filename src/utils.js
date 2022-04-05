@@ -206,11 +206,11 @@ const screenClientForFallback = async (
     }
     // No client entry implies that the fallback issuer is needed for the given client
     if (!clientInfo || !clientInfo.Item) {
-      return { fallback: apiCategory.fallback, client_id: client_id };
+      return apiCategory.fallback;
     }
   }
 
-  return { client_id: client_id };
+  return undefined;
 };
 
 /**
@@ -235,17 +235,17 @@ const getProxyRequest = async (
   bodyEncoder
 ) => {
   delete req.headers.host;
-  let screenedClient = {};
+  let fallback;
   let destinationUrl = issuer_metadata[metadata_type];
   if (req.body && req.body.client_id) {
-    screenedClient = await screenClientForFallback(
+    fallback = await screenClientForFallback(
       req.body.client_id,
       dynamoClient,
       config,
       req.path
     );
-    if (screenedClient.fallback) {
-      destinationUrl = screenedClient.fallback.issuer.metadata[metadata_type];
+    if (fallback) {
+      destinationUrl = fallback.issuer.metadata[metadata_type];
     }
   }
   req.destinationUrl = destinationUrl;

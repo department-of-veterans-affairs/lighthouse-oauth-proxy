@@ -271,15 +271,13 @@ async function createClientMetadata(
       error_description: "Client authentication failed",
     };
   }
-  const screenedClient = await screenClientForFallback(
+  const fallback = await screenClientForFallback(
     clientMetadata.client_id,
     dynamoClient,
     config,
     req.path
   );
-  clientMetadata.issuer = screenedClient.fallback
-    ? screenedClient.fallback.issuer
-    : issuer;
+  clientMetadata.issuer = fallback ? fallback.issuer : issuer;
 
   return clientMetadata;
 }

@@ -40,7 +40,6 @@ const authorizeHandler = async (
     req.path
   );
   let okta_client = oktaClient;
-  const screenedClientId = screenedClient.client_id;
   let issuer_data = issuer;
   let client_validation_app_category = app_category;
   if (screenedClient.fallback) {
@@ -51,7 +50,7 @@ const authorizeHandler = async (
 
   let clientValidation = await validateClient(
     logger,
-    screenedClientId,
+    client_id,
     client_redirect,
     dynamoClient,
     config.dynamo_clients_table,
@@ -87,7 +86,7 @@ const authorizeHandler = async (
       state: state,
       redirect_uri: client_redirect,
       expires_on: getUnixTime(addMinutes(Date.now(), 10)),
-      client_id: screenedClientId,
+      client_id: client_id,
       proxy:
         config.host + config.well_known_base_path + app_category.api_category,
       aud: app_category.audience,
@@ -115,7 +114,7 @@ const authorizeHandler = async (
   }
 
   const params = new URLSearchParams(req.query);
-  params.set("client_id", screenedClientId);
+  params.set("client_id", client_id);
   params.set("redirect_uri", redirect_uri);
   // Rewrite to an internally maintained state
   params.set("state", internal_state);

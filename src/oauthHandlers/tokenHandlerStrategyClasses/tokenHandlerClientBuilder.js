@@ -280,7 +280,6 @@ async function createClientMetadata(
   clientMetadata.issuer = screenedClient.fallback
     ? screenedClient.fallback.issuer
     : issuer;
-  clientMetadata.client_id = screenedClient.client_id;
 
   return clientMetadata;
 }

@@ -275,6 +275,16 @@ const getProxyRequest = async (
   return proxy_request;
 };
 
+const rewriteRedirect = (config, request) => {
+  if (config.redirects) {
+    const redirect = config.redirects
+      .find((r) => r.condition === request.header["X-Lighthouse-Gateway"])
+      .orElse((r) => r.condition === "default");
+    request.query.redirect_uri = redirect;
+  }
+  return request;
+};
+
 module.exports = {
   isRuntimeError,
   rethrowIfRuntimeError,
@@ -289,4 +299,5 @@ module.exports = {
   screenClientForFallback,
   appCategoryFromPath,
   getProxyRequest,
+  rewriteRedirect,
 };

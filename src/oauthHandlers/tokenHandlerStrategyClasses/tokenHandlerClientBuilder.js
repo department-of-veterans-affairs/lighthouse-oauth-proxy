@@ -32,7 +32,11 @@ const {
 const {
   GetPatientInfoFromLaunchStrategy,
 } = require("./getPatientInfoStrategies/getPatientInfoFromLaunchStrategy");
-const { parseBasicAuth, screenClientForFallback } = require("../../utils");
+const {
+  parseBasicAuth,
+  screenClientForFallback,
+  rewriteRedirect,
+} = require("../../utils");
 const {
   codeTokenIssueCounter,
   refreshTokenIssueCounter,
@@ -72,7 +76,7 @@ const buildTokenHandlerClient = async (
   app_category
 ) => {
   const strategies = await getStrategies(
-    redirect_uri,
+    rewriteRedirect(redirect_uri),
     issuer,
     logger,
     dynamoClient,

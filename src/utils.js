@@ -275,14 +275,14 @@ const getProxyRequest = async (
   return proxy_request;
 };
 
-const rewriteRedirect = (config, request) => {
+const rewriteRedirect = (config, request, redirect_uri) => {
   if (config.redirects) {
     const redirect = config.redirects
       .find((r) => r.condition === request.header["X-Lighthouse-Gateway"])
       .orElse((r) => r.condition === "default");
-    request.query.redirect_uri = redirect;
+    return redirect;
   }
-  return request;
+  return redirect_uri;
 };
 
 module.exports = {

@@ -2,7 +2,7 @@ const { URLSearchParams, URL } = require("url");
 const { loginBegin } = require("../metrics");
 const { v4: uuidv4 } = require("uuid");
 const { addMinutes, getUnixTime } = require("date-fns");
-const { screenClientForFallback } = require("../utils");
+const { screenClientForFallback, rewriteRedirect } = require("../utils");
 /**
  * Checks for valid authorization request and proxies to authorization server.
  *
@@ -115,7 +115,7 @@ const authorizeHandler = async (
 
   const params = new URLSearchParams(req.query);
   params.set("client_id", client_id);
-  params.set("redirect_uri", redirect_uri);
+  params.set("redirect_uri", rewriteRedirect(config, req, redirect_uri));
   // Rewrite to an internally maintained state
   params.set("state", internal_state);
 

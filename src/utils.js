@@ -276,9 +276,9 @@ const getProxyRequest = async (
 };
 
 const rewriteRedirect = (config, request, redirect_uri) => {
-  if (config.redirects && request.header["X-Lighthouse-Gateway"]) {
+  if (config.redirects && request.headers["X-Lighthouse-Gateway"]) {
     const redirectUrl = config.redirects
-      .find((r) => r.condition === request.header["X-Lighthouse-Gateway"])
+      .find((r) => r.condition === request.headers["X-Lighthouse-Gateway"])
       .orElse((r) => r.condition === "default");
     return redirectUrl;
   }

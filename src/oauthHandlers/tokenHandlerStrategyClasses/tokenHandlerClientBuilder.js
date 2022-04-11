@@ -76,7 +76,7 @@ const buildTokenHandlerClient = async (
   app_category
 ) => {
   const strategies = await getStrategies(
-    rewriteRedirect(redirect_uri),
+    rewriteRedirect(config, req, redirect_uri),
     issuer,
     logger,
     dynamoClient,

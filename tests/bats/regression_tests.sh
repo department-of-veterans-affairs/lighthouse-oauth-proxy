@@ -131,9 +131,9 @@ track_result() {
 
 assign_code() {
   local network=""
-  if [[ $HOST == *"lighthouse-oauth-proxy-oauth-proxy-1"* ]];
+  if [[ $HOST == *"localhost"* ]];
   then
-    network="-i --network lighthouse-oauth-proxy_default"
+    network="-i --network container:lighthouse-oauth-proxy_oauth-proxy_1"
   else
     network=""
   fi

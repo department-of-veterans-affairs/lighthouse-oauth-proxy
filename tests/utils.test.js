@@ -464,6 +464,17 @@ describe("rewriteRedirect tests", () => {
       },
     ];
   });
+  it("rewriteRedirect old_config", async () => {
+    config.redirects = undefined;
+    const req = {
+      headers: {
+        host: "localhost",
+        "x-lighthouse-gateway": "default",
+      },
+    };
+    const result = rewriteRedirect(config, req, "http://orig/oauth2/redirect");
+    expect(result).toBe("http://orig/oauth2/redirect");
+  });
   it("rewriteRedirect default", async () => {
     const req = {
       headers: {

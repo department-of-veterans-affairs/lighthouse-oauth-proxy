@@ -276,11 +276,15 @@ const getProxyRequest = async (
 };
 
 const rewriteRedirect = (config, request, redirect_uri) => {
-  if (config.redirects && request.headers["X-Lighthouse-Gateway"]) {
-    const redirectUrl = config.redirects
-      .find((r) => r.condition === request.headers["X-Lighthouse-Gateway"])
-      .orElse((r) => r.condition === "default");
-    return redirectUrl;
+  if (config.redirects && request.headers["x-lighthouse-gateway"]) {
+    const xLighthouseGateway = request.headers["x-lighthouse-gateway"];
+    let redirectUrl = config.redirects.find(
+      (r) => r.condition === xLighthouseGateway
+    );
+    redirectUrl = redirectUrl
+      ? redirectUrl
+      : config.redirects.find((r) => r.condition === "default");
+    return redirectUrl ? redirectUrl : redirect_uri;
   }
   return redirect_uri;
 };

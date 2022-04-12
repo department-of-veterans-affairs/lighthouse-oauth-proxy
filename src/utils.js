@@ -275,6 +275,13 @@ const getProxyRequest = async (
   return proxy_request;
 };
 
+/**
+ * Determines the value of the redirect url based on a request header setting.
+ * @param {*} config application configuration.
+ * @param {express.Request} request express request object.
+ * @param {*} redirect_uri the orignal redirect url
+ * @returns The potentially rewritten url.
+ */
 const rewriteRedirect = (config, request, redirect_uri) => {
   if (config.redirects && request.headers["x-lighthouse-gateway"]) {
     const xLighthouseGateway = request.headers["x-lighthouse-gateway"];

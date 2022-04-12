@@ -284,7 +284,7 @@ const rewriteRedirect = (config, request, redirect_uri) => {
     redirectUrl = redirectUrl
       ? redirectUrl
       : config.redirects.find((r) => r.condition === "default");
-    return redirectUrl ? redirectUrl : redirect_uri;
+    return redirectUrl ? redirectUrl.uri : redirect_uri;
   }
   return redirect_uri;
 };

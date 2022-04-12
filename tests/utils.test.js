@@ -501,7 +501,11 @@ describe("rewriteRedirect tests", () => {
         host: "localhost",
       },
     };
-    const result = rewriteRedirect(config, req, "http://original/oauth2/redirect");
+    const result = rewriteRedirect(
+      config,
+      req,
+      "http://original/oauth2/redirect"
+    );
     expect(result).toBe("http://original/oauth2/redirect");
   });
 });

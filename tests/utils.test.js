@@ -464,7 +464,6 @@ describe("rewriteRedirect tests", () => {
       },
     ];
   });
-
   it("rewriteRedirect default", async () => {
     const req = {
       headers: {
@@ -474,5 +473,24 @@ describe("rewriteRedirect tests", () => {
     };
     const result = rewriteRedirect(config, req, "http:/not_this_redirect");
     expect(result).toBe("http://default/oauth2/redirect");
+  });
+  it("rewriteRedirect api2", async () => {
+    const req = {
+      headers: {
+        host: "localhost",
+        "x-lighthouse-gateway": "api2",
+      },
+    };
+    const result = rewriteRedirect(config, req, "http:/not_this_redirect");
+    expect(result).toBe("http://api2/oauth2/redirect");
+  });
+  it("rewriteRedirect original", async () => {
+    const req = {
+      headers: {
+        host: "localhost",
+      },
+    };
+    const result = rewriteRedirect(config, req, "http://original/oauth2/redirect");
+    expect(result).toBe("http://original/oauth2/redirect");
   });
 });

@@ -123,7 +123,8 @@ function processArgs() {
       },
       redirects_header: {
         type: "string",
-        description: "The the header used to determine the condition for a rewrite of the redirect url",
+        description:
+          "The the header used to determine the condition for a rewrite of the redirect url",
         required: false,
         default: "x-lighthouse-gateway",
       },
@@ -134,12 +135,11 @@ function processArgs() {
         required: false,
         condition: {
           description:
-          "A string used to match the value in the request header for determine the correct redirect url",
+            "A string used to match the value in the request header for determine the correct redirect url",
           required: true,
         },
         uri: {
-          description:
-          "A string that represents the redirect url",
+          description: "A string that represents the redirect url",
           required: true,
         },
       },

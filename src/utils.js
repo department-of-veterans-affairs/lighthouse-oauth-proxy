@@ -283,8 +283,8 @@ const getProxyRequest = async (
  * @returns The potentially rewritten url.
  */
 const rewriteRedirect = (config, request, redirect_uri) => {
-  if (config.redirects && request.headers["x-lighthouse-gateway"]) {
-    const xLighthouseGateway = request.headers["x-lighthouse-gateway"];
+  if (config.redirects && request.headers[config.redirects_header]) {
+    const xLighthouseGateway = request.headers[config.redirects_header];
     let redirectUrl = config.redirects.find(
       (r) => r.condition === xLighthouseGateway
     );

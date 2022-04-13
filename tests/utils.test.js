@@ -453,6 +453,7 @@ describe("getProxyRequest tests", () => {
 
 describe("rewriteRedirect tests", () => {
   beforeEach(() => {
+    config.redirects_header = "x-lighthouse-gateway";
     config.redirects = [
       {
         condition: "api2",

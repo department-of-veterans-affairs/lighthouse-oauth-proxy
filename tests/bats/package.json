@@ -1,0 +1,17 @@
+{
+  "name": "oauth_proxy_regression_tests",
+  "version": "1.0.0",
+  "description": "Oauth Proxy regression tests.",
+  "main": "oauth-proxy-regression.test.js",
+  "scripts": {
+    "test": "jest -- oauth-proxy-regression.test.js"
+  },
+  "keywords": [
+    "oauth-proxy-bats-tests"
+  ],
+  "author": "Pivot!",
+  "license": "ISC",
+  "dependencies": {
+    "lighthouse-auth-utils": "git+https://github.com/department-of-veterans-affairs/lighthouse-auth-utils.git"
+  }
+}

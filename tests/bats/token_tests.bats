@@ -113,9 +113,13 @@ do_client_credentials() {
     network="-i --network container:lighthouse-oauth-proxy_oauth-proxy_1"
   fi
 
+  local auth_cmd="docker run $network --rm vasdvp/lighthouse-auth-utils:latest auth-cc.js"
+  if [ $NO_DOCKER ]; then
+     auth_cmd="node node_modules/lighthouse-auth-utils/auth-cc.js"
+  fi
+
   local cc
-  cc="$(docker run $network --rm \
-          vasdvp/lighthouse-auth-utils:latest auth-cc \
+  cc="$($auth_cmd \
           --client-id="$CC_CLIENT_ID" \
           --client-secret="$CC_CLIENT_SECRET" \
           --authorization-url=$url \

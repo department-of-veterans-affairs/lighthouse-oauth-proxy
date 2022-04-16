@@ -2,10 +2,6 @@
   "name": "oauth_proxy_regression_tests",
   "version": "1.0.0",
   "description": "Oauth Proxy regression tests.",
-  "main": "oauth-proxy-regression.test.js",
-  "scripts": {
-    "test": "jest -- oauth-proxy-regression.test.js"
-  },
   "keywords": [
     "oauth-proxy-bats-tests"
   ],

@@ -124,7 +124,7 @@ function processArgs() {
       redirects_header: {
         type: "string",
         description:
-          "The the header used to determine the condition for a rewrite of the redirect url",
+          "The header used to determine the condition for a rewrite of the redirect url",
         required: false,
         default: "x-lighthouse-gateway",
       },

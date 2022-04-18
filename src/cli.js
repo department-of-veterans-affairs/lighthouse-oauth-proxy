@@ -121,6 +121,28 @@ function processArgs() {
         required: false,
         default: false,
       },
+      redirects_header: {
+        type: "string",
+        description:
+          "The header used to determine the condition for a rewrite of the redirect url",
+        required: false,
+        default: "x-lighthouse-gateway",
+      },
+      redirects: {
+        type: "array",
+        description:
+          "An array of objects that enables redirect_url rewrites based on the value of a request header",
+        required: false,
+        condition: {
+          description:
+            "A string used to match the value in the request header for determine the correct redirect url",
+          required: true,
+        },
+        uri: {
+          description: "A string that represents the redirect url",
+          required: true,
+        },
+      },
       routes: {
         description:
           "An object that describes route configurations for isolated api categories",

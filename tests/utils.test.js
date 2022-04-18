@@ -14,6 +14,7 @@ const {
   screenClientForFallback,
   appCategoryFromPath,
   getProxyRequest,
+  rewriteRedirect,
 } = require("../src/utils");
 
 describe("statusCodeFromError", () => {
@@ -447,5 +448,65 @@ describe("getProxyRequest tests", () => {
     );
     expect(result.data).toBe("client_id=testClient2");
     expect(result.url).toBe("http://fallback.com/introspect");
+  });
+});
+
+describe("rewriteRedirect tests", () => {
+  beforeEach(() => {
+    config.redirects_header = "x-lighthouse-gateway";
+    config.redirects = [
+      {
+        condition: "api2",
+        uri: "http://api2/oauth2/redirect",
+      },
+      {
+        condition: "default",
+        uri: "http://default/oauth2/redirect",
+      },
+    ];
+  });
+  it("rewriteRedirect old_config", async () => {
+    config.redirects = undefined;
+    const req = {
+      headers: {
+        host: "localhost",
+        "x-lighthouse-gateway": "default",
+      },
+    };
+    const result = rewriteRedirect(config, req, "http://orig/oauth2/redirect");
+    expect(result).toBe("http://orig/oauth2/redirect");
+  });
+  it("rewriteRedirect default", async () => {
+    const req = {
+      headers: {
+        host: "localhost",
+        "x-lighthouse-gateway": "default",
+      },
+    };
+    const result = rewriteRedirect(config, req, "http:/not_this_redirect");
+    expect(result).toBe("http://default/oauth2/redirect");
+  });
+  it("rewriteRedirect api2", async () => {
+    const req = {
+      headers: {
+        host: "localhost",
+        "x-lighthouse-gateway": "api2",
+      },
+    };
+    const result = rewriteRedirect(config, req, "http:/not_this_redirect");
+    expect(result).toBe("http://api2/oauth2/redirect");
+  });
+  it("rewriteRedirect original", async () => {
+    const req = {
+      headers: {
+        host: "localhost",
+      },
+    };
+    const result = rewriteRedirect(
+      config,
+      req,
+      "http://original/oauth2/redirect"
+    );
+    expect(result).toBe("http://original/oauth2/redirect");
   });
 });

@@ -275,6 +275,27 @@ const getProxyRequest = async (
   return proxy_request;
 };
 
+/**
+ * Determines the value of the redirect url based on a request header setting.
+ * @param {*} config application configuration.
+ * @param {express.Request} request express request object.
+ * @param {*} redirect_uri the orignal redirect url
+ * @returns The potentially rewritten url.
+ */
+const rewriteRedirect = (config, request, redirect_uri) => {
+  if (config.redirects && request.headers[config.redirects_header]) {
+    const xLighthouseGateway = request.headers[config.redirects_header];
+    let redirectUrl = config.redirects.find(
+      (r) => r.condition === xLighthouseGateway
+    );
+    redirectUrl = redirectUrl
+      ? redirectUrl
+      : config.redirects.find((r) => r.condition === "default");
+    return redirectUrl ? redirectUrl.uri : redirect_uri;
+  }
+  return redirect_uri;
+};
+
 module.exports = {
   isRuntimeError,
   rethrowIfRuntimeError,
@@ -289,4 +310,5 @@ module.exports = {
   screenClientForFallback,
   appCategoryFromPath,
   getProxyRequest,
+  rewriteRedirect,
 };

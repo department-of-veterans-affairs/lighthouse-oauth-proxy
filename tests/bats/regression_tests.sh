@@ -37,10 +37,15 @@ done
 
 # Dependency Check
 
-if ! docker -v COMMAND &> /dev/null
+if [ -z "$NO_DOCKER" ];
 then
-    echo "please install docker."
-    exit 1
+  if ! docker -v COMMAND &> /dev/null
+  then
+      echo "please install docker."
+      exit 1
+  fi
+ else
+   npm i 
 fi
 
 if ! jq --version COMMAND &> /dev/null
@@ -138,10 +143,13 @@ assign_code() {
     network=""
   fi
 
+  local auth_cmd="docker run $network --rm vasdvp/lighthouse-auth-utils:latest auth"
+  if [ $NO_DOCKER ]; then
+     auth_cmd="node node_modules/lighthouse-auth-utils/auth.js"
+  fi
+
   local code
-  code=$(docker run \
-      $network --rm \
-      vasdvp/lighthouse-auth-utils:latest auth \
+  code=$($auth_cmd \
       --redirect-uri="$REDIRECT_URI" \
       --authorization-url="$HOST" \
       --user-email="$USER_EMAIL" \
@@ -179,10 +187,13 @@ tokan_payload_pkce() {
     network=""
   fi
 
+  local auth_cmd="docker run $network --rm vasdvp/lighthouse-auth-utils:latest auth"
+  if [ $NO_DOCKER ]; then
+     auth_cmd="node node_modules/lighthouse-auth-utils/auth.js"
+  fi
+
   local payload
-  payload=$(docker run \
-      $network --rm \
-      vasdvp/lighthouse-auth-utils:latest auth \
+  payload=$($auth_cmd \
       --authorization-url="$PKCE_AUTH_SERVER" \
       --user-email="$USER_EMAIL" \
       --user-password="$USER_PASSWORD" \
@@ -205,8 +216,10 @@ tokan_payload_pkce() {
 # ----
 
 # Pulling latest lighthouse-auth-utils docker image if necessary
-if [ -z "$USE_LOCAL_IMAGE" ]; then
-  docker pull vasdvp/lighthouse-auth-utils:latest
+if [ -z "$NO_DOCKER" ]; then
+  if [ -z "$USE_LOCAL_IMAGE" ]; then
+    docker pull vasdvp/lighthouse-auth-utils:latest
+  fi
 fi
 
 # Start Tests

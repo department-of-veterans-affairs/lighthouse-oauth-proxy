@@ -253,6 +253,7 @@ describe("handleToken tests", () => {
     expect(response.statusCode).toBe(200);
     expect(response.responseBody.access_token).toBe(token.access_token);
     expect(response.responseBody.patient).toBe("1234V5678");
+    expect(typeOf(response.responseBody.patient)).toBe(String);
   });
 
   it("getToken 401 Response", async () => {

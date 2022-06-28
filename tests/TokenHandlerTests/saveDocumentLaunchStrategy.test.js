@@ -94,12 +94,14 @@ describe("saveDocumentToDynamo tests", () => {
     let token = buildToken(false, false);
     token.launch = "launch";
 
+    let launch2 = {
+      patient: "1234V5678"
+    };
     let document = convertObjectToDynamoAttributeValues({
       access_token: token,
-      launch: {
-        patient: "1234V5678"
-      },
     });
+    document.launch = launch2;
+    console.log(launch2);
     dynamoClient = buildFakeDynamoClient(document);
 
     const strategy = new SaveDocumentLaunchStrategy(
@@ -108,20 +110,19 @@ describe("saveDocumentToDynamo tests", () => {
       config,
       hashingFunction
     );
-
+    expect(strategy.launchValidation(document.launch)).toBe(true);
     await strategy.saveDocumentToDynamo(document, token);
+    expect(logger.error.mock.calls).toHaveLength(0);
     expect(dynamoClient.savePayloadToDynamo).toHaveBeenCalledWith(
       {
         access_token:
           "e0f866111645e58199f0382a6fa50a217b0c2ccc1ca07e27738e758e1183a8db",
         expires_on: 803837100,
-        launch: {
-          S: "launch",
-        },
+        launch: launch2,
       },
       "LaunchContext"
     );
-    expect(logger.error.mock.calls).toHaveLength(0);
+    
   });
   it("happy launch", async () => {
     let launch= {
@@ -175,6 +176,6 @@ describe("saveDocumentToDynamo tests", () => {
       hashingFunction
     );
 
-    expect(strategy.launchValidation(launch)).toBe(false);
+    expect(strategy.launchValidation(launch)).toBe(true);
   });
 });

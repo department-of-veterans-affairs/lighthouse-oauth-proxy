@@ -313,7 +313,6 @@ do_token "$(jq \
 
 @test 'Client Credentials deprecated happy path' {
   cc=$(do_client_credentials "launch/patient" "123V456")
-  cat "$cc"
   [ "$(echo "$cc" | jq 'has("access_token")')" == "true" ]
   [ "$(echo "$cc" | jq .token_type | tr -d '"')" == "Bearer" ]
   [ "$(echo "$cc" | jq .scope | tr -d '"')" == "launch/patient" ]
@@ -329,10 +328,9 @@ do_token "$(jq \
 }
 @test 'Client Credentials encoded non string path' {
   cc=$(do_client_credentials "launch" "eyJwYXRpZW50IjozMjAwMDIyNX0K")
-  cat "$cc" 
-  #[ "$(echo "$cc" | jq 'has("access_token")')" == "false" ]
+  [ "$(echo "$cc" | jq 'has("access_token")')" == "false" ]
   #[ "$(echo "$cc" | jq .status | tr -d '"')" == "400" ]
-  #[ "$(echo "$cc" | jq 'has("expires_in")')" == "false" ]
+  [ "$(echo "$cc" | jq 'has("expires_in")')" == "false" ]
 }
 @test 'Token Handler invalid strategy' {
   do_token "$(jq \

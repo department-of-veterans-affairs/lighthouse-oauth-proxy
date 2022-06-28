@@ -159,7 +159,7 @@ class TokenHandlerClient {
           );
           for (let key in decodedLaunch) {
             if (!responseBody[key]) {
-              //responseBody[key] = String(decodedLaunch[key]);
+              responseBody[key] = decodedLaunch[key];
             }
           }
         } catch (error) {

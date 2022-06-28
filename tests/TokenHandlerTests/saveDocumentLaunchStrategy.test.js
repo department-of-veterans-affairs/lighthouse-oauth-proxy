@@ -155,7 +155,7 @@ describe("saveDocumentToDynamo tests", () => {
     );
     expect(strategy.launchValidation(launch)).toBe(false);
   });
-  it("coded launch", async () => {
+  it("coded launch no string", async () => {
     let launch= "eyJwYXRpZW50IjozMjAwMDIyNX0K"
     const strategy = new SaveDocumentLaunchStrategy(
       logger,
@@ -163,6 +163,18 @@ describe("saveDocumentToDynamo tests", () => {
       config,
       hashingFunction
     );
-    expect(strategy.launchValidation(launch)).toBe(true);
+
+    expect(strategy.launchValidation(launch)).toBe(false);
+  });
+  it("coded launch string", async () => {
+    let launch= "eyJwYXRpZW50IjogIjMyMDAwMjI1In0K"
+    const strategy = new SaveDocumentLaunchStrategy(
+      logger,
+      dynamoClient,
+      config,
+      hashingFunction
+    );
+
+    expect(strategy.launchValidation(launch)).toBe(false);
   });
 });

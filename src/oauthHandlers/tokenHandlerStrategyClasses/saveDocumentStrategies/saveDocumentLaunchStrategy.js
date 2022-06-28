@@ -12,7 +12,7 @@ class SaveDocumentLaunchStrategy {
     if (document.launch) {
       let launch = document.launch;
       
-      if(!this.launchValidation(launch)){ 
+      if(!tokens.scope.split(" ").includes("launch/patient") && !this.launchValidation(launch) ){ 
           throw {
             status: 400,
               error: "invalid_request",
@@ -48,7 +48,7 @@ class SaveDocumentLaunchStrategy {
       let decodedLaunch = JSON.parse(
         Buffer.from(launch, "base64").toString("ascii")
       );
-      if(!decodedLaunch["patient"] || typeof(decodedLaunch['patient'] != typeof('string'))) {
+      if(!decodedLaunch['patient'] || typeof(decodedLaunch['patient']) != typeof('string')) {
         return false;
       }
     }

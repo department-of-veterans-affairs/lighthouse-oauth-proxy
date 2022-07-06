@@ -95,7 +95,7 @@ describe("saveDocumentToDynamo tests", () => {
     token.launch = "launch";
 
     let launch2 = {
-      patient: "1234V5678"
+      patient: "1234V5678",
     };
     let document = convertObjectToDynamoAttributeValues({
       access_token: token,
@@ -122,12 +122,11 @@ describe("saveDocumentToDynamo tests", () => {
       },
       "LaunchContext"
     );
-    
   });
   it("happy launch", async () => {
-    let launch= {
-      patient: "1234V5678"
-    }
+    let launch = {
+      patient: "1234V5678",
+    };
     const strategy = new SaveDocumentLaunchStrategy(
       logger,
       dynamoClient,
@@ -137,7 +136,7 @@ describe("saveDocumentToDynamo tests", () => {
     expect(strategy.launchValidation(launch)).toBe(true);
   });
   it("empty launch", async () => {
-    let launch= {}
+    let launch = {};
     const strategy = new SaveDocumentLaunchStrategy(
       logger,
       dynamoClient,
@@ -147,7 +146,7 @@ describe("saveDocumentToDynamo tests", () => {
     expect(strategy.launchValidation(launch)).toBe(false);
   });
   it("null launch", async () => {
-    let launch= null
+    let launch = null;
     const strategy = new SaveDocumentLaunchStrategy(
       logger,
       dynamoClient,
@@ -157,7 +156,7 @@ describe("saveDocumentToDynamo tests", () => {
     expect(strategy.launchValidation(launch)).toBe(false);
   });
   it("coded launch no string", async () => {
-    let launch= "eyJwYXRpZW50IjozMjAwMDIyNX0K"
+    let launch = "eyJwYXRpZW50IjozMjAwMDIyNX0K";
     const strategy = new SaveDocumentLaunchStrategy(
       logger,
       dynamoClient,
@@ -168,7 +167,7 @@ describe("saveDocumentToDynamo tests", () => {
     expect(strategy.launchValidation(launch)).toBe(false);
   });
   it("coded launch string", async () => {
-    let launch= "eyJwYXRpZW50IjogIjMyMDAwMjI1In0K"
+    let launch = "eyJwYXRpZW50IjogIjMyMDAwMjI1In0K";
     const strategy = new SaveDocumentLaunchStrategy(
       logger,
       dynamoClient,

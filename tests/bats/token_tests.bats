@@ -328,6 +328,7 @@ do_token "$(jq \
 }
 @test 'Client Credentials encoded non string path' {
   cc=$(do_client_credentials "launch" "eyJwYXRpZW50IjozMjAwMDIyNX0K")
+  cat "$cc" 
   [ "$(echo "$cc" | jq 'has("access_token")')" == "false" ]
   #[ "$(echo "$cc" | jq .status | tr -d '"')" == "400" ]
   [ "$(echo "$cc" | jq 'has("expires_in")')" == "false" ]

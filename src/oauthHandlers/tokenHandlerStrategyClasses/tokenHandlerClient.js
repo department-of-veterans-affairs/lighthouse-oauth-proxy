@@ -112,20 +112,22 @@ class TokenHandlerClient {
           },
         };
       }
-      /*
-      if(document.launch){
-        if(this.saveDocumentToDynamoStrategy.launchValidation(document.launch) === false)
-        {
+
+      if (document.launch) {
+        if (
+          this.saveDocumentToDynamoStrategy.launchValidation(
+            document.launch
+          ) === false
+        ) {
           return {
             statusCode: 400,
             responseBody: {
               error: "invalid_launch",
-              error_description:
-                  "The provided patient launch must be a string",
+              error_description: "The provided patient launch must be a string",
             },
           };
         }
-      }*/
+      }
     }
 
     try {

@@ -296,6 +296,31 @@ const rewriteRedirect = (config, request, redirect_uri) => {
   return redirect_uri;
 };
 
+const launchValidation = (launch) => {
+  if (launch === null || launch === "") return false;
+  var base64regex = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
+  if (base64regex.test(launch)) {
+    let decodedLaunch = JSON.parse(
+      Buffer.from(launch, "base64").toString("ascii")
+    );
+    if (
+      !decodedLaunch["patient"] ||
+      typeof decodedLaunch["patient"] != typeof "string"
+    ) {
+      return false;
+    }
+  } else {
+    if (launch === "" || Object.keys(launch).length === 0) {
+      return false;
+    } else if (
+      !launch.hasOwnProperty("patient") ||
+      typeof launch["patient"] != typeof "string"
+    )
+      return false;
+  }
+  return true;
+};
+
 module.exports = {
   isRuntimeError,
   rethrowIfRuntimeError,
@@ -311,4 +336,5 @@ module.exports = {
   appCategoryFromPath,
   getProxyRequest,
   rewriteRedirect,
+  launchValidation,
 };

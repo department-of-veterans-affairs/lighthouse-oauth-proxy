@@ -2,7 +2,11 @@ const { URLSearchParams, URL } = require("url");
 const { loginBegin } = require("../metrics");
 const { v4: uuidv4 } = require("uuid");
 const { addMinutes, getUnixTime } = require("date-fns");
-const { screenClientForFallback, rewriteRedirect } = require("../utils");
+const {
+  screenClientForFallback,
+  rewriteRedirect,
+  launchValidation,
+} = require("../utils");
 /**
  * Checks for valid authorization request and proxies to authorization server.
  *
@@ -99,6 +103,14 @@ const authorizeHandler = async (
       req.query.scope.split(" ").includes("launch") &&
       req.query.launch
     ) {
+      if (!launchValidation(req.query.launch)) {
+        return {
+          status: 400,
+          error: "invalid_request",
+          error_description:
+            "The provided patient launch must be a strin or base64 encoded json",
+        };
+      }
       authorizePayload.launch = req.query.launch;
     }
 

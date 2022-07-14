@@ -312,11 +312,11 @@ do_token "$(jq \
 }
 
 @test 'Client Credentials deprecated happy path' {
-  cc=$(do_client_credentials "launch/patient" "{"patient": "32000225"}")
-  #cat "$cc" 
+  cc=$(do_client_credentials "launch" "123V456")
+
   [ "$(echo "$cc" | jq 'has("access_token")')" == "true" ]
   [ "$(echo "$cc" | jq .token_type | tr -d '"')" == "Bearer" ]
-  [ "$(echo "$cc" | jq .scope | tr -d '"')" == "launch/patient" ]
+  [ "$(echo "$cc" | jq .scope | tr -d '"')" == "launch" ]
   [ "$(echo "$cc" | jq 'has("expires_in")')" == "true" ]
 }
 @test 'Client Credentials encoded happy path' {

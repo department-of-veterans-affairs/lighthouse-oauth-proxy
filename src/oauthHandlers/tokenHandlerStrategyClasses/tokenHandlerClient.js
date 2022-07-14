@@ -120,7 +120,8 @@ class TokenHandlerClient {
             statusCode: 400,
             responseBody: {
               error: "invalid_launch",
-              error_description: "The provided patient launch must be a string",
+              error_description:
+                "The provided patient launch must be a string or base64 encoded json",
             },
           };
         }

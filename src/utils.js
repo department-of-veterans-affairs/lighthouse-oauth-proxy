@@ -310,13 +310,12 @@ const launchValidation = (launch) => {
       return false;
     }
   } else {
+    // decaprecated launch condition
     if (launch === "" || Object.keys(launch).length === 0) {
       return false;
-    } else if (
-      !launch.hasOwnProperty("patient") ||
-      typeof launch["patient"] != typeof "string"
-    )
+    } else if (typeof launch != typeof "string") {
       return false;
+    }
   }
   return true;
 };

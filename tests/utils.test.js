@@ -15,7 +15,9 @@ const {
   appCategoryFromPath,
   getProxyRequest,
   rewriteRedirect,
+  launchValidation,
 } = require("../src/utils");
+const { describe } = require("yargs");
 
 describe("statusCodeFromError", () => {
   describe("returns the default", () => {
@@ -510,3 +512,31 @@ describe("rewriteRedirect tests", () => {
     expect(result).toBe("http://original/oauth2/redirect");
   });
 });
+
+// describe("launchValidation tests", () => {
+//   it("happy launch", async () => {
+//     let launch = {
+//       patient: "1234V5678",
+//     };
+
+//     expect(launchValidation(launch)).toBe(true);
+//   });
+//   it("empty launch", async () => {
+//     let launch = {};
+//     expect(launchValidation(launch)).toBe(false);
+//   });
+//   it("null launch", async () => {
+//     let launch = null;
+//     expect(launchValidation(launch)).toBe(false);
+//   });
+//   it("coded launch no string", async () => {
+//     let launch = "eyJwYXRpZW50IjozMjAwMDIyNX0K";
+
+//     expect(launchValidation(launch)).toBe(false);
+//   });
+//   it("coded launch string", async () => {
+//     let launch = "eyJwYXRpZW50IjogIjMyMDAwMjI1In0K";
+
+//     expect(launchValidation(launch)).toBe(true);
+//   });
+// });

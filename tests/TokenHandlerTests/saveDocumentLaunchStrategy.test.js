@@ -30,26 +30,26 @@ describe("saveDocumentToDynamo tests", () => {
     jest.useRealTimers();
   });
 
-  it("Empty Tokens", async () => {
-    let token = buildToken(false, false);
-    let document = convertObjectToDynamoAttributeValues({
-      access_token: token,
-      launch: "launch",
-    });
-    dynamoClient = buildFakeDynamoClient(document);
+  // it("Empty Tokens", async () => {
+  //   let token = buildToken(false, false);
+  //   let document = convertObjectToDynamoAttributeValues({
+  //     access_token: token,
+  //     launch: "launch",
+  //   });
+  //   dynamoClient = buildFakeDynamoClient(document);
 
-    const strategy = new SaveDocumentLaunchStrategy(
-      logger,
-      dynamoClient,
-      config,
-      hashingFunction
-    );
-    //await strategy.saveDocumentToDynamo(document, null);
-    expect(strategy.launchValidation("")).toBe(false);
-    // await expect( ()=> {
-    //    strategy.saveDocumentToDynamo(document, null);
-    // }).rejects.toThrow("invalid_request");
-  });
+  //   // const strategy = new SaveDocumentLaunchStrategy(
+  //   //   logger,
+  //   //   dynamoClient,
+  //   //   config,
+  //   //   hashingFunction
+  //   // );
+  //   //await strategy.saveDocumentToDynamo(document, null);
+  //   expect(launchValidation("")).toBe(false);
+  //   // await expect( ()=> {
+  //   //    strategy.saveDocumentToDynamo(document, null);
+  //   // }).rejects.toThrow("invalid_request");
+  // });
 
   it("Missing Document Launch", async () => {
     let token = buildToken(false, false);
@@ -66,8 +66,8 @@ describe("saveDocumentToDynamo tests", () => {
     );
 
     await strategy.saveDocumentToDynamo(document, token);
-    expect(dynamoClient.savePayloadToDynamo).not.toHaveBeenCalled();
-    expect(logger.error.mock.calls).toHaveLength(1);
+    expect(dynamoClient.savePayloadToDynamo).toHaveBeenCalled();
+    expect(logger.error.mock.calls).toHaveLength(0);
   });
 
   it("Empty Document Launch", async () => {
@@ -86,8 +86,8 @@ describe("saveDocumentToDynamo tests", () => {
     );
 
     await strategy.saveDocumentToDynamo(document, token);
-    expect(dynamoClient.savePayloadToDynamo).not.toHaveBeenCalled();
-    expect(logger.error.mock.calls).toHaveLength(1);
+    expect(dynamoClient.savePayloadToDynamo).toHaveBeenCalled();
+    expect(logger.error.mock.calls).toHaveLength(0);
   });
 
   it("happy path", async () => {
@@ -110,7 +110,6 @@ describe("saveDocumentToDynamo tests", () => {
       config,
       hashingFunction
     );
-    expect(strategy.launchValidation(document.launch)).toBe(true);
     await strategy.saveDocumentToDynamo(document, token);
     expect(logger.error.mock.calls).toHaveLength(0);
     expect(dynamoClient.savePayloadToDynamo).toHaveBeenCalledWith(
@@ -122,59 +121,5 @@ describe("saveDocumentToDynamo tests", () => {
       },
       "LaunchContext"
     );
-  });
-  it("happy launch", async () => {
-    let launch = {
-      patient: "1234V5678",
-    };
-    const strategy = new SaveDocumentLaunchStrategy(
-      logger,
-      dynamoClient,
-      config,
-      hashingFunction
-    );
-    expect(strategy.launchValidation(launch)).toBe(true);
-  });
-  it("empty launch", async () => {
-    let launch = {};
-    const strategy = new SaveDocumentLaunchStrategy(
-      logger,
-      dynamoClient,
-      config,
-      hashingFunction
-    );
-    expect(strategy.launchValidation(launch)).toBe(false);
-  });
-  it("null launch", async () => {
-    let launch = null;
-    const strategy = new SaveDocumentLaunchStrategy(
-      logger,
-      dynamoClient,
-      config,
-      hashingFunction
-    );
-    expect(strategy.launchValidation(launch)).toBe(false);
-  });
-  it("coded launch no string", async () => {
-    let launch = "eyJwYXRpZW50IjozMjAwMDIyNX0K";
-    const strategy = new SaveDocumentLaunchStrategy(
-      logger,
-      dynamoClient,
-      config,
-      hashingFunction
-    );
-
-    expect(strategy.launchValidation(launch)).toBe(false);
-  });
-  it("coded launch string", async () => {
-    let launch = "eyJwYXRpZW50IjogIjMyMDAwMjI1In0K";
-    const strategy = new SaveDocumentLaunchStrategy(
-      logger,
-      dynamoClient,
-      config,
-      hashingFunction
-    );
-
-    expect(strategy.launchValidation(launch)).toBe(true);
   });
 });

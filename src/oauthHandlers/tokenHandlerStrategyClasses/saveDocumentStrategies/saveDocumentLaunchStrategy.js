@@ -1,4 +1,4 @@
-const { hashString, launchValidation } = require("../../../utils");
+const { hashString } = require("../../../utils");
 const { getUnixTime } = require("date-fns");
 
 class SaveDocumentLaunchStrategy {
@@ -8,19 +8,9 @@ class SaveDocumentLaunchStrategy {
     this.config = config;
   }
   async saveDocumentToDynamo(document, tokens) {
-    let launch;
+    let launch = null;
     if (document.launch) {
       launch = document.launch;
-      if (
-        !tokens.scope.split(" ").includes("launch/patient") &&
-        !launchValidation(launch)
-      ) {
-        throw {
-          status: 400,
-          error: "invalid_request",
-          error_description: "The provided patient launch must be a string",
-        };
-      }
     }
     try {
       let accessToken = hashString(

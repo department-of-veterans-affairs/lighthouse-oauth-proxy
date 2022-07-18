@@ -115,7 +115,7 @@ class TokenHandlerClient {
       }
 
       if (document.launch) {
-        if (launchValidation(document.launch) === false) {
+        if (!launchValidation(document.launch)) {
           return {
             statusCode: 400,
             responseBody: {

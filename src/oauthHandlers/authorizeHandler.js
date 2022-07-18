@@ -104,12 +104,12 @@ const authorizeHandler = async (
       req.query.launch
     ) {
       if (!launchValidation(req.query.launch)) {
-        return {
-          status: 400,
+        res.status(400).json({
           error: "invalid_request",
           error_description:
-            "The provided patient launch must be a strin or base64 encoded json",
-        };
+            "The provided patient launch must be a string or base64 encoded json",
+        });
+        return next();
       }
       authorizePayload.launch = req.query.launch;
     }

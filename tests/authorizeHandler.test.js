@@ -735,6 +735,42 @@ describe("Invalid Request", () => {
     expect(next).toHaveBeenCalled();
     expect(res.redirect).not.toHaveBeenCalled();
   });
+
+  it("Invalid Launch", async () => {
+    let response = buildFakeGetAuthorizationServerInfoResponse(["aud"]);
+    getAuthorizationServerInfoMock.mockResolvedValue(response);
+    res.redirect = jest.fn();
+
+    req.query = {
+      state: "fake_state",
+      client_id: "clientId123",
+      redirect_uri: "http://localhost:8080/oauth/redirect",
+      scope: "launch",
+      launch: "e30K",
+    };
+
+    await authorizeHandler(
+      redirect_uri,
+      logger,
+      issuer,
+      dynamoClient,
+      oktaClient,
+      mockSlugHelper,
+      api_category,
+      config,
+      req,
+      res,
+      next
+    );
+    //expect(res.redirect).toHaveBeenCalled();
+    //expect(dynamoClient.savePayloadToDynamo).not.toHaveBeenCalled();
+    expect(next).toHaveBeenCalled();
+    expect(res.json).toHaveBeenCalledWith({
+      error: "invalid_request",
+      error_description:
+        "The provided patient launch must be a string or base64 encoded json",
+    });
+  });
 });
 
 describe("Server Error", () => {

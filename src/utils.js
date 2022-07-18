@@ -311,9 +311,7 @@ const launchValidation = (launch) => {
     }
   } else {
     // decaprecated launch condition
-    if (launch === "" || Object.keys(launch).length === 0) {
-      return false;
-    } else if (typeof launch != typeof "string") {
+    if (typeof launch != typeof "string") {
       return false;
     }
   }

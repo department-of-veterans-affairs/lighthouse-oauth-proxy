@@ -45,10 +45,7 @@ describe("saveDocumentToDynamo tests", () => {
       hashingFunction
     );
     await strategy.saveDocumentToDynamo(document, null);
-    // await expect(() => {
-    //   strategy.saveDocumentToDynamo(document, null);
-    // }).rejects.toThrow("invalid_request");
-    expect(dynamoClient.savePayloadToDynamo).not.toHaveBeenCalled();
+
     expect(logger.error.mock.calls).toHaveLength(1);
   });
 
@@ -67,7 +64,7 @@ describe("saveDocumentToDynamo tests", () => {
     );
 
     await strategy.saveDocumentToDynamo(document, token);
-    expect(dynamoClient.savePayloadToDynamo).toHaveBeenCalled();
+    expect(dynamoClient.savePayloadToDynamo).not.toHaveBeenCalled();
     expect(logger.error.mock.calls).toHaveLength(0);
   });
 
@@ -87,7 +84,7 @@ describe("saveDocumentToDynamo tests", () => {
     );
 
     await strategy.saveDocumentToDynamo(document, token);
-    expect(dynamoClient.savePayloadToDynamo).toHaveBeenCalled();
+    expect(dynamoClient.savePayloadToDynamo).not.toHaveBeenCalled();
     expect(logger.error.mock.calls).toHaveLength(0);
   });
 
@@ -95,14 +92,10 @@ describe("saveDocumentToDynamo tests", () => {
     let token = buildToken(false, false);
     token.launch = "launch";
 
-    let launch2 = {
-      patient: "1234V5678",
-    };
     let document = convertObjectToDynamoAttributeValues({
       access_token: token,
+      launch: "launch",
     });
-    document.launch = launch2;
-    console.log(launch2);
     dynamoClient = buildFakeDynamoClient(document);
 
     const strategy = new SaveDocumentLaunchStrategy(
@@ -111,16 +104,19 @@ describe("saveDocumentToDynamo tests", () => {
       config,
       hashingFunction
     );
+
     await strategy.saveDocumentToDynamo(document, token);
-    expect(logger.error.mock.calls).toHaveLength(0);
     expect(dynamoClient.savePayloadToDynamo).toHaveBeenCalledWith(
       {
         access_token:
           "e0f866111645e58199f0382a6fa50a217b0c2ccc1ca07e27738e758e1183a8db",
         expires_on: 803837100,
-        launch: launch2,
+        launch: {
+          S: "launch",
+        },
       },
       "LaunchContext"
     );
+    expect(logger.error.mock.calls).toHaveLength(0);
   });
 });

@@ -30,26 +30,27 @@ describe("saveDocumentToDynamo tests", () => {
     jest.useRealTimers();
   });
 
-  // it("Empty Tokens", async () => {
-  //   let token = buildToken(false, false);
-  //   let document = convertObjectToDynamoAttributeValues({
-  //     access_token: token,
-  //     launch: "launch",
-  //   });
-  //   dynamoClient = buildFakeDynamoClient(document);
+  it("Empty Tokens", async () => {
+    let token = buildToken(false, false);
+    let document = convertObjectToDynamoAttributeValues({
+      access_token: token,
+      launch: "launch",
+    });
+    dynamoClient = buildFakeDynamoClient(document);
 
-  //   // const strategy = new SaveDocumentLaunchStrategy(
-  //   //   logger,
-  //   //   dynamoClient,
-  //   //   config,
-  //   //   hashingFunction
-  //   // );
-  //   //await strategy.saveDocumentToDynamo(document, null);
-  //   expect(launchValidation("")).toBe(false);
-  //   // await expect( ()=> {
-  //   //    strategy.saveDocumentToDynamo(document, null);
-  //   // }).rejects.toThrow("invalid_request");
-  // });
+    const strategy = new SaveDocumentLaunchStrategy(
+      logger,
+      dynamoClient,
+      config,
+      hashingFunction
+    );
+    await strategy.saveDocumentToDynamo(document, null);
+    // await expect(() => {
+    //   strategy.saveDocumentToDynamo(document, null);
+    // }).rejects.toThrow("invalid_request");
+    expect(dynamoClient.savePayloadToDynamo).not.toHaveBeenCalled();
+    expect(logger.error.mock.calls).toHaveLength(1);
+  });
 
   it("Missing Document Launch", async () => {
     let token = buildToken(false, false);

@@ -298,7 +298,7 @@ const rewriteRedirect = (config, request, redirect_uri) => {
 
 const launchValidation = (launch) => {
   if (launch === null || launch === "") return false;
-  var base64regex = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
+  const base64regex = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
   if (base64regex.test(launch)) {
     let decodedLaunch = JSON.parse(
       Buffer.from(launch, "base64").toString("ascii")

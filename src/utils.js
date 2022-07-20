@@ -296,6 +296,11 @@ const rewriteRedirect = (config, request, redirect_uri) => {
   return redirect_uri;
 };
 
+/**
+ * Validates the launch context as Base64 encoded json or deprecated string.
+ * @param {*} launch context value supplied by consumer application.
+ * @returns boolean value based on validation.
+ */
 const launchValidation = (launch) => {
   if (launch === null || launch === "") return false;
   const base64regex = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
@@ -310,7 +315,7 @@ const launchValidation = (launch) => {
       return false;
     }
   } else {
-    // decaprecated launch condition
+    // deprecated launch condition
     if (typeof launch != typeof "string") {
       return false;
     }

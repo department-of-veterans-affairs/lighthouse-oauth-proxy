@@ -15,6 +15,7 @@ const {
   appCategoryFromPath,
   getProxyRequest,
   rewriteRedirect,
+  launchValidation,
 } = require("../src/utils");
 
 describe("statusCodeFromError", () => {
@@ -508,5 +509,32 @@ describe("rewriteRedirect tests", () => {
       "http://original/oauth2/redirect"
     );
     expect(result).toBe("http://original/oauth2/redirect");
+  });
+});
+
+describe("launchValidation tests", () => {
+  it("happy deprecated launch", async () => {
+    let launch = "1234V5678";
+    expect(launchValidation(launch)).toBe(true);
+  });
+  it("bad launch nonstring", async () => {
+    let launch = 278;
+    expect(launchValidation(launch)).toBe(false);
+  });
+  it("empty launch", async () => {
+    let launch = "";
+    expect(launchValidation(launch)).toBe(false);
+  });
+  it("null launch", async () => {
+    let launch = null;
+    expect(launchValidation(launch)).toBe(false);
+  });
+  it("encoded launch no string", async () => {
+    let launch = "eyJwYXRpZW50IjozMjAwMDIyNX0K";
+    expect(launchValidation(launch)).toBe(false);
+  });
+  it("encoded launch string", async () => {
+    let launch = "eyJwYXRpZW50IjogIjMyMDAwMjI1In0K";
+    expect(launchValidation(launch)).toBe(true);
   });
 });

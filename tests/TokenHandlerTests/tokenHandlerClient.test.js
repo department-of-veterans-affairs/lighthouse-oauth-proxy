@@ -235,6 +235,20 @@ describe("handleToken tests", () => {
     expect(response.responseBody.patient).toBe("patient");
   });
 
+  it("bad Path with invalid launch", async () => {
+    let token = buildToken(false, true, false, "launch");
+
+    let tokenHandlerClient = buildTokenClient({
+      token: token,
+      pullDocumentFromDynamoStrategy: buildGetDocumentStrategy({
+        launch: "e30K",
+      }),
+      getPatientInfoStrategy: buildGetPatientInfoStrategy("e30K"),
+    });
+    let response = await tokenHandlerClient.handleToken();
+
+    expect(response.statusCode).toBe(400);
+  });
   it("Happy Path with launch base64", async () => {
     let token = buildToken(false, true, false, "launch");
 
@@ -253,6 +267,7 @@ describe("handleToken tests", () => {
     expect(response.statusCode).toBe(200);
     expect(response.responseBody.access_token).toBe(token.access_token);
     expect(response.responseBody.patient).toBe("1234V5678");
+    expect(typeof response.responseBody.patient).toBe(typeof "string");
   });
 
   it("getToken 401 Response", async () => {

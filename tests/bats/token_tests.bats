@@ -311,15 +311,28 @@ do_token "$(jq \
   [ "$(cat "$curl_body" | jq .error_description | tr -d '"')" == "The client secret supplied for a confidential client is invalid." ]
 }
 
-@test 'Client Credentials happy path' {
-  cc=$(do_client_credentials "launch/patient" "123V456")
+@test 'Client Credentials deprecated happy path' {
+  cc=$(do_client_credentials "launch" "123V456")
 
+  [ "$(echo "$cc" | jq 'has("access_token")')" == "true" ]
+  [ "$(echo "$cc" | jq .token_type | tr -d '"')" == "Bearer" ]
+  [ "$(echo "$cc" | jq .scope | tr -d '"')" == "launch" ]
+  [ "$(echo "$cc" | jq 'has("expires_in")')" == "true" ]
+}
+@test 'Client Credentials encoded happy path' {
+  cc=$(do_client_credentials "launch/patient" "eyJwYXRpZW50IjogIjMyMDAwMjI1In0K")
   [ "$(echo "$cc" | jq 'has("access_token")')" == "true" ]
   [ "$(echo "$cc" | jq .token_type | tr -d '"')" == "Bearer" ]
   [ "$(echo "$cc" | jq .scope | tr -d '"')" == "launch/patient" ]
   [ "$(echo "$cc" | jq 'has("expires_in")')" == "true" ]
 }
+@test 'Client Credentials encoded non string path' {
+  cc=$(do_client_credentials "launch/patient" "eyJwYXRpZW50IjozMjAwMDIyNX0K")
 
+  [ "$(echo "$cc" | jq 'has("access_token")')" == "false" ]
+  [ "$(echo "$cc" | jq 'has("scope")')" == "false" ]
+  [ "$(echo "$cc" | jq 'has("expires_in")')" == "false" ]
+}
 @test 'Token Handler invalid strategy' {
   do_token "$(jq \
                 -scn \

@@ -296,6 +296,33 @@ const rewriteRedirect = (config, request, redirect_uri) => {
   return redirect_uri;
 };
 
+/**
+ * Validates the launch context as Base64 encoded json or deprecated string.
+ * @param {*} launch context value supplied by consumer application.
+ * @returns boolean value based on validation.
+ */
+const launchValidation = (launch) => {
+  if (launch === null || launch === "") return false;
+  const base64regex = /^([0-9a-zA-Z+/]{4})*(([0-9a-zA-Z+/]{2}==)|([0-9a-zA-Z+/]{3}=))?$/;
+  if (base64regex.test(launch)) {
+    let decodedLaunch = JSON.parse(
+      Buffer.from(launch, "base64").toString("ascii")
+    );
+    if (
+      !decodedLaunch["patient"] ||
+      typeof decodedLaunch["patient"] != typeof "string"
+    ) {
+      return false;
+    }
+  } else {
+    // deprecated launch condition
+    if (typeof launch != typeof "string") {
+      return false;
+    }
+  }
+  return true;
+};
+
 module.exports = {
   isRuntimeError,
   rethrowIfRuntimeError,
@@ -311,4 +338,5 @@ module.exports = {
   appCategoryFromPath,
   getProxyRequest,
   rewriteRedirect,
+  launchValidation,
 };

@@ -2,6 +2,7 @@ const {
   rethrowIfRuntimeError,
   hashString,
   minimalError,
+  launchValidation,
 } = require("../../utils");
 const { translateTokenSet } = require("../tokenResponse");
 const { staticRefreshTokenIssueCounter } = require("../../metrics");
@@ -111,6 +112,19 @@ class TokenHandlerClient {
               "The provided authorization grant or refresh token is expired or otherwise invalid.",
           },
         };
+      }
+
+      if (document.launch) {
+        if (!launchValidation(document.launch)) {
+          return {
+            statusCode: 400,
+            responseBody: {
+              error: "invalid_launch",
+              error_description:
+                "The provided patient launch must be a string or base64 encoded json",
+            },
+          };
+        }
       }
     }
 

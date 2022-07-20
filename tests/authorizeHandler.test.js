@@ -762,8 +762,7 @@ describe("Invalid Request", () => {
       res,
       next
     );
-    //expect(res.redirect).toHaveBeenCalled();
-    //expect(dynamoClient.savePayloadToDynamo).not.toHaveBeenCalled();
+
     expect(next).toHaveBeenCalled();
     expect(res.json).toHaveBeenCalledWith({
       error: "invalid_request",
